@@ -1,6 +1,6 @@
 # led-over-rj245: agent instructions
 
-Electronics, firmware configuration, wiring diagrams and field documentation for four LED
+Electronics, firmware configuration, wiring diagrams and field documentation for the LED
 statues at Midburn (two V-shaped groups of 7 towers). One ESP32 running WLED drives all 14
 towers, one channel each; statue 2's channels cross to box 2 as RS-485 on buried CAT5e. Enclosures live in `../electronics-enclosure`
 ([MrMil/electronics-enclosure](https://github.com/MrMil/electronics-enclosure)) — read that
