@@ -17,22 +17,23 @@ source of truth for what happens. These docs are the source of truth for why.
 
 ## Design
 
-The system: four statues in an 8 m circle at Midburn (Negev desert), WS2812B strips on each,
-running one show with effects that travel between statues. Outdoors for the event: dust,
+The system: **two statues** in an 8 m circle at Midburn (Negev desert), each a V of 7 towers
+(500–2000 mm tall, 40 × 40 cm, CNC-cut faces with a diffuser behind, a structural post in the
+middle). WS2812B 60/m strips inside, 4 per tower (one per face, on the post, facing out), run
+one show from one controller. Outdoors for the event: dust,
 40 °C+ days, near-freezing nights, generator power, heavy 2.4 GHz congestion, Leave No Trace.
 This repository holds the electronics, firmware configuration, wiring diagrams and the field
 documentation; the enclosures live in another repository (below).
 
-**The artwork is anamorphic** (owner, 2026-10-09). From outside, the circle looks like nothing.
-Standing at its centre, the viewer sees the statues' forms resolve into human figures in
-different poses (e.g. a person making the om hand gesture). **The shapes come from the
-sculpture, not from the LEDs.** The LEDs sit on the parts that make up each figure. The
-animation is a 2D image wrapped around the viewer, and each LED shows the colour of the point
-in that image where the LED appears from the centre, like projection mapping with LEDs as the
-projector's pixels. What matters for every LED is therefore its **direction as seen from the
-centre** (azimuth around the circle, elevation), not its 3D position. This drives the mapping
-and calibration design in [firmware/](firmware/README.md).
-The statues' detailed needs are still being worked out with the statue builders.
+**The artwork is a mural** (owner, 2026-10-09/10). The CNC cuts on the tower faces form a
+picture when viewed from the centre; tower edges fall in the middle of the picture. **The
+shapes come from the cuts, not from the LEDs**; the LEDs light the faces from behind. People
+look from all angles, so every face is lit. All 4 faces of a tower show the same pixels.
+The animation is a rolled 2D map: x = tower, y = height ([firmware/](firmware/README.md)).
+
+**Changed 2026-10-10:** previously four statues star-wired from a controller at statue 0,
+two channels each over one CAT5e per statue. Reduced to two statues, 3 weeks before the event,
+for less work; one channel per tower, so no data has to return from the top of a tower.
 
 Most of the design is hardware, so "code" paths below are often diagrams
 (`tools/wiring_diagrams.py`) or human guide pages (`guide/`).
@@ -43,13 +44,14 @@ Most of the design is hardware, so "code" paths below are often diagrams
   in this tree marked "(owner)" come from it; reasons marked "(agent, date)" were chosen by an
   agent and have not been confirmed by the owner — treat them as reversible.
 - **Enclosures are designed in [MrMil/electronics-enclosure](https://github.com/MrMil/electronics-enclosure)**
-  (checked out locally at `../electronics-enclosure`), not here: `100W-masterbox` for the
-  controller, `100W-rj45` for statues 1–3 (owner). This repo only consumes their geometry —
-  wall positions of jacks and LED exits. Do not copy enclosure decisions here; link to them.
+  (checked out locally at `../electronics-enclosure`), not here: `100W-masterbox` for both
+  boxes (owner, 2026-10-10; each needs 7 tower data + 7 tower power outputs, enclosure change
+  pending). This repo only consumes their geometry —
+  wall positions of jacks and tower outputs. Do not copy enclosure decisions here; link to them.
 - **Power stays local; only data crosses between statues** (owner). Each box has its own
-  mains-fed 5 V PSU. Sending 5 V at LED currents over 8–10 m would need heavy cable and still
-  drop volts; data needs one CAT5e cable.
-- **Grounds are common across all four boxes**, via the spare CAT5e conductors (owner). See
+  mains-fed 5 V PSU feeding its 7 towers. Sending 5 V at LED currents between statues would
+  need heavy cable and still drop volts; data needs three CAT5e cables.
+- **Grounds are common across both boxes**, via pins 7/8 of each CAT5e (owner). See
   [data_link/](data_link/README.md) for why the receiver needs it.
 - **Human documentation is separate from this tree** (owner, 2026-10-09): `README.md` and
   `guide/` are for the field crew, who will build and run the installation without the owner
@@ -57,7 +59,9 @@ Most of the design is hardware, so "code" paths below are often diagrams
 
 ### One controller, no synchronisation
 
-**Why.** At 8 m, one ESP32 can drive every strip of all four statues directly (owner). One
+**Why.** One ESP32 can drive every tower of both statues directly (owner; reconfirmed
+2026-10-10 for the two-statue layout: "2 controllers give us a synchronisation problem and
+that's the big reason we did the cat5"). One
 controller means one clock, one framebuffer and one render loop, so the statues are
 frame-perfect by construction: no drift, no clock discipline, no cue protocol, no failure modes
 from nodes disagreeing. Distributing controllers would *create* a synchronisation problem that
@@ -77,26 +81,28 @@ otherwise does not exist.
 - *A wired 60 Hz frame clock on a dedicated pair* with RS-485 frame numbers. Sub-µs, trivial
   code — rejected only because at 8 m the LED data itself fits down the cable, deleting three
   ESP32s. **Revisit this first if the installation ever grows in distance.**
-**Constrains.** Total LED count and frame rate are bounded by one ESP32's 8 outputs and
-render throughput ([firmware/](firmware/README.md)). The controller is a single point of
+**Constrains.** One output per tower means 14 outputs, beyond the ESP32's 8 RMT channels:
+WLED 16's RMT + I2S mix must carry it (bench test pending; fallback 12 channels by sharing
+two towers' channels). Frame rate is bounded by render throughput
+([firmware/](firmware/README.md)). The controller is a single point of
 failure — mitigated by a pre-flashed spare ESP32 in a socket ([controller/](controller/README.md)).
 
-### Open questions (owner, not yet decided)
+### Open questions
 
-1. LED count per statue — drives PSU load, frame rate, shift-out compensation, and whether 2
-   channels per statue suffice.
-2. ~~Physical strip layout per statue~~ — the statue artist's scope; this project receives LED
-   counts, strip order and positions from her ([strips_and_power/](strips_and_power/README.md)).
-3. PSU sizing per statue once counts are known (the enclosures assume S-100-5, 5 V 20 A).
-4. ~~How artists author animations in the field~~ — decided 2026-10-09: C++ WLED effects
-   written ahead of time, with only parameters and geometry calibration changed in the field
-   ([firmware/](firmware/README.md)).
+1. **14 outputs on one ESP32 in WLED 16**: bench test pending (owner, 2026-10-10).
+2. ~~PSU size per statue~~ — decided 2026-10-10: 5 × S-100-5 per statue; strand-to-PSU
+   grouping proposed in [strips_and_power/led_power_budget.md](strips_and_power/led_power_budget.md).
+3. ~~Tower power wiring~~ — decided 2026-10-10: see
+   [strips_and_power/power_distribution.md](strips_and_power/power_distribution.md). Pending: the
+   enclosure repo's `100W` box with XT60 outputs, and the strip voltage-drop measurement.
+4. **Tower order and heights** T1–T7 were read off the model photo; confirm on site.
+5. **Distance between the statues**: sets whether 10 m CAT5e reaches.
 
 ## Areas
 
-- [`controller/`](controller/README.md) — the ESP32 box at statue 0: GPIO map, local strip outputs, transmitters, logic power.
-- [`data_link/`](data_link/README.md) — RS-485 over buried CAT5e to statues 1–3: transceivers, cabling, termination and bias.
-- [`strips_and_power/`](strips_and_power/README.md) — what every box does with 5 V and LED data: strip arrangement, power distribution, current budget, shift-out timing.
+- [`controller/`](controller/README.md) — the ESP32 box at statue 1: GPIO map, statue 1's tower outputs, transmitters for statue 2, logic power.
+- [`data_link/`](data_link/README.md) — RS-485 over 3 buried CAT5e cables to box 2: transceivers, cabling, termination and bias.
+- [`strips_and_power/`](strips_and_power/README.md) — towers, strips and power: tower layout, tower-base splitter, power distribution, current budget, timing.
 - [`firmware/`](firmware/README.md) — WLED on the controller: configuration, logical LED order, presets, animation authoring.
 - [`field_docs/`](field_docs/README.md) — the human guide (`README.md`, `guide/`) and the generated wiring diagrams.
 

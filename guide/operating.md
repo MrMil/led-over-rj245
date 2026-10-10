@@ -15,8 +15,8 @@ The controller runs [WLED](https://kno.wled.ge) 16.
 
 | Preset | Expected | If not |
 |---|---|---|
-| 1 · Test colours | Statue 0 red, 1 green, 2 blue, 3 white; all strips lit | Wrong colour on a statue: its cable is in the wrong controller jack |
-| 2 · Test order | One dot running 0 → 1 → 2 → 3 → 0 | Dot jumps backwards: statues numbered in the wrong order |
+| 1 · Test colours | Each tower one colour: T1 red, T2 orange, T3 yellow, T4 green, T5 cyan, T6 blue, T7 magenta; same in both statues, all 4 faces lit | Two towers swapped: their data cables are swapped. A face dark: see troubleshooting |
+| 2 · Test order | A light runs up each tower in turn: statue 1 T1 → T7, then statue 2 T1 → T7 | Out of order: tower cables or CAT5e jacks swapped |
 
 ## Presets
 
@@ -32,8 +32,8 @@ The controller runs [WLED](https://kno.wled.ge) 16.
 
 ## Do not touch
 
-- **Config → LED Preferences**: outputs, LED counts, colour order, and the 3000 mA per-output
-  current limit that keeps each LED exit under its 3 A rating.
+- **Config → LED Preferences**: the 14 outputs, LED counts, colour order and current
+  settings. The current cap itself is fixed in the firmware and can't be raised from here.
 - **Config → WiFi Setup**: a wrong setting here takes the access point down.
 
 To undo changes to either: [build.md → Restore a backup](build.md#restore-a-backup).

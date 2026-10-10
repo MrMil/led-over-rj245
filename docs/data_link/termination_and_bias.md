@@ -2,7 +2,7 @@
 
 Path: [docs](../README.md) › [data_link](README.md) › **termination_and_bias**
 Parent: [README.md](README.md)
-**Code:** `tools/wiring_diagrams.py` (`statue()`), `guide/img/statue-wiring.svg`, `guide/wiring.md`
+**Code:** `tools/wiring_diagrams.py` (`box2()`), `guide/img/box2-wiring.svg`, `guide/wiring.md`
 **Covers:** the resistors across and onto each A/B pair.
 
 ## What it does
@@ -17,7 +17,7 @@ Each pair has 120 Ω across A/B at both ends (already on the modules). At the re
   is what RS-485 specifies and two 120 Ω in parallel (60 Ω) is within the MAX485's 54 Ω drive
   rating, so the controller-side resistor on the module stays.
 - **Idle bias 560 Ω / 560 Ω at the receiver** (owner). With the controller off or rebooting
-  the line floats and RO is indeterminate, so the strips show garbage. The bias holds the
+  the line floats and RO is indeterminate, so the towers show garbage. The bias holds the
   differential at about −250 mV (5 V × 60 Ω / 1180 Ω with both terminations), which the
   receiver reads as logic 0 and the strip sees as idle-low.
 - **B to 5 V and A to GND, not the reverse** (owner). That polarity reads as logic 0. A low

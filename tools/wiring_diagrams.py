@@ -3,9 +3,9 @@
 
 Usage:  python3 tools/wiring_diagrams.py
 
-The pin tables below are the single source for every diagram: change a GPIO or
-an RJ45 pin here, re-run, and all diagrams follow. Do not hand-edit the SVGs.
-Standard library only.
+The tables below are the single source for every diagram: change a GPIO, a
+jack pin or a tower here, re-run, and all diagrams follow. Do not hand-edit the
+SVGs. Standard library only.
 """
 
 from pathlib import Path
@@ -13,36 +13,44 @@ from pathlib import Path
 OUT = Path(__file__).resolve().parent.parent / "guide" / "img"
 
 # --------------------------------------------------------------------------
-# Pin tables
+# Tables
 # --------------------------------------------------------------------------
 
-# Channel -> ESP32 GPIO. S0 is local (74AHCT125); S1-S3 go out over RS-485.
+# Two statues, each a V of 7 towers T1..T7 numbered from one tip of the V to
+# the other; T4 is the apex. Heights in mm, from the model photo (confirm).
+TOWER_H = {"T1": 800, "T2": 1150, "T3": 1550, "T4": 2000, "T5": 1150, "T6": 800, "T7": 500}
+TOWERS = list(TOWER_H)
+
+# One channel per tower. Statue 1 is local to the controller box; statue 2's
+# channels cross to the second box as RS-485.
 GPIO = {
-    "S0-A": 13, "S0-B": 14,
-    "S1-A": 16, "S1-B": 17,
-    "S2-A": 18, "S2-B": 19,
-    "S3-A": 23, "S3-B": 25,
+    "S1-T1": 4, "S1-T2": 13, "S1-T3": 14, "S1-T4": 16, "S1-T5": 17, "S1-T6": 18, "S1-T7": 19,
+    "S2-T1": 21, "S2-T2": 22, "S2-T3": 23, "S2-T4": 25, "S2-T5": 26, "S2-T6": 27, "S2-T7": 32,
 }
 
-# RJ45 pin -> (function, T568B colour name, colour, striped-with-white)
 ORANGE, GREEN, BLUE, BROWN = "#f08a24", "#2e9e44", "#1f5fbf", "#8b5a2b"
+# RJ45 pin -> (T568B colour name, colour, striped, role)
 RJ45 = {
-    1: ("A", "ch A", "w/orange", ORANGE, True),
-    2: ("B", "ch A", "orange", ORANGE, False),
-    3: ("A", "ch B", "w/green", GREEN, True),
-    4: ("GND", "", "blue", BLUE, False),
-    5: ("GND", "", "w/blue", BLUE, True),
-    6: ("B", "ch B", "green", GREEN, False),
-    7: ("GND", "", "w/brown", BROWN, True),
-    8: ("GND", "", "brown", BROWN, False),
+    1: ("w/orange", ORANGE, True, ("A", 1)),
+    2: ("orange", ORANGE, False, ("B", 1)),
+    3: ("w/green", GREEN, True, ("A", 2)),
+    4: ("blue", BLUE, False, ("A", 3)),
+    5: ("w/blue", BLUE, True, ("B", 3)),
+    6: ("green", GREEN, False, ("B", 2)),
+    7: ("w/brown", BROWN, True, ("GND", None)),
+    8: ("brown", BROWN, False, ("GND", None)),
 }
-RJ45_GND = [4, 5, 7, 8]
+CH_PINS = {1: (1, 2), 2: (3, 6), 3: (4, 5)}   # channel in a cable -> (A pin, B pin)
+# jack -> statue-2 tower per channel (None = spare)
+JACKS = {1: ["T1", "T2", "T3"], 2: ["T4", "T5", "T6"], 3: ["T7", None, None]}
 
-# Physical LED exits (JST-SM, back wall) in every box: two strips per channel,
-# chained. Strip 1 takes the channel's data; strip 2 takes its data from strip
-# 1's DOUT on the statue, so its exit carries power only.
-# (exit number, channel, strip, carries data)
-EXITS = [(1, "A", 1, True), (2, "A", 2, False), (3, "B", 1, True), (4, "B", 2, False)]
+
+def jack_of(tower):
+    for j, chans in JACKS.items():
+        if tower in chans:
+            return j, chans.index(tower) + 1
+    raise KeyError(tower)
+
 
 DATA_33 = "#1565c0"   # 3.3 V logic
 DATA_5 = "#7b1fa2"    # 5 V logic
@@ -164,54 +172,6 @@ def legend(d, x, y, extra=()):
         d.text(x + 100, yy + 5, txt, size=14)
 
 
-def jack(d, x, top, title, pins_on, channel_names):
-    """RJ45 coupler pigtail. Returns {pin: (x, y)} attachment points."""
-    w, pitch = 250, 26
-    d.rect(x, top, w, 40 + pitch * 8 + 4, fill="#f4f4f4", stroke="#333")
-    d.text(x + w / 2, top + 26, title, size=16, anchor="middle", weight="bold")
-    pts = {}
-    for n in range(1, 9):
-        fn, ch, cname, col, stripe = RJ45[n]
-        y = top + 40 + pitch * (n - 1) + 14
-        px = x if pins_on == "left" else x + w
-        sx = x + 34 if pins_on == "left" else x + 14
-        d.add(f'<rect x="{sx}" y="{y - 6}" width="34" height="12" fill="{col}" stroke="#777"/>')
-        if stripe:
-            d.add(f'<rect x="{sx + 8}" y="{y - 6}" width="9" height="12" fill="#fff"/>'
-                  f'<rect x="{sx + 25}" y="{y - 6}" width="9" height="12" fill="#fff"/>')
-        label = f"{fn} · {channel_names[ch]}" if ch else "GND"
-        if pins_on == "left":
-            d.text(x + 14, y + 5, n, size=14, weight="bold")
-            d.text(x + 76, y + 5, f"{cname:<9}", size=13, fill="#555")
-            d.text(x + 150, y + 5, label, size=14, weight="bold")
-        else:
-            d.text(x + w - 14, y + 5, n, size=14, weight="bold", anchor="end")
-            d.text(x + 56, y + 5, cname, size=13, fill="#555")
-            d.text(x + 126, y + 5, label, size=14, weight="bold")
-        d.pin(px, y)
-        pts[n] = (px, y)
-    return pts
-
-
-def gnd_brackets(d, pts, side):
-    """Join RJ45 pins 4+5 and 7+8 to GND with short stubs in their own colours."""
-    s = -1 if side == "left" else 1
-    for pair in ((4, 5), (7, 8)):
-        bx = pts[pair[0]][0] + s * 26
-        for n in pair:
-            px, py = pts[n]
-            d.wire([(px, py), (bx, py)], RJ45[n][3], 4, stripe=RJ45[n][4])
-        y0, y1 = pts[pair[0]][1], pts[pair[1]][1]
-        d.wire([(bx, y0), (bx, y1)], BLACK, 3)
-        d.dot(bx, y0), d.dot(bx, y1)
-        d.flag(bx, (y0 + y1) / 2, "GND", side)
-
-
-def pair_wire(d, n, pts):
-    _, _, _, col, stripe = RJ45[n]
-    d.wire(pts, col, 5, stripe=stripe)
-
-
 def max485(d, x, y0, title, left, right, w=220, pitch=26):
     """Blue MAX485 module. left/right: list of pin names top to bottom.
     Returns {name: (x, y)}."""
@@ -232,37 +192,134 @@ def max485(d, x, y0, title, left, right, w=220, pitch=26):
     return pts
 
 
-def jst_exit(d, x, y, n, statue, ch, strip, data=True):
-    if data:
-        d.rect(x, y - 24, 250, 48, fill="#fff8e1", stroke="#b58900")
-        d.pin(x, y)
-        d.text(x + 14, y - 3, f"LED exit {n} · DATA", size=15, weight="bold")
-        d.text(x + 14, y + 16, f"{statue}-{ch} strip {strip} → chains to strip 2", size=14, fill="#555")
+
+
+def swatch(d, x, y, pin):
+    cname, col, stripe, _ = RJ45[pin]
+    d.add(f'<rect x="{x}" y="{y - 6}" width="34" height="12" fill="{col}" stroke="#777"/>')
+    if stripe:
+        d.add(f'<rect x="{x + 8}" y="{y - 6}" width="9" height="12" fill="#fff"/>'
+              f'<rect x="{x + 25}" y="{y - 6}" width="9" height="12" fill="#fff"/>')
+
+
+def jack_table(d, x, top, title, j):
+    """RJ45 coupler pin table. Pigtail wires are joined by matching labels."""
+    w, pitch = 300, 26
+    d.rect(x, top, w, 48 + pitch * 8, fill="#f4f4f4", stroke="#333")
+    d.text(x + w / 2, top + 28, title, size=16, anchor="middle", weight="bold")
+    for n in range(1, 9):
+        cname, col, stripe, (fn, ch) = RJ45[n]
+        y = top + 52 + pitch * (n - 1)
+        d.text(x + 16, y + 5, n, size=14, weight="bold")
+        swatch(d, x + 40, y, n)
+        d.text(x + 84, y + 5, cname, size=13, fill="#555")
+        if fn == "GND":
+            label = "GND"
+        else:
+            t = JACKS[j][ch - 1]
+            label = f"{fn} · S2-{t}" if t else f"{fn} · spare"
+        d.text(x + 170, y + 5, label, size=14, weight="bold")
+
+
+def pair_label(d, x, y, pin, j, side):
+    """Short coloured pigtail stub plus 'jack j · pin n' label."""
+    cname, col, stripe, _ = RJ45[pin]
+    if side == "right":
+        d.wire([(x, y), (x + 60, y)], col, 5, stripe=stripe)
+        d.text(x + 70, y + 5, f"jack {j} · pin {pin} ({cname})", size=13, weight="bold")
     else:
-        d.rect(x, y - 24, 250, 48, fill="#fafafa", stroke="#b58900", dash="6 4")
-        d.text(x + 14, y - 3, f"LED exit {n} · power only", size=15, weight="bold", fill="#777")
-        d.text(x + 14, y + 16, f"{statue}-{ch} strip 2 · DATA pin n/c", size=14, fill="#777")
+        d.wire([(x - 60, y), (x, y)], col, 5, stripe=stripe)
+        d.text(x - 70, y + 5, f"jack {j} · pin {pin} ({cname})", size=13, weight="bold", anchor="end")
+
+
+def tower_exit(d, x, y, name, sub):
+    d.rect(x, y - 24, 260, 48, fill="#fff8e1", stroke="#b58900")
+    d.pin(x, y)
+    d.text(x + 14, y - 3, name, size=15, weight="bold")
+    d.text(x + 14, y + 16, sub, size=13, fill="#555")
+
+
+def buffer_chip(d, x, top, gates, title, unused_note):
+    """74AHCT125. gates: list of (A pin, A name, Y name, Y pin, y). Returns bottom y."""
+    bw = 220
+    bot = top + 30 + 60 * len(gates) + 60
+    d.rect(x, top, bw, bot - top, fill="#f3e5f5", stroke=DATA_5)
+    for (pa, a, yname, py_, y) in gates:
+        d.pin(x, y), d.text(x + 10, y + 5, f"{pa} · {a}", size=14, weight="bold")
+        d.pin(x + bw, y), d.text(x + bw - 10, y + 5, f"{yname} · {py_}", size=14, weight="bold", anchor="end")
+    d.text(x + bw / 2, bot - 40, title, size=15, anchor="middle", weight="bold", fill=DATA_5)
+    d.text(x + bw / 2, bot - 22, "VCC 14→+5V · GND 7 · OE→GND", size=11, anchor="middle", fill="#555")
+    if unused_note:
+        d.text(x + bw / 2, bot - 8, unused_note, size=11, anchor="middle", fill="#555")
+    return bot
 
 
 # --------------------------------------------------------------------------
-# 1. Controller box (statue 0)
+# 1. Overview
+# --------------------------------------------------------------------------
+
+def overview():
+    d = Drawing(1200, 980, "System overview")
+    header(d, "System overview — top view (schematic, not to scale)",
+           ["One controller drives both statues: one channel per tower, 14 in total.",
+            "Each statue is a V of 7 towers, T1–T7 from tip to tip, T4 the apex."])
+    cx, cy, r = 600, 500, 320
+    d.add(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="#bbb" stroke-width="2" stroke-dasharray="8 8"/>')
+    d.add(f'<circle cx="{cx}" cy="{cy}" r="10" fill="#555"/>')
+    d.text(cx, cy + 32, "viewing point", size=14, anchor="middle", fill="#555")
+    cable, led = "#6a1b9a", "#e65100"
+
+    def statue(apex_x, s, label, box_col, box_label):
+        # s = +1: V opens to the right (towards the centre); -1: to the left
+        pos = {}
+        for i, t in enumerate(TOWERS):
+            k = abs(i - 3)
+            side = -1 if i < 3 else 1
+            pos[t] = (apex_x + s * 55 * k, cy + side * 60 * k)
+        bx, by = apex_x - s * 70, cy
+        for t, (x, y) in pos.items():
+            d.wire([(bx, by), (x, y)], led, 2)
+        for t, (x, y) in pos.items():
+            sz = 12 + TOWER_H[t] / 100
+            d.rect(x - sz / 2, y - sz / 2, sz, sz, fill="#ffe0b2", stroke="#e65100", sw=2, rx=3)
+            d.text(x + s * (sz / 2 + 6), y + 5, t, size=13, anchor="start" if s > 0 else "end", weight="bold")
+        d.rect(bx - 34, by - 22, 68, 44, fill=box_col, stroke="#333")
+        d.text(bx, by + 5, box_label, size=12, anchor="middle", weight="bold", fill="#fff")
+        d.text(apex_x, cy - 230, label, size=17, anchor="middle", weight="bold")
+        return bx, by
+
+    b1 = statue(cx - r + 40, 1, "Statue 1", "#2e7d32", "CTRL")
+    b2 = statue(cx + r - 40, -1, "Statue 2", "#1565c0", "BOX 2")
+    for dy in (-12, 0, 12):
+        d.wire([(b1[0] - 34, b1[1] + dy), (b1[0] - 60, b1[1] + dy), (b1[0] - 60, cy + 300 + dy),
+                (b2[0] + 60, cy + 300 + dy), (b2[0] + 60, b2[1] + dy), (b2[0] + 34, b2[1] + dy)], cable, 4)
+    d.rect(cx - 150, cy + 312, 300, 30, fill="#fff", stroke=cable, sw=1.5)
+    d.text(cx, cy + 333, "3 × CAT5e, jacks 1–3 → jacks 1–3", size=14, anchor="middle", fill=cable, weight="bold")
+    d.rect(60, 870, 1080, 96, fill="#fafafa", stroke="#bbb", sw=1)
+    d.lines(80, 896, ["CTRL = controller box (ESP32) in statue 1's base. BOX 2 = receiver box in statue 2's base.",
+                      "Orange: per-tower data cable (DATA + GND) and 2-pin power feed from the box, in the trench under the statue.",
+                      "Purple: 3 data cables between the boxes, buried with the mains. Placement and distances to be confirmed."],
+            size=14)
+    d.save("overview.svg", "Two statues of 7 towers, one controller, three data cables between the boxes.")
+
+
+# --------------------------------------------------------------------------
+# 2. Controller box (statue 1)
 # --------------------------------------------------------------------------
 
 def controller():
-    d = Drawing(1600, 1640, "Controller box wiring (statue 0)")
-    header(d, "Controller box — statue 0 (enclosure 100W-masterbox)",
-           ["Signals only. Power wiring: box-power.svg.",
-            "8 channels: 2 for statue 0 through the 74AHCT125,",
-            "6 over RS-485 to statues 1–3 (2 per RJ45 jack)."])
+    d = Drawing(1600, 2200, "Controller box wiring (statue 1)")
+    header(d, "Controller box — statue 1 (enclosure 100W-masterbox)",
+           ["Signals only. Power: box-power.svg.",
+            "14 channels: statue 1's 7 towers through 2 × 74AHCT125,",
+            "statue 2's 7 towers as RS-485 on 3 RJ45 jacks."])
     legend(d, 960, 20, [("stripe", ORANGE, "RJ45 pigtail wires, T568B colours (striped = white/colour)")])
 
-    # ESP32
-    ex, ew, etop, ebot = 150, 230, 210, 1600
+    ex, ew, etop, ebot = 150, 230, 220, 2050
     d.rect(ex, etop, ew, ebot - etop, fill="#eef7ee", stroke="#2e7d32")
-    d.lines(ex + ew / 2, 570, ["ESP32", "dev board", "classic, no PSRAM", "runs WLED"],
+    d.lines(ex + ew / 2, 860, ["ESP32", "dev board", "classic, no PSRAM", "runs WLED"],
             size=16, anchor="middle", fill="#2e7d32", weight="bold")
-    d.lines(ex + ew / 2, 770, ["USB: flashing", "and debug only"], size=13,
-            anchor="middle", fill="#555")
+    d.lines(ex + ew / 2, 960, ["USB: flashing", "and debug only"], size=13, anchor="middle", fill="#555")
     for name, y in (("5V / VIN", 300), ("GND", 340)):
         d.pin(ex, y), d.text(ex + 10, y + 5, name, size=14, weight="bold")
     d.flag(ex, 300, "+5V", "left"), d.flag(ex, 340, "GND", "left")
@@ -272,238 +329,264 @@ def controller():
         d.text(ex + ew - 10, y + 5, f"GPIO {GPIO[ch]}", size=15, weight="bold", anchor="end")
         return (ex + ew, y)
 
-    # 74AHCT125 for statue 0
-    bx, bw, btop, bbot = 560, 220, 210, 520
-    d.rect(bx, btop, bw, bbot - btop, fill="#f3e5f5", stroke=DATA_5)
-    d.lines(bx + bw / 2, btop + 140, ["74AHCT125", "3.3 V → 5 V", "buffer"], size=16,
-            anchor="middle", weight="bold", fill=DATA_5)
-    # Gates 1 and 2 are used; 3 and 4 have their inputs grounded.
-    gates = {"S0-A": ("1A", 2, "1Y", 3, 260), "S0-B": ("2A", 5, "2Y", 6, 420)}
-    for (a, pa, yname, py_, y) in gates.values():
-        d.pin(bx, y), d.text(bx + 10, y + 5, f"{pa} · {a}", size=14, weight="bold")
-        d.pin(bx + bw, y), d.text(bx + bw - 10, y + 5, f"{yname} · {py_}", size=14, weight="bold", anchor="end")
-    for px, flag in ((590, "+5V"), (650, "GND"), (710, "GND"), (770, "GND")):
-        d.pin(px, bbot)
-        d.wire([(px, bbot), (px, bbot + 18)], BLACK, 2)
-        d.flag(px, bbot + 18, flag, "down")
-    d.lines(bx + bw / 2, bbot - 46, ["14 VCC · 7 GND · OE 1,4,10,13", "unused inputs 9, 12 → GND"],
-            size=12, anchor="middle", fill="#555")
-    d.text(bx + bw / 2, bbot - 8, "VCC     GND     OE     9,12", size=12, anchor="middle", fill="#555")
+    # statue 1: two buffers
+    names = [("1A", 2, "1Y", 3), ("2A", 5, "2Y", 6), ("3A", 9, "3Y", 8), ("4A", 12, "4Y", 11)]
+    bx = 560
+    top = 220
+    rows = []
+    for chip, towers in (("74AHCT125 #1", TOWERS[:4]), ("74AHCT125 #2", TOWERS[4:])):
+        gates = [(names[i][1], names[i][0], names[i][2], names[i][3], top + 50 + 60 * i) for i in range(len(towers))]
+        note = "unused 4A (pin 12) → GND" if len(towers) < 4 else ""
+        bot = buffer_chip(d, bx, top, gates, chip, note)
+        for (pa, a, yn, py_, y), t in zip(gates, towers):
+            ch = f"S1-{t}"
+            d.wire([gpio(ch, y), (bx, y)], DATA_33, 3)
+            d.wire([(bx + 220, y), (1150, y)], DATA_5, 3)
+            d.resistor(950, y, "100 Ω", color=DATA_5)
+            tower_exit(d, 1150, y, f"Tower {t} data", f"statue 1 · {TOWER_H[t]} mm tower · + GND")
+        top = bot + 30
 
-    for ch, (_, _, _, _, y) in gates.items():
-        d.wire([gpio(ch, y), (bx, y)], DATA_33, 3)
-        d.wire([(bx + bw, y), (1150, y)], DATA_5, 3)
-        d.resistor(940, y, "100 Ω", color=DATA_5)
-    for (n, ch, strip, data) in EXITS:
-        y = gates[f"S0-{ch}"][4] + (0 if data else 70)
-        jst_exit(d, 1150, y, n, "S0", ch, strip, data)
-
-    # MAX485 transmitters + RJ45 jacks, one group per remote statue
-    for k, statue in enumerate(("S1", "S2", "S3")):
-        G = 590 + k * 330
-        names = {"ch A": f"{statue}-A", "ch B": f"{statue}-B"}
-        jp = jack(d, 1150, G + 24, f"RJ45 jack {k + 1} → statue {k + 1}", "left", names)
-        gnd_brackets(d, jp, "left")
-        for m, ch in enumerate(("A", "B")):
-            y0 = G + m * 170
-            mp = max485(d, 560, y0, f"TX · {statue}-{ch}", ["RO", "RE", "DE", "DI"], ["VCC", "GND", "A", "B"])
-            d.text(548, mp["RO"][1] + 5, "n/c", size=13, anchor="end", fill="#777")
-            d.wire([mp["RE"], (530, mp["RE"][1]), (530, mp["DE"][1]), mp["DE"]], RED, 2)
-            d.dot(530, mp["RE"][1], RED, 4), d.dot(530, mp["DE"][1], RED, 4)
-            d.flag(530, (mp["RE"][1] + mp["DE"][1]) / 2, "+5V", "left")
-            d.wire([gpio(f"{statue}-{ch}", mp["DI"][1]), mp["DI"]], DATA_33, 3)
-            d.wire([mp["VCC"], (800, mp["VCC"][1])], RED, 2), d.flag(800, mp["VCC"][1], "+5V", "right")
-            d.wire([mp["GND"], (800, mp["GND"][1])], BLACK, 2), d.flag(800, mp["GND"][1], "GND", "right")
-            if ch == "A":
-                pair_wire(d, 1, [mp["A"], jp[1]])
-                pair_wire(d, 2, [mp["B"], jp[2]])
-            else:
-                ax, bx2 = 1010, 1040
-                pair_wire(d, 3, [mp["A"], (ax, mp["A"][1]), (ax, jp[3][1]), jp[3]])
-                pair_wire(d, 6, [mp["B"], (bx2, mp["B"][1]), (bx2, jp[6][1]), jp[6]])
-
-    d.save("controller-wiring.svg", "ESP32, 74AHCT125, six MAX485 transmitters and three RJ45 jacks in the controller box.")
+    # statue 2: transmitters
+    G = top + 30
+    for i, t in enumerate(TOWERS):
+        y0 = G + i * 160
+        mp = max485(d, 560, y0, f"TX · S2-{t}", ["RO", "RE", "DE", "DI"], ["VCC", "GND", "A", "B"])
+        d.text(548, mp["RO"][1] + 5, "n/c", size=13, anchor="end", fill="#777")
+        d.wire([mp["RE"], (530, mp["RE"][1]), (530, mp["DE"][1]), mp["DE"]], RED, 2)
+        d.dot(530, mp["RE"][1], RED, 4), d.dot(530, mp["DE"][1], RED, 4)
+        d.flag(530, (mp["RE"][1] + mp["DE"][1]) / 2, "+5V", "left")
+        d.wire([gpio(f"S2-{t}", mp["DI"][1]), mp["DI"]], DATA_33, 3)
+        d.wire([mp["VCC"], (800, mp["VCC"][1])], RED, 2), d.flag(800, mp["VCC"][1], "+5V", "right")
+        d.wire([mp["GND"], (800, mp["GND"][1])], BLACK, 2), d.flag(800, mp["GND"][1], "GND", "right")
+        j, ch = jack_of(t)
+        pa, pb = CH_PINS[ch]
+        pair_label(d, mp["A"][0], mp["A"][1], pa, j, "right")
+        pair_label(d, mp["B"][0], mp["B"][1], pb, j, "right")
+    for j in (1, 2, 3):
+        jt = G + (j - 1) * 480 + 20
+        jack_table(d, 1260, jt, f"RJ45 jack {j} → box 2 jack {j}", j)
+        d.text(1410, jt + 48 + 26 * 8 + 22, "pins 7, 8 → GND", size=13, anchor="middle", fill="#555")
+    d.save("controller-wiring.svg", "ESP32, two 74AHCT125, seven MAX485 transmitters and three RJ45 jacks in the controller box.")
 
 
 # --------------------------------------------------------------------------
-# 2. Statue box (statues 1-3)
+# 3. Box 2 (statue 2)
 # --------------------------------------------------------------------------
 
-def statue():
-    d = Drawing(1600, 960, "Statue box wiring (statues 1-3)")
-    header(d, "Statue box — statues 1, 2, 3 (enclosure 100W-rj45)",
-           ["Signals only. Power wiring: box-power.svg.",
-            "Same in all three boxes. In the labels, S# is this statue's number.",
-            "Pin 1 here = pin 1 at the controller (straight-through cable)."])
+def box2():
+    d = Drawing(1700, 2030, "Box 2 wiring (statue 2)")
+    header(d, "Box 2 — statue 2 (enclosure 100W-masterbox, no ESP32)",
+           ["Signals only. Power: box-power.svg.",
+            "7 receivers, one per tower. Jack N here = jack N at the controller",
+            "(straight-through cables)."])
     legend(d, 960, 20, [("stripe", ORANGE, "RJ45 pigtail wires, T568B colours (striped = white/colour)")])
-
-    jp = jack(d, 60, 300, "RJ45 jack ← from controller", "right", {"ch A": "S#-A", "ch B": "S#-B"})
-    gnd_brackets(d, jp, "right")
-
-    mx = 700
-    for m, ch in enumerate(("A", "B")):
-        y0 = 328 + m * 272
-        mp = max485(d, mx, y0, f"RX · S#-{ch}", ["A", "B"], ["RO", "RE", "DE", "DI"], w=200)
-        # power pins on the bottom edge (module drawn taller to make room)
-        yb = y0 + 190
-        d.add(f'<rect x="{mx + 2}" y="{y0 + 120}" width="196" height="{yb - y0 - 121}" fill="#e3edf9" stroke="none"/>')
-        d.add(f'<polyline points="{mx},{y0 + 140} {mx},{yb} {mx + 200},{yb} {mx + 200},{y0 + 140}" '
-              f'fill="none" stroke="#1f5fbf" stroke-width="2"/>')
-        d.text(mx + 100, yb - 34, "120 Ω on board: leave it", size=12, anchor="middle", fill="#1f5fbf")
-        for px, lbl, flag in ((mx + 50, "VCC", "+5V"), (mx + 150, "GND", "GND")):
-            d.pin(px, yb), d.text(px, yb - 10, lbl, size=13, anchor="middle", weight="bold")
-            d.wire([(px, yb), (px, yb + 16)], BLACK, 2), d.flag(px, yb + 16, flag, "down")
-        # cable to module, with idle bias
-        if ch == "A":
-            pa, pb = 1, 2
-            pair_wire(d, pa, [jp[pa], mp["A"]])
-            pair_wire(d, pb, [jp[pb], mp["B"]])
-        else:
-            pa, pb = 3, 6
-            pair_wire(d, pa, [jp[pa], (420, jp[pa][1]), (420, mp["A"][1]), mp["A"]])
-            pair_wire(d, pb, [jp[pb], (400, jp[pb][1]), (400, mp["B"][1]), mp["B"]])
-        # bias: A -> 560 -> GND (drawn upward), B -> 560 -> +5V (drawn downward)
+    mx = 820
+    G = 300
+    for i, t in enumerate(TOWERS):
+        y0 = G + i * 240
+        mp = max485(d, mx, y0, f"RX · S2-{t}", ["A", "B"], ["RO", "RE", "DE", "DI", "VCC", "GND"], w=200)
+        j, ch = jack_of(t)
+        pa, pb = CH_PINS[ch]
         ya, yb = mp["A"][1], mp["B"][1]
-        d.dot(560, ya), d.wire([(560, ya), (560, ya - 70)], BLACK, 2)
-        d.resistor(560, ya - 38, "560 Ω")
-        d.flag(560, ya - 70, "GND", "up")
-        d.dot(620, yb), d.wire([(620, yb), (620, yb + 80)], RED, 2)
-        d.resistor(620, yb + 40, "560 Ω", vertical=True, color=RED)
-        d.flag(620, yb + 80, "+5V", "down")
-        # RE + DE to GND, DI unused
+        pair_label(d, 640, ya, pa, j, "left"), d.wire([(640, ya), (mx, ya)], RJ45[pa][1], 5, stripe=RJ45[pa][2])
+        pair_label(d, 640, yb, pb, j, "left"), d.wire([(640, yb), (mx, yb)], RJ45[pb][1], 5, stripe=RJ45[pb][2])
+        # bias: A -> 560 -> GND (up), B -> 560 -> +5V (down)
+        d.dot(700, ya), d.wire([(700, ya), (700, ya - 66)], BLACK, 2)
+        d.resistor(700, ya - 36, "560 Ω", vertical=True)
+        d.flag(700, ya - 66, "GND", "up")
+        d.dot(760, yb), d.wire([(760, yb), (760, yb + 66)], RED, 2)
+        d.resistor(760, yb + 36, "560 Ω", vertical=True, color=RED)
+        d.flag(760, yb + 66, "+5V", "down")
         rx = mx + 200
         d.wire([mp["RE"], (rx + 30, mp["RE"][1]), (rx + 30, mp["DE"][1]), mp["DE"]], BLACK, 2)
         d.dot(rx + 30, mp["RE"][1], BLACK, 4), d.dot(rx + 30, mp["DE"][1], BLACK, 4)
         d.wire([(rx + 30, (mp["RE"][1] + mp["DE"][1]) / 2), (rx + 60, (mp["RE"][1] + mp["DE"][1]) / 2)], BLACK, 2)
         d.flag(rx + 60, (mp["RE"][1] + mp["DE"][1]) / 2, "GND", "right")
         d.text(rx + 12, mp["DI"][1] + 5, "n/c", size=13, fill="#777")
-        # RO splits to two strips
+        d.wire([mp["VCC"], (rx + 30, mp["VCC"][1])], RED, 2), d.flag(rx + 30, mp["VCC"][1], "+5V", "right")
+        d.wire([mp["GND"], (rx + 30, mp["GND"][1])], BLACK, 2), d.flag(rx + 30, mp["GND"][1], "GND", "right")
         ro = mp["RO"]
-        d.wire([ro, (1250, ro[1])], DATA_5, 3)
-        d.resistor(1160, ro[1], "100 Ω", color=DATA_5)
-        for (n, ech, strip, data) in EXITS:
-            if ech == ch:
-                jst_exit(d, 1250, ro[1] + (0 if data else 80), n, "S#", ch, strip, data)
-
-    d.lines(60, 880, ["Bias resistors (560 Ω) are soldered on the perfboard, one pair per module. They hold the",
-                      "line at a defined 'idle low' when the controller is off or rebooting, so the strips stay dark",
-                      "instead of flickering. Check the module: if it has its own bias resistors, these still win."],
-            size=15, fill="#333")
-    d.save("statue-wiring.svg", "RJ45 jack, two MAX485 receivers with idle bias, and four LED exits in a statue box.")
+        d.wire([ro, (1390, ro[1])], DATA_5, 3)
+        d.resistor(1300, ro[1], "100 Ω", color=DATA_5)
+        tower_exit(d, 1390, ro[1], f"Tower {t} data", f"statue 2 · {TOWER_H[t]} mm tower · + GND")
+    for j in (1, 2, 3):
+        jack_table(d, 40, 300 + (j - 1) * 560, f"RJ45 jack {j} ← controller jack {j}", j)
+        d.text(190, 300 + (j - 1) * 560 + 48 + 26 * 8 + 22, "pins 7, 8 → GND", size=13, anchor="middle", fill="#555")
+    d.lines(40, 2005, ["Each receiver: 560 Ω A→GND and B→+5V hold the line idle-low when the controller is off, so the towers stay dark instead of flickering."],
+            size=14, fill="#333")
+    d.save("box2-wiring.svg", "Three RJ45 jacks, seven MAX485 receivers with idle bias, and seven tower data outputs in box 2.")
 
 
 # --------------------------------------------------------------------------
-# 3. Power (every box)
+# 4. Tower base
 # --------------------------------------------------------------------------
+
+def tower_base():
+    d = Drawing(1500, 760, "Tower base wiring (all 14 towers)")
+    header(d, "Tower base — the same in all 14 towers",
+           ["One data channel in, split to the 4 faces. All 4 faces show the same pixels.",
+            "Mounted in the 15 cm dark space at the bottom of the tower."])
+    # cable in
+    d.rect(40, 250, 230, 120, fill="#fff8e1", stroke="#b58900")
+    d.lines(56, 280, ["Data cable from box", "DATA", "GND"], size=15, weight="bold")
+    d.pin(270, 307), d.pin(270, 334)
+    d.rect(40, 420, 230, 110, fill="#fde3e3", stroke=RED)
+    d.lines(56, 450, ["Tower power (2-pin)", "+5V", "GND"], size=15, weight="bold", fill=RED)
+    d.text(56, 515, "connector and wiring: TBD", size=12, fill="#555")
+    d.wire([(270, 334), (330, 334)], BLACK, 3), d.flag(330, 334, "GND", "right")
+    # pull-down + buffer
+    x0 = 620
+    ys = [240, 330, 420, 510]
+    d.wire([(270, 307), (520, 307)], DATA_5, 3)
+    d.dot(440, 307, DATA_5), d.wire([(440, 307), (440, 380)], BLACK, 2)
+    d.resistor(440, 350, "10 kΩ", vertical=True)
+    d.flag(440, 380, "GND", "down")
+    d.wire([(520, ys[0]), (520, ys[-1])], DATA_5, 3)
+    for y in ys:
+        d.wire([(520, y), (x0, y)], DATA_5, 3)
+    d.dot(520, 307, DATA_5)
+    names = [("1A", 2, "1Y", 3), ("2A", 5, "2Y", 6), ("3A", 9, "3Y", 8), ("4A", 12, "4Y", 11)]
+    gates = [(names[i][1], names[i][0], names[i][2], names[i][3], ys[i]) for i in range(4)]
+    buffer_chip(d, x0, 190, gates, "74AHCT125", "")
+    for i, y in enumerate(ys):
+        d.wire([(x0 + 220, y), (1150, y)], DATA_5, 3)
+        d.resistor(980, y, "100 Ω", color=DATA_5)
+        d.rect(1150, y - 22, 300, 44, fill="#fff8e1", stroke="#b58900")
+        d.pin(1150, y)
+        d.text(1164, y - 2, f"Face {i + 1} strip · DIN", size=15, weight="bold")
+        d.text(1164, y + 15, "5V / GND from the tower power", size=12, fill="#555")
+    d.lines(40, 660, ["Strips run bottom to top: LED 0 at the base. 10 kΩ pull-down keeps the buffer input low (strips dark) if the data cable is unplugged.",
+                      "74AHCT125 VCC from the tower's +5V; OE pins to GND. 100 Ω resistors optional."], size=14, fill="#333")
+    d.save("tower-base.svg", "Tower base: data cable in, 10 k pull-down, 74AHCT125 splitting to four face strips.")
+
+
+# --------------------------------------------------------------------------
+# 5. Supply box (all 10)
+# --------------------------------------------------------------------------
+
+# Supplies per statue: name -> (sits at, feeds [(tower, faces)])
+SUPPLIES = {
+    "A": ("T2", [("T1", "1–4"), ("T2", "1–4")]),
+    "B": ("T3", [("T3", "1–4")]),
+    "C": ("T4", [("T4", "1–2")]),
+    "D": ("T4", [("T4", "3–4"), ("T5", "1–2")]),
+    "E": ("T6", [("T5", "3–4"), ("T6", "1–4"), ("T7", "1–4")]),
+}
+
 
 def power():
-    d = Drawing(1560, 720, "Box power wiring (all four boxes)")
-    header(d, "Power — the same in all four boxes",
-           ["Mains to the PSU; strip power straight from the PSU, never through the perfboard.",
-            "Perfboard (+5V / GND rails) gets its own pair from the PSU's second +V / −V terminals."])
-
-    # C14
+    d = Drawing(1400, 640, "Supply box wiring (all 10 supplies)")
+    header(d, "Supply box — the same for all 10 supplies (5 per statue)",
+           ["Mains into the box's C14; 5 V out to XT60 outputs, one pair per destination tower.",
+            "Supply C sits in the apex box and also feeds the perfboard (ESP32 / transceivers)."])
     d.rect(180, 170, 260, 100, fill="#fff3e0", stroke="#e65100")
-    d.lines(310, 205, ["C14 inlet", "fuse + switch"], size=16, anchor="middle", weight="bold", fill="#e65100")
-    # PSU
+    d.lines(310, 205, ["C14 inlet", "1 A fuse + switch"], size=16, anchor="middle", weight="bold", fill="#e65100")
     d.rect(200, 440, 760, 140, fill="#eceff1", stroke="#455a64")
-    d.lines(580, 520, ["S-100-5 power supply · 5 V 20 A"], size=18, anchor="middle", weight="bold", fill="#455a64")
-    d.text(580, 548, "V-ADJ pot: not touched in the field", size=13, anchor="middle", fill="#555")
+    d.text(580, 520, "S-100-5 · 5 V 20 A", size=18, anchor="middle", weight="bold", fill="#455a64")
     terms = [(260, "1 L"), (320, "2 N"), (380, "3 FG"), (520, "4 −V"), (580, "5 −V"), (660, "6 +V"), (720, "7 +V")]
     for x, lbl in terms:
         d.pin(x, 440), d.text(x, 470, lbl, size=13, anchor="middle", weight="bold")
-    d.text(320, 500, "AC side", size=13, anchor="middle", fill="#e65100")
-    d.text(620, 500, "DC side", size=13, anchor="middle", fill="#455a64")
-    for x, col, stripe, lbl in ((260, "#8b5a2b", False, "L"), (320, BLUE, False, "N"), (380, "#2e9e44", False, "PE")):
+    for x, col, lbl in ((260, "#8b5a2b", "L"), (320, BLUE, "N"), (380, "#2e9e44", "PE")):
         d.pin(x, 270), d.text(x, 262, lbl, size=13, anchor="middle", weight="bold")
         d.wire([(x, 270), (x, 440)], col, 5)
     d.wire([(380, 275), (380, 435)], "#f9d71c", 5)
     d.add('<polyline points="380,275 380,435" fill="none" stroke="#2e9e44" stroke-width="5" stroke-dasharray="10 10"/>')
     d.text(170, 340, "230 V AC", size=18, anchor="end", weight="bold", fill="#c62828")
-    d.text(170, 362, "brown L · blue N", size=13, anchor="end", fill="#555")
-    d.text(170, 380, "green/yellow PE", size=13, anchor="end", fill="#555")
-
-    # perfboard feed: flags
     d.wire([(580, 440), (580, 400)], BLACK, 3), d.flag(580, 400, "GND", "up")
     d.wire([(720, 440), (720, 400)], RED, 3), d.flag(720, 400, "+5V", "up")
-    d.text(770, 390, "← both to perfboard rails, 0.5 mm²", size=13, fill="#555")
-
-    # heavy buses
-    d.wire([(520, 440), (520, 240), (1460, 240)], BLACK, 6)
-    d.wire([(660, 440), (660, 290), (1460, 290)], RED, 6)
-    d.text(560, 230, "GND · WAGO 221-415, fed with 1.5 mm²", size=13, fill="#222")
-    d.text(690, 314, "+5 V · WAGO 221-415, fed with 1.5 mm²", size=13, fill=RED)
-
-    # exits along the back wall
-    for i, (n, ch, strip, data) in enumerate(EXITS):
-        x = 1000 + i * 125
-        d.rect(x, 100, 110, 70, fill="#fff8e1", stroke="#b58900")
-        d.text(x + 55, 122, f"LED exit {n}", size=14, anchor="middle", weight="bold")
-        d.text(x + 55, 140, f"{ch} strip {strip}" + ("" if data else " (power)"), size=12, anchor="middle", fill="#555")
-        for dx, lbl in ((20, "5V"), (55, "DAT"), (90, "GND")):
-            d.pin(x + dx, 170), d.text(x + dx, 160, lbl, size=10, anchor="middle", fill="#555")
-        d.wire([(x + 20, 290), (x + 20, 170)], RED, 3), d.dot(x + 20, 290, RED)
-        d.wire([(x + 90, 240), (x + 90, 170)], BLACK, 3), d.dot(x + 90, 240, BLACK)
-        if data:
-            d.wire([(x + 55, 170), (x + 55, 200)], DATA_5, 3)
-            d.text(x + 55, 216, "data", size=11, anchor="middle", fill=DATA_5)
-        else:
-            d.text(x + 55, 192, "n/c", size=11, anchor="middle", fill="#777")
-    d.lines(1000, 380, ["Each JST-SM exit carries at most 3 A.",
-                        "These four exits are the statue's only power;",
-                        "the controller's brightness limit keeps each under 3 A.",
-                        "Data wire: from the perfboard, see the",
-                        "box's signal diagram."], size=14, fill="#333")
-    d.lines(200, 620, ["Mains wiring is done in the workshop and checked before the event. In the field, never open a box",
-                       "while its C14 cord is plugged in. JST pigtail colours vary by supplier — check 5V / DATA / GND with a meter."],
-            size=15, fill="#c62828")
-    d.save("box-power.svg", "Mains inlet, PSU terminals and 5 V distribution to the LED exits and perfboard.")
+    d.text(770, 390, "← supply C only: perfboard rails, 0.5 mm²", size=13, fill="#555")
+    d.wire([(520, 440), (520, 240), (1000, 240)], BLUE, 6)
+    d.wire([(660, 440), (660, 290), (1000, 290)], RED, 6)
+    d.text(700, 232, "−V (blue), 2.5 mm²", size=13, fill=BLUE)
+    d.text(700, 314, "+5 V (red), 2.5 mm²", size=13, fill=RED)
+    d.rect(1000, 200, 360, 130, fill="#fafafa", stroke="#999")
+    d.lines(1016, 228, ["XT60 outputs: one per destination", "tower (or tower half), split to",
+                        "that tower's strand XT60s at its base.", "Which outputs: statue-power.svg"],
+            size=14, fill="#333")
+    d.save("box-power.svg", "Supply box: C14 inlet, S-100-5, XT60 outputs per destination tower.")
 
 
 # --------------------------------------------------------------------------
-# 4. Overview
+# 6. Statue power distribution
 # --------------------------------------------------------------------------
 
-def overview():
-    d = Drawing(1200, 940, "System overview")
-    header(d, "System overview — top view", ["One controller (statue 0) drives all four statues.",
-                                             "Only data crosses the ground; each statue has its own mains-powered PSU."])
-    cx, cy, r = 600, 470, 240
-    d.add(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="#bbb" stroke-width="2" stroke-dasharray="8 8"/>')
-    d.text(cx - 80, cy + 6, "8 m circle", size=16, anchor="middle", fill="#999")
-    pos = {0: (cx, cy - r), 1: (cx + r, cy), 2: (cx, cy + r), 3: (cx - r, cy)}
-    cable = "#6a1b9a"
-    for k in (1, 2, 3):
-        x0, y0 = pos[0]
-        x1, y1 = pos[k]
-        if k == 2:
-            pts = [(x0 + 40, y0 + 40), (x0 + 40, y1 - 40)]
+def statue_power():
+    d = Drawing(1600, 900, "Statue power distribution")
+    header(d, "Statue power — the same at both statues",
+           ["230 V from the outlet at the apex to 5 supply boxes; 5 V from each supply to its towers.",
+            "Thick lines run in the trench; thin lines stay inside a base. Data cables: see the box diagrams."])
+    tx = {"T1": 150, "T2": 360, "T3": 570, "T4": 800, "T5": 1030, "T6": 1240, "T7": 1450}
+    ty = 520
+    # towers
+    split_note = {"T4": "1–2 ← C · 3–4 ← D", "T5": "1–2 ← D · 3–4 ← E"}
+    for t, x in tx.items():
+        d.rect(x - 60, ty, 120, 90, fill="#ffe0b2", stroke="#e65100")
+        d.text(x, ty + 30, f"{t} · {TOWER_H[t]}", size=15, anchor="middle", weight="bold")
+        d.text(x, ty + 52, split_note.get(t, "all 4 faces"), size=12, anchor="middle", fill="#555")
+        d.text(x, ty + 72, "XT60 per face", size=11, anchor="middle", fill="#777")
+    d.text(800, ty + 110, "T4: + top feed up the post (faces 1–2 from C, 3–4 from D)", size=13, anchor="middle", fill=RED)
+    # supplies
+    sx = {"A": 360, "B": 570, "C": 735, "D": 865, "E": 1240}
+    sw = {"A": 150, "B": 150, "C": 110, "D": 110, "E": 150}
+    sy0, sy1 = 300, 380
+    for n, x in sx.items():
+        box = "apex box" if n == "C" else "100W box"
+        d.rect(x - sw[n] / 2, sy0, sw[n], sy1 - sy0, fill="#eceff1", stroke="#455a64")
+        d.text(x, sy0 + 28, f"Supply {n}", size=15, anchor="middle", weight="bold", fill="#455a64")
+        d.text(x, sy0 + 50, box, size=12, anchor="middle", fill="#555")
+        d.text(x, sy0 + 68, "S-100-5", size=12, anchor="middle", fill="#555")
+    # ground bond between supplies
+    bond = [(sx["A"] + 75, 340), (sx["B"] - 75, 340)], [(sx["B"] + 75, 340), (sx["C"] - 55, 340)], \
+           [(sx["C"] + 55, 340), (sx["D"] - 55, 340)], [(sx["D"] + 55, 340), (sx["E"] - 75, 340)]
+    for seg in bond:
+        d.add(f'<polyline points="{seg[0][0]},{seg[0][1]} {seg[1][0]},{seg[1][1]}" fill="none" stroke="{BLACK}" '
+              f'stroke-width="3" stroke-dasharray="8 6"/>')
+    # mains
+    d.rect(700, 135, 200, 50, fill="#fff3e0", stroke="#e65100")
+    d.lines(800, 156, ["230 V outlet + strip", "at the apex"], size=14, anchor="middle", weight="bold", fill="#e65100")
+    MAINS = "#8b5a2b"
+    d.wire([(760, 185), (760, sy0)], MAINS, 2), d.wire([(840, 185), (840, sy0)], MAINS, 2)
+    d.wire([(720, 185), (720, 235), (sx["B"], 235), (sx["B"], sy0)], MAINS, 6)
+    d.wire([(705, 185), (705, 210), (sx["A"], 210), (sx["A"], sy0)], MAINS, 6)
+    d.wire([(880, 185), (880, 220), (sx["E"], 220), (sx["E"], sy0)], MAINS, 6)
+    d.text(470, 203, "230 V → A", size=13, anchor="middle", fill=MAINS, weight="bold")
+    d.text(640, 253, "230 V → B", size=13, anchor="middle", fill=MAINS, weight="bold")
+    d.text(1060, 213, "230 V → E", size=13, anchor="middle", fill=MAINS, weight="bold")
+    # 5 V
+    def feed(pts, thick, label=None, lx=None, ly=None):
+        d.wire(pts, RED, 6 if thick else 2)
+        if label:
+            d.text(lx, ly, label, size=12, anchor="middle", fill=RED, weight="bold")
+    feed([(sx["A"] + 20, sy1), (sx["A"] + 20, ty)], False)
+    feed([(sx["A"] - 40, sy1), (sx["A"] - 40, 450), (tx["T1"], 450), (tx["T1"], ty)], True, "3×2.5", 230, 442)
+    feed([(sx["B"], sy1), (sx["B"], ty)], False)
+    feed([(sx["C"] + 35, sy1), (sx["C"] + 35, ty)], False)
+    feed([(sx["D"] - 20, sy1), (sx["D"] - 20, ty)], False)
+    feed([(sx["D"] + 30, sy1), (sx["D"] + 30, 440), (tx["T5"] - 30, 440), (tx["T5"] - 30, ty)], True, "3×2.5", 960, 432)
+    feed([(sx["E"] - 50, sy1), (sx["E"] - 50, 450), (tx["T5"] + 30, 450), (tx["T5"] + 30, ty)], True, "3×2.5", 1130, 442)
+    feed([(sx["E"], sy1), (sx["E"], ty)], False)
+    feed([(sx["E"] + 50, sy1), (sx["E"] + 50, 450), (tx["T7"], 450), (tx["T7"], ty)], True, "3×2.5", 1370, 442)
+    # legend
+    d.rect(60, 690, 1480, 190, fill="#fafafa", stroke="#bbb", sw=1)
+    rows = [(MAINS, 6, False, "230 V, buried: H07RN-F 3×1.5 cord with C13 → C14 inlet of the supply box"),
+            (MAINS, 2, False, "230 V inside the apex base"),
+            (RED, 6, False, "5 V, buried: 3-core cable, brown +5 V, blue GND, green/yellow unused or GND; XT60 at both ends"),
+            (RED, 2, False, "5 V inside a base"),
+            (BLACK, 3, True, "ground bond: all supply −V tied together (1.5 mm², in the trench)")]
+    for i, (col, w, dash, txt) in enumerate(rows):
+        y = 720 + 34 * i
+        if dash:
+            d.add(f'<polyline points="80,{y} 150,{y}" fill="none" stroke="{col}" stroke-width="{w}" stroke-dasharray="8 6"/>')
         else:
-            pts = [(x0 + (25 if k == 1 else -25), y0 + 30), (x1 + (-30 if k == 1 else 30), y1 - 30)]
-        d.wire(pts, cable, 6)
-        mx, my = (pts[0][0] + pts[1][0]) / 2, (pts[0][1] + pts[1][1]) / 2
-        d.rect(mx - 70 + (55 if k == 2 else 0), my - 16, 140, 30, fill="#fff", stroke=cable, sw=1.5)
-        d.text(mx + (55 if k == 2 else 0), my + 5, f"cable {k} · jack {k}", size=14, anchor="middle", fill=cable, weight="bold")
-    for k, (x, y) in pos.items():
-        col = "#2e7d32" if k == 0 else "#1565c0"
-        d.add(f'<circle cx="{x}" cy="{y}" r="46" fill="#fff" stroke="{col}" stroke-width="4"/>')
-        d.text(x, y - 4, f"Statue {k}", size=17, anchor="middle", weight="bold", fill=col)
-        d.text(x, y + 16, "controller" if k == 0 else "statue box", size=13, anchor="middle", fill="#555")
-    # phone + mains notes
-    d.rect(800, 150, 330, 92, fill="#eef7ee", stroke="#2e7d32")
-    d.lines(816, 176, ["WiFi access point from the controller.", "Phones connect to it to run the show.",
-                       "No internet needed."], size=14)
-    d.wire([(800, 196), (650, 236)], "#2e7d32", 2)
-    d.rect(60, 790, 1080, 120, fill="#fafafa", stroke="#bbb", sw=1)
-    d.lines(80, 818, ["Purple = 10 m CAT5e patch lead, buried in a trench. Carries LED data + ground only. NOT Ethernet.",
-                      "Mains cords are buried in the same trenches. No cable above ground: boxes sit inside the bases.",
-                      "Wave order around the circle: statue 0 → 1 → 2 → 3 (clockwise in this drawing).",
-                      "Which physical statue is 0–3 is set at install: label boxes and cables to match."], size=15)
-    d.save("overview.svg", "Four statues in a circle, star-wired from the controller at statue 0.")
+            d.wire([(80, y), (150, y)], col, w)
+        d.text(170, y + 5, txt, size=14)
+    d.save("statue-power.svg", "Mains from the apex to five supplies per statue, and 5 V from each supply to its towers.")
 
 
 if __name__ == "__main__":
     overview()
     controller()
-    statue()
+    box2()
+    tower_base()
     power()
+    statue_power()

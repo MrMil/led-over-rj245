@@ -18,13 +18,17 @@ installation — and how the show is built and changed.
 - **WLED 16.x, 16.0.1 or later** (agent, 2026-10-09). Current release line as of 2026-10
   ([release notes](https://github.com/wled/WLED/releases/tag/v16.0.1)); 16.0.1 fixes a
   ledmap parser overrun, and 0.15.4 fixed a preset-file corruption bug.
-- **All 8 outputs on the RMT driver** (agent, 2026-10-09). WLED 16 offers per-output RMT or
-  parallel I2S on classic ESP32 (8 + 8); 8 outputs fit in RMT, and parallel I2S needs all I2S
-  buses to be the same type and DMA memory proportional to the largest bus. Source:
-  `wled00/const.h` on WLED main, WLED issue #5266.
-- **One continuous logical strip, outputs ordered S0-A, S0-B, S1-A … S3-B** (owner). Effects
-  that move along the strip then travel around the circle with no synchronisation logic
-  anywhere.
+- **14 outputs, one per tower: 8 on RMT + 6 on I2S** (owner/agent, 2026-10-10). WLED 16
+  supports up to 8 RMT + 8 parallel I2S outputs on classic ESP32. All I2S buses must be the
+  same LED type (all WS2812B), and I2S uses DMA memory proportional to the largest bus.
+  Source: `wled00/const.h` on WLED main, WLED issue #5266. **Not yet verified on hardware:
+  bench test pending.** Fallback: 12 outputs, with two towers sharing a channel each.
+  **Changed 2026-10-10:** previously 8 outputs, all RMT.
+- **Each output's LED count is one face** (agent, 2026-10-10). All 4 faces of a tower get the
+  same data in parallel ([../strips_and_power/tower_layout.md](../strips_and_power/tower_layout.md)),
+  so WLED renders ~414 pixels per statue, ~830 total: around 80–100 fps of render capacity.
+- **One continuous logical strip, outputs ordered S1-T1 … S1-T7, S2-T1 … S2-T7** (agent,
+  2026-10-10). Effects that move along the strip sweep across each statue's V in order.
 - **AP mode "Always", fixed channel, password changed from default** (owner + agent). The
   default only raises the AP when no known network is found, so behaviour would depend on
   what WiFi is in range (owner). A fixed channel (1/6/11) avoids the AP hopping in congested
@@ -41,10 +45,10 @@ installation — and how the show is built and changed.
   refer to "preset 1"; separate ranges stop field edits overwriting workshop work; the boot
   preset makes the show resume unattended after generator dropouts (owner requirement:
   "a reboot should rejoin the show cleanly").
-- **Test presets: 1 = solid colour per statue (0 red, 1 green, 2 blue, 3 white), 2 = a single
-  dot running the whole strip** (agent, 2026-10-09). Preset 1 checks every channel and the
-  colour order (statue 0 must be red under GRB); preset 2 checks statue numbering and output
-  order, which a wrong cable-to-jack mapping would scramble.
+- **Test presets: 1 = solid colour per tower (T1 red … T7 magenta, both statues), 2 = a single
+  light running the whole strip** (agent, 2026-10-10). Preset 1 checks every channel, every
+  face and the colour order (T1 must be red under GRB). Preset 2 checks tower order and
+  cable-to-jack mapping.
 
 ### Animations in C++ ahead of time; only parameters and calibration in the field
 
@@ -52,55 +56,54 @@ installation — and how the show is built and changed.
 Complex animations are written beforehand as WLED effects in C++. Each exposes its creative
 knobs as WLED effect controls (speed, intensity, up to 3 custom sliders, 3 checkboxes, colours,
 palette), so artists tune, save and sequence them from a phone. What the field does need is
-**calibration**: the strips are independently placed, so an effect such as "something
-travelling around the circle" only looks right if every LED's physical angle or position is
-known.
-**Coordinate system** (owner direction, 2026-10-09, pending the statue builders): a panorama
-seen from the circle's centre, with x = azimuth and y = elevation, so effects are written as
-"a round screen around the viewer" (see the anamorphic note in [../README.md](../README.md)).
-WLED's `ledmap.json` can express this as a 2D grid. Its limits:
-- At most 255 cells per side, so azimuth resolution is at best 360/255 ≈ 1.4° (≈10 cm at 4 m).
-- One LED per cell.
-- Render cost is per cell, not per LED: about 65–85 k cells/s, so a 120 × 30 grid runs at
-  roughly 20 fps.
-
-Because many LEDs on one part of a figure see nearly the same point of the image, a coarse
-WLED grid leaves most of them unmapped, and a fine one is slow.
-**Planned shape** (owner direction + agent proposal, 2026-10-09, not built). **A rolled 2D
-map**: x = angle around the circle, y = height. Animations are written as 2D images f(x, y, t)
-on this unrolled cylinder. **Every LED has its own continuous (x, y)**, not a grid cell, so a
-ground-to-sky wash still lights the bottom of a hand before its top (owner's example).
-Calibration is split by when it can be done:
-- **Workshop, per statue:** each LED's position in the statue's own frame (sideways offset,
-  height), mapped once when the LEDs are fitted. A statue is rigid, so this never changes in
-  the field. Methods: export from the builders' 3D model if one exists, camera mapping from
-  the design viewpoint with binary-coded LED patterns (about log₂(N) photos), or marked LEDs
-  measured along each strip and interpolated. Stored as a file on the ESP32 (int16, ~4 bytes
-  per LED).
-- **Field, per statue, a few numbers in Config → Usermods:** angle on the circle, distance
-  from centre, rotation about its own axis, height offset. Each LED's x is then the statue's
-  angle + atan(sideways offset / distance). The statues must be placed precisely for the
-  anamorphic illusion anyway, so these come from the same placement measurements. A
-  calibration effect (a vertical line at a slider-set angle, a horizontal line at a set
-  height) verifies them by eye from the centre.
+**geometry**: effects must know where each pixel is.
+**Coordinate system: a rolled 2D map, x = tower, y = height** (owner direction 2026-10-09;
+simplified 2026-10-10). Each output is one tower and each pixel's index is its height (strips
+run bottom to top, 60/m, starting 150 mm above the base). An effect computes
+f(tower position, height, time), so a ground-to-sky wash lights the bottom of each face before
+the top. Tower position along the mural is T1–T7 per statue, optionally with each tower's
+horizontal position or angle as seen from the centre. That is a short table, not per-LED
+mapping.
+**Field calibration** reduces to tower order and LED counts. They live in WLED's LED
+Preferences, plus at most one position number per tower as a usermod setting.
 **Rejected.**
-- *A few numbers per strip (start/end angle, height range):* a strip curving round a hand
-  can't be described by its ends (owner's example, 2026-10-09).
-- *Reusing WLED's built-in 2D effects by sampling a small virtual grid:* every LED in one cell
-  gets the same colour, so a ground-to-sky wash could not light the bottom of a hand before
-  its top (owner, 2026-10-09).
+- *Per-LED positions from camera or 3D-model mapping* (planned 2026-10-09): needed for strips
+  following figures; with vertical strips on rectangular towers, position follows from tower
+  and LED index.
+- *An azimuth/elevation panorama with WLED's `ledmap.json`:* 255 cells per side and per-cell
+  render cost. A `ledmap.json` with one column per tower can still be generated so WLED's
+  built-in 2D effects work.
 - *Calibration through effect sliders:* only 8-bit resolution, stored per preset rather than
-  once for the installation, and too few controls.
-- *WLED's `ledmap.json` alone:* integer grid of at most 255 cells per side, every empty cell
-  costs render time, and it only serves 2D effects. It can still be generated from the same
-  geometry for the built-in 2D effects.
+  once for the installation.
 - *Field programming tools (MoonLight, Pixelblaze, ARTI-FX):* not needed once nobody
   programs in the field.
-**Constrains.** Every LED must be individually addressable, which is why the strips are
-chained, not parallel
-([../strips_and_power/strip_layout.md](../strips_and_power/strip_layout.md)). It also means a
-custom WLED build (PlatformIO) instead of the stock binary from install.wled.me. Whether saved
-usermod settings apply without a reboot in WLED 16 is unverified.
+**Constrains.** A custom WLED build (PlatformIO) instead of the stock binary.
+
+**Pre-rendered playback** (discussed 2026-10-10, not planned). Frames rendered offline (e.g.
+xLights FSEQ) and played from a microSD card would remove render cost entirely. It costs live
+parameters, needs a playback module (not in stock WLED; an FSEQ PR was open as of
+2026-10-09), and needs 4 GPIOs, which 14 outputs don't leave. With one face rendered per tower
+the frame-rate reason for it is gone.
+
+### The current cap cannot be changed from the UI
+
+**Why.** The owner requires it (2026-10-10). The cap protects the PSUs and wiring, and it must
+survive a mistake made by a crew member with full access.
+**Planned shape** (agent, 2026-10-10, not built). The custom build knows which strands feed
+from which PSU (a compile-time table) and each PSU's ceiling. Every frame it estimates each
+PSU group's current, takes the most constrained group's ratio (ceiling ÷ demand), and scales
+**the whole frame by that one factor**. No PSU can be overloaded, and relative brightness
+between towers is preserved: a bright scene never leaves the tall tower dimmer than the rest
+(owner requirement, 2026-10-10). The ceilings cannot be changed from the UI, a restored backup
+or the JSON API; only re-flashing changes them.
+**Rejected.** *WLED's per-output limiter* (each tower capped at a fraction of its worst
+case): even in uniformly bright scenes, but in uneven scenes it clips only the towers above
+the limit, flattening contrast. It also can't see PSU groups that span towers. *WLED's global
+limiter alone:* scales uniformly but only against the total, so one bright PSU group can
+still overload while the total looks fine.
+**Rejected.** *WLED Settings PIN* (owner, 2026-10-10): the people with the WiFi password would
+have the PIN, so it does not prevent their mistakes. *PSU overload protection as the cap:* it
+trips the supply into shutdown, a dark statue rather than a dimmer one.
 
 ### Custom firmware — rejected for now
 
@@ -116,27 +119,28 @@ has exactly 8 RMT channels; `FASTLED_ESP32_I2S` gives headroom.
 
 ### Gotchas
 
-- **Throughput:** WLED renders ~65–85 k LEDs/s on ESP32; ~4000 LEDs total gives ~18 fps.
-  WLED's docs call 4 outputs × 512–800 LEDs the sweet spot; at 8 outputs check frame rate
-  early ([kno.wled.ge multi-strip](https://kno.wled.ge/features/multi-strip/)). Target
-  ~2000–2500 LEDs total for ~30 fps.
+- **Throughput:** WLED renders ~65–85 k LEDs/s on ESP32
+  ([kno.wled.ge multi-strip](https://kno.wled.ge/features/multi-strip/)); ~830 rendered
+  pixels is comfortable. Heavier custom effects cost more; check FPS on the Info page.
 - **About 4 phones max on the AP:** WLED calls `softAP` without `max_connection`, so the ESP32
   default of 4 clients applies (`wled00/wled.cpp`).
 - **The web UI is disabled while a realtime stream (DDP/Art-Net/E1.31) is active.**
 - **Limits:** preset IDs 1–250; playlists up to 100 entries; `ledmap.json` + `ledmap1…15`.
-- **Brightness limiter: 3000 mA per output**, so neither of an output's two strip exits can
-  exceed 3 A: [../strips_and_power/led_power_budget.md](../strips_and_power/led_power_budget.md).
+- **Current estimate is 4× low** unless LED current per LED is set to 4× the real value:
+  each output is configured as one face but drives four.
+  See [../strips_and_power/led_power_budget.md](../strips_and_power/led_power_budget.md).
 
 ## Contents
 
 ### Not yet documented
 
 - **WLED configuration backup** — `wled/cfg.json`, `wled/presets.json` (to be created) — the restorable state of the controller; the AP password must be blanked before commit.
-- **Spatial mapping (ledmap)** — not built — a 2D `ledmap.json` over all outputs; depends on strip layout (owner open question 2).
-- **Geometry usermod and calibration effect** — not built — see *Animations in C++ ahead of time* above.
+- **Optional `ledmap.json`** — not built — one column per tower, so WLED's built-in 2D effects can be used.
+- **Tower-position settings** — not built — see *Animations in C++ ahead of time* above.
+- **Firmware current ceiling** — not built — see *The current cap cannot be changed from the UI*.
 - **Custom effects** — not built — the installation's own animations, written in C++ as WLED effects.
 
 ## Related
 
-- [../controller/gpio_assignment.md](../controller/gpio_assignment.md) — the pins behind the 8 outputs.
+- [../controller/gpio_assignment.md](../controller/gpio_assignment.md) — the pins behind the 14 outputs.
 - [../field_docs/README.md](../field_docs/README.md) — the operating guide written for this configuration.

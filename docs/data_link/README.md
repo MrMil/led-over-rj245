@@ -3,10 +3,10 @@
 Path: [docs](../README.md) › **data_link**
 Parent: [../README.md](../README.md)
 
-**Covers:** getting WS2812 data from the controller to statues 1–3: two RS-485 differential
-pairs per statue in one buried CAT5e cable, received back to single-ended 5 V data in each
-statue box.
-**Code:** `tools/wiring_diagrams.py` (`RJ45`, `statue()`, `controller()`), `guide/img/statue-wiring.svg`, `guide/img/controller-wiring.svg`, `guide/wiring.md`
+**Covers:** getting statue 2's 7 tower channels from the controller box to box 2: RS-485 on
+three buried CAT5e cables, three channels per cable, received back to single-ended 5 V data
+in box 2.
+**Code:** `tools/wiring_diagrams.py` (`RJ45`, `JACKS`, `box2()`, `controller()`), `guide/img/box2-wiring.svg`, `guide/img/controller-wiring.svg`, `guide/wiring.md`
 
 ## Design
 
@@ -14,14 +14,17 @@ statue box.
 
 - **Raw WS2812 waveform over RS-485, not a protocol** (owner). The transmitter just converts
   the 800 kHz WS2812 bitstream to differential and the receiver converts it back. Nothing is
-  decoded, buffered or re-timed, so there is no firmware at the statues and no added latency.
-- **Two channels per cable, one cable per statue, star from the controller** (owner). A CAT5e
-  cable has four pairs: two carry data, two carry ground. Star wiring means one bad cable
-  darkens one statue.
-- **Ground travels with the data, on pins 4/5/7/8** (owner). The ground conductors carry no
+  decoded, buffered or re-timed, so there is no firmware in box 2 and no added latency.
+- **Three channels per cable, three cables between the boxes** (owner, 2026-10-10: "we can pass
+  9 channels over the rj45 cables"). Three of a CAT5e's four pairs carry data, one carries
+  ground; 9 channels for 7 towers leaves 2 spare. Jack 1 = S2-T1–T3, jack 2 = T4–T6, jack 3 =
+  T7. A bad cable darkens at most three towers.
+  **Changed 2026-10-10:** previously two channels per cable (two ground pairs), one cable per
+  remote statue, star from the controller to three statues.
+- **Ground travels with the data, on pins 7/8** (owner; one pair since 2026-10-10). The ground conductors carry no
   signal; they hold the two boxes' grounds close enough that A and B stay inside the
   receiver's −7 V … +12 V common-mode window. Without them, leakage and capacitive coupling
-  from four independent mains-fed PSUs can push the inputs out of range — the likely cause of
+  from independent mains-fed PSUs can push the inputs out of range — the likely cause of
   "statue 2 works until the generator load changes". The offset only has to be small, not zero.
 
 ### Differential, not single-ended
@@ -51,4 +54,4 @@ restructuring the whole show around DMX for no benefit (owner).
 ## Related
 
 - [../controller/README.md](../controller/README.md) — the transmitting end.
-- [../strips_and_power/strip_layout.md](../strips_and_power/strip_layout.md) — what the receiver output drives.
+- [../strips_and_power/tower_base.md](../strips_and_power/tower_base.md) — what the receiver output drives.

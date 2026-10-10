@@ -7,15 +7,16 @@ Parent: [README.md](README.md)
 
 ## What it does
 
-Pin 1/2 (orange pair) = channel A, A/B. Pin 3/6 (green pair) = channel B, A/B. Pins 4/5/7/8
-(blue and brown pairs) = GND. Identical at both ends; cables are straight-through.
+Pin 1/2 (orange pair) = channel 1, A/B. Pin 3/6 (green pair) = channel 2, A/B. Pin 4/5 (blue
+pair) = channel 3, A/B. Pins 7/8 (brown pair) = GND. Identical at both ends; cables are
+straight-through. Three cables run between the controller box and box 2.
 
 ## Decisions
 
 - **A and B of a channel are always the two wires of one twisted pair** (owner). Common-mode
   rejection only works if noise couples equally into both; split a pair and differential
-  signalling stops protecting the link. That is why channel B is on 3/6 (one T568B pair,
-  physically split in the connector) rather than the adjacent 3/4.
+  signalling stops protecting the link. That is why channel 2 is on 3/6 (one T568B pair,
+  physically split in the connector) and channel 3 on 4/5.
 - **Panel-mount coupler in the enclosure wall, short cut patch-cable pigtail inside landing
   on the MAX485 screw terminals** (owner). The trench run is then a factory patch lead: no
   field wiring, and a failed run is a cable swap. The enclosures use a round threaded Cat6A
@@ -39,18 +40,15 @@ Pin 1/2 (orange pair) = channel A, A/B. Pin 3/6 (green pair) = channel B, A/B. P
 - **No cable above ground** (owner, 2026-10-09). The police safety check before the event
   fails an installation with exposed cables, which would mean tearing it down. Each box is
   hidden inside its statue's base, and the cables come up out of the ground inside the base.
-- **All cables 10 m** (owner, 2026-10-09). This covers the 8 m run with the rise into both
-  bases. The ~2.5 m extra on the near runs is acceptable, and identical lengths make every
-  spare fit every run.
-- **Cable lengths fit the runs; no large spools** (owner, 2026-10-09). Any spare length has
-  to be stored inside a statue base, and the controller's base already holds the LED and
-  power wiring for statue 0. Three long coils there would be a rat's nest.
+- **All cables 10 m** (owner, 2026-10-09). Identical lengths make every spare fit every run.
+  Whether 10 m reaches depends on the distance between the two statues' bases (open).
+- **Cable lengths fit the runs; no large spools** (owner, 2026-10-09). Spare length is stored
+  inside a statue base, which already holds the box and the tower wiring.
 - **Mains shares the data trenches** (owner, 2026-10-09). Each trench is dug once; RS-485
   tolerates running alongside mains.
-- **Trenches are the straight runs only: 8 m to the far statue, ~5.7 m to the two near ones**
-  (owner, 2026-10-09). The controller sits at one statue of an 8 m circle; digging hard desert
-  soil in the heat is the most expensive labour in the build. Cable length is chosen to fit
-  those trenches, never the other way round.
+- **One straight trench between the statues** (owner, 2026-10-09/10). Digging hard desert
+  soil in the heat is the most expensive labour in the build; cable length is chosen to fit
+  the trench, never the other way round. Tower cables run in the trench under each statue.
 - **A distinctive cable colour used for nothing else, and labels on everything** (owner). The
   cables look exactly like Ethernet; PoE on A/B would put 48 V into the transceivers at both
   ends.
