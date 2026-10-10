@@ -15,6 +15,9 @@ These docs are written for LLM coding agents. Design changes are documented in t
 makes them; see [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md).
 <!-- META-DOCS:END -->
 
+**Layout pending approval:** this guide describes the two-statue version, which awaits
+Midburn's approval. The approved design has four statues.
+
 ## Guide
 
 | | |

@@ -4,6 +4,9 @@
 
 ## Measure / confirm
 
+- [ ] **Midburn approval** for two statues (approved design: four). Four statues of 7 towers
+  means 28 channels, beyond one ESP32's 16 outputs.
+
 - [ ] **Layout:** tower spacing along each arm, and the distance between the two apexes.
   Gives the lengths of the 5 V runs, tower data cables, ground bonds, and whether 10 m CAT5e
   reaches. See [trenches](docs/strips_and_power/trenches.md).

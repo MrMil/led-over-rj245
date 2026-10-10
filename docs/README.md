@@ -31,9 +31,16 @@ shapes come from the cuts, not from the LEDs**; the LEDs light the faces from be
 look from all angles, so every face is lit. All 4 faces of a tower show the same pixels.
 The animation is a rolled 2D map: x = tower, y = height ([firmware/](firmware/README.md)).
 
-**Changed 2026-10-10:** previously four statues star-wired from a controller at statue 0,
-two channels each over one CAT5e per statue. Reduced to two statues, 3 weeks before the event,
-for less work; one channel per tower, so no data has to return from the top of a tower.
+**Status: the two-statue layout is pending Midburn approval** (owner, 2026-10-10). The
+approved design has **four statues** of 7 towers. Art pieces above a certain size need
+approval from the Midburn authorities, and the change to two statues (3 weeks before the event,
+for less work) has been requested but not granted. This tree describes the two-statue
+variant because the owner asked for it. Do not treat it as final.
+**If it stays at four statues:** 28 towers with one channel each would need 28 outputs. One
+ESP32 in WLED tops out at 16 (8 RMT + 8 I2S), so towers would have to share channels, or the
+single-controller decision would have to be revisited. Earlier four-statue design: four
+statues star-wired from a controller at statue 0, two channels each over one CAT5e per statue
+(see git history before 2026-10-10).
 
 Most of the design is hardware, so "code" paths below are often diagrams
 (`tools/wiring_diagrams.py`) or human guide pages (`guide/`).
@@ -89,6 +96,7 @@ failure — mitigated by a pre-flashed spare ESP32 in a socket ([controller/](co
 
 ### Open questions
 
+0. **Two or four statues**: awaiting Midburn approval (owner, 2026-10-10).
 1. **14 outputs on one ESP32 in WLED 16**: bench test pending (owner, 2026-10-10).
 2. ~~PSU size per statue~~ — decided 2026-10-10: 5 × S-100-5 per statue; strand-to-PSU
    grouping proposed in [strips_and_power/led_power_budget.md](strips_and_power/led_power_budget.md).
