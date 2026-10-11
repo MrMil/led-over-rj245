@@ -47,7 +47,11 @@ strand XT60s.
   supply has 2 output ports — in the end it all combines"). That replaces a cable per strand.
 - **Buried 5 V runs use 3-core mains-type cable with XT60 at both ends** (owner, 2026-10-10).
   Brown +5 V, blue GND, green/yellow unused or joined to GND. 3 × 2.5 mm² (owner's choice,
-  "כבל פנדל פלסטי 3*2.5"), well above the ≤ 7.5 A per run at datasheet currents. No extra labelling: an XT60 can't be
+  "כבל פנדל פלסטי 3*2.5"), well above the ≤ 7.5 A per run at datasheet currents. Three cores although only two are
+  used, because standard 3-core mains cable is sold in any hardware store and is far cheaper
+  than 2-core cable of the same gauge (owner, 2026-10-11). **Rejected:** imported 2 × 12 AWG
+  (Carol C2410A, E3062S): enough copper, but costlier, sold mostly on 305 m reels, and
+  indoor-rated. No extra labelling: an XT60 can't be
   mistaken for mains (owner). H07RN-F (rubber) is the tougher jacket; PVC survives a week.
   Inside boxes and bases: NYAF 2.5 mm², red +5 V, blue GND (owner's chosen wire; it has no
   black).

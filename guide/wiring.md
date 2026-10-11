@@ -49,7 +49,7 @@ GPIO 33 is spare.
 | 14 (VCC) | +5V |
 | 7 (GND), 1/4/10/13 (OE) | GND |
 | 2, 5, 9, 12 (1A–4A) | GPIOs per the table; on #2, pin 12 (unused 4A) → GND |
-| 3, 6, 8, 11 (1Y–4Y) | 100 Ω → tower data output |
+| 3, 6, 8, 11 (1Y–4Y) | 100 Ω (upright in the pin's row) → wire → tower data output |
 
 The 74AHCT125s and 100 Ω resistors are optional, depending on perfboard space; without them
 the GPIO drives the tower data output directly.

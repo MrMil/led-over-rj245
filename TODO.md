@@ -27,6 +27,8 @@
 
 - [ ] **Enclosure repo:** `100W` box with XT60 outputs (×8); `100W-masterbox` with 7 tower
   data outputs + XT60 outputs (×2).
-- [ ] **Check parts:** every MAX485 chip reads MAX485 (not 483/487); the ESP32 has no PSRAM
-  and breaks out all 14 pins.
+- [ ] **SN74AHCT125N chips and A 14-LC-TT sockets:** ordered 2026-10-11, due about 2026-10-15.
+- [ ] **Check parts:** every MAX485 chip reads MAX485 (not 483/487); every 74AHCT125 reads
+  AHCT125 (cheap listings sometimes ship relabelled HC parts); the ESP32 has no PSRAM and breaks
+  out all 14 pins.
 - [ ] **Bench test** the whole system before the event ([build.md](guide/build.md)).

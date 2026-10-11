@@ -16,7 +16,18 @@ and 7 tower power outputs. PETG or ASA, not PLA.
 Follow [wiring.md](wiring.md) and the diagrams there.
 
 **Controller box:**
-- ESP32 board: female headers for the ESP32, 2 × 74AHCT125 in sockets, 7 × 100 Ω.
+- ESP32 board (breadboard-style, 30 rows), in this order along the board:
+  - ESP32 on 2 × 1×15 female headers, at one end, over a mounting hole.
+  - 74AHCT125 #1 in a socket.
+  - 74AHCT125 #2 on 2 × 1×7 female headers, at the other end, over the other mounting hole.
+    Dry-fit the two strips over a bolt head first; if they don't sit flat, file their inside
+    faces.
+  To bolt or unbolt the board, pull the ESP32 and chip #2; the hex key goes in between the
+  header strips. Tape or a dab of hot glue keeps chip #2 in its headers.
+- 7 × 100 Ω, standing upright: one lead in a free hole of the chip output's row (not on the
+  chip leg, which must stay removable), the wire to the tower data output soldered to the
+  top lead. Heat shrink over the resistor and that joint. Tie the 7 wires down so they don't
+  pull on the resistors.
 - Transmitter board: 7 MAX485 modules.
 
 **Box 2:** 7 MAX485 receivers, 7 pairs of 560 Ω bias resistors, 7 × 100 Ω.

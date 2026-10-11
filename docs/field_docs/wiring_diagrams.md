@@ -34,6 +34,12 @@ Standard library only. The tables in the script (`TOWER_H`, `GPIO`, `RJ45`, `CH_
   jack table lists the same.
 - **Real module pin names (RO, RE, DE, DI, VCC, GND, A, B) and 74AHCT125 pin numbers** so the
   diagram can be followed against the physical part.
+- **All 14 pins of every 74AHCT125 drawn, power and enables included** (owner asked,
+  2026-10-11). VCC, GND and the four OE pins used to be a one-line note inside the chip; the
+  builder solders all 14 pins, the OE pins (1, 4, 10, 13) are scattered round the package, and
+  a missed one leaves a face dark. Each is now a pin with a `+5V`/`GND` flag, as on the MAX485
+  modules. An unused gate shows its input to GND and its output "n/c". The tower base's power
+  input carries the same flags, which shows the data cable's GND joins the strip GND there.
 - **Vertical layout for the controller diagram** (agent, 2026-10-09). Phones scroll vertically
   much more comfortably than they pan sideways.
 

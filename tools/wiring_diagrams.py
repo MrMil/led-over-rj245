@@ -239,19 +239,42 @@ def tower_exit(d, x, y, name, sub):
     d.text(x + 14, y + 16, sub, size=13, fill="#555")
 
 
-def buffer_chip(d, x, top, gates, title, unused_note):
-    """74AHCT125. gates: list of (A pin, A name, Y name, Y pin, y). Returns bottom y."""
-    bw = 220
-    bot = top + 30 + 60 * len(gates) + 60
+BUF_GATES = [("1A", 2, "1Y", 3), ("2A", 5, "2Y", 6), ("3A", 9, "3Y", 8), ("4A", 12, "4Y", 11)]
+BUF_OE = [(1, "1OE"), (4, "2OE"), (10, "3OE"), (13, "4OE")]
+
+
+def buffer_chip(d, x, top, used, title, gap=60):
+    """74AHCT125 with all 14 pins. Gates 1..used carry signals; the rest get
+    their input grounded and output left open. Returns ({gate: y}, bottom y)."""
+    bw, pitch = 220, 26
+    gy = {i: top + 50 + gap * i for i in range(4)}
+    py0 = gy[3] + 60
+    bot = py0 + pitch * 3 + 60
     d.rect(x, top, bw, bot - top, fill="#f3e5f5", stroke=DATA_5)
-    for (pa, a, yname, py_, y) in gates:
+    for i, (a, pa, yn, py_) in enumerate(BUF_GATES):
+        y = gy[i]
         d.pin(x, y), d.text(x + 10, y + 5, f"{pa} · {a}", size=14, weight="bold")
-        d.pin(x + bw, y), d.text(x + bw - 10, y + 5, f"{yname} · {py_}", size=14, weight="bold", anchor="end")
-    d.text(x + bw / 2, bot - 40, title, size=15, anchor="middle", weight="bold", fill=DATA_5)
-    d.text(x + bw / 2, bot - 22, "VCC 14→+5V · GND 7 · OE→GND", size=11, anchor="middle", fill="#555")
-    if unused_note:
-        d.text(x + bw / 2, bot - 8, unused_note, size=11, anchor="middle", fill="#555")
-    return bot
+        d.pin(x + bw, y), d.text(x + bw - 10, y + 5, f"{yn} · {py_}", size=14, weight="bold", anchor="end")
+        if i >= used:
+            d.wire([(x, y), (x - 30, y)], BLACK, 2), d.flag(x - 30, y, "GND", "left")
+            d.text(x + bw + 12, y + 5, "n/c", size=13, fill="#777")
+    # output enables (active low): all tied to GND
+    bus = x - 30
+    for i, (pn, n) in enumerate(BUF_OE):
+        y = py0 + pitch * i
+        d.pin(x, y), d.text(x + 10, y + 5, f"{pn} · {n}", size=14, weight="bold")
+        d.wire([(x, y), (bus, y)], BLACK, 2)
+        if 0 < i < 3:
+            d.dot(bus, y, BLACK, 4)
+    d.wire([(bus, py0), (bus, py0 + pitch * 3)], BLACK, 2)
+    d.flag(bus, py0 + pitch * 1.5, "GND", "left")
+    # supply
+    for i, (pn, n, net, col) in enumerate(((14, "VCC", "+5V", RED), (7, "GND", "GND", BLACK))):
+        y = py0 + pitch * i
+        d.pin(x + bw, y), d.text(x + bw - 10, y + 5, f"{n} · {pn}", size=14, weight="bold", anchor="end")
+        d.wire([(x + bw, y), (x + bw + 40, y)], col, 2), d.flag(x + bw + 40, y, net, "right")
+    d.text(x + bw / 2, bot - 22, title, size=15, anchor="middle", weight="bold", fill=DATA_5)
+    return gy, bot
 
 
 # --------------------------------------------------------------------------
@@ -308,18 +331,18 @@ def overview():
 # --------------------------------------------------------------------------
 
 def controller():
-    d = Drawing(1600, 2200, "Controller box wiring (statue 1)")
+    d = Drawing(1600, 2460, "Controller box wiring (statue 1)")
     header(d, "Controller box — statue 1 (enclosure 100W-masterbox)",
            ["Signals only. Power: box-power.svg.",
             "14 channels: statue 1's 7 towers through 2 × 74AHCT125,",
             "statue 2's 7 towers as RS-485 on 3 RJ45 jacks."])
     legend(d, 960, 20, [("stripe", ORANGE, "RJ45 pigtail wires, T568B colours (striped = white/colour)")])
 
-    ex, ew, etop, ebot = 150, 230, 220, 2050
+    ex, ew, etop, ebot = 150, 230, 220, 2310
     d.rect(ex, etop, ew, ebot - etop, fill="#eef7ee", stroke="#2e7d32")
-    d.lines(ex + ew / 2, 860, ["ESP32", "dev board", "classic, no PSRAM", "runs WLED"],
+    d.lines(ex + ew / 2, 1000, ["ESP32", "dev board", "classic, no PSRAM", "runs WLED"],
             size=16, anchor="middle", fill="#2e7d32", weight="bold")
-    d.lines(ex + ew / 2, 960, ["USB: flashing", "and debug only"], size=13, anchor="middle", fill="#555")
+    d.lines(ex + ew / 2, 1100, ["USB: flashing", "and debug only"], size=13, anchor="middle", fill="#555")
     for name, y in (("5V / VIN", 300), ("GND", 340)):
         d.pin(ex, y), d.text(ex + 10, y + 5, name, size=14, weight="bold")
     d.flag(ex, 300, "+5V", "left"), d.flag(ex, 340, "GND", "left")
@@ -330,15 +353,12 @@ def controller():
         return (ex + ew, y)
 
     # statue 1: two buffers
-    names = [("1A", 2, "1Y", 3), ("2A", 5, "2Y", 6), ("3A", 9, "3Y", 8), ("4A", 12, "4Y", 11)]
     bx = 560
     top = 220
-    rows = []
     for chip, towers in (("74AHCT125 #1", TOWERS[:4]), ("74AHCT125 #2", TOWERS[4:])):
-        gates = [(names[i][1], names[i][0], names[i][2], names[i][3], top + 50 + 60 * i) for i in range(len(towers))]
-        note = "unused 4A (pin 12) → GND" if len(towers) < 4 else ""
-        bot = buffer_chip(d, bx, top, gates, chip, note)
-        for (pa, a, yn, py_, y), t in zip(gates, towers):
+        gy, bot = buffer_chip(d, bx, top, len(towers), chip)
+        for i, t in enumerate(towers):
+            y = gy[i]
             ch = f"S1-{t}"
             d.wire([gpio(ch, y), (bx, y)], DATA_33, 3)
             d.wire([(bx + 220, y), (1150, y)], DATA_5, 3)
@@ -422,7 +442,7 @@ def box2():
 # --------------------------------------------------------------------------
 
 def tower_base():
-    d = Drawing(1500, 760, "Tower base wiring (all 14 towers)")
+    d = Drawing(1500, 840, "Tower base wiring (all 14 towers)")
     header(d, "Tower base — the same in all 14 towers",
            ["One data channel in, split to the 4 faces. All 4 faces show the same pixels.",
             "Mounted in the 15 cm dark space at the bottom of the tower."])
@@ -433,6 +453,10 @@ def tower_base():
     d.rect(40, 420, 230, 110, fill="#fde3e3", stroke=RED)
     d.lines(56, 450, ["Tower power (2-pin)", "+5V", "GND"], size=15, weight="bold", fill=RED)
     d.text(56, 515, "connector and wiring: TBD", size=12, fill="#555")
+    d.pin(270, 465), d.pin(270, 485)
+    d.wire([(270, 465), (330, 465)], RED, 2), d.flag(330, 465, "+5V", "right")
+    d.wire([(270, 485), (330, 485)], BLACK, 2)
+    d.wire([(330, 485), (330, 505)], BLACK, 2), d.flag(330, 505, "GND", "right")
     d.wire([(270, 334), (330, 334)], BLACK, 3), d.flag(330, 334, "GND", "right")
     # pull-down + buffer
     x0 = 620
@@ -445,9 +469,7 @@ def tower_base():
     for y in ys:
         d.wire([(520, y), (x0, y)], DATA_5, 3)
     d.dot(520, 307, DATA_5)
-    names = [("1A", 2, "1Y", 3), ("2A", 5, "2Y", 6), ("3A", 9, "3Y", 8), ("4A", 12, "4Y", 11)]
-    gates = [(names[i][1], names[i][0], names[i][2], names[i][3], ys[i]) for i in range(4)]
-    buffer_chip(d, x0, 190, gates, "74AHCT125", "")
+    buffer_chip(d, x0, 190, 4, "74AHCT125", gap=90)
     for i, y in enumerate(ys):
         d.wire([(x0 + 220, y), (1150, y)], DATA_5, 3)
         d.resistor(980, y, "100 Ω", color=DATA_5)
@@ -455,8 +477,8 @@ def tower_base():
         d.pin(1150, y)
         d.text(1164, y - 2, f"Face {i + 1} strip · DIN", size=15, weight="bold")
         d.text(1164, y + 15, "5V / GND from the tower power", size=12, fill="#555")
-    d.lines(40, 660, ["Strips run bottom to top: LED 0 at the base. 10 kΩ pull-down keeps the buffer input low (strips dark) if the data cable is unplugged.",
-                      "74AHCT125 VCC from the tower's +5V; OE pins to GND. 100 Ω resistors optional."], size=14, fill="#333")
+    d.lines(40, 760, ["Strips run bottom to top: LED 0 at the base. 10 kΩ pull-down keeps the buffer input low (strips dark) if the data cable is unplugged.",
+                      "+5V and GND here are the tower power feed; the data cable's GND joins the same GND. 100 Ω resistors optional."], size=14, fill="#333")
     d.save("tower-base.svg", "Tower base: data cable in, 10 k pull-down, 74AHCT125 splitting to four face strips.")
 
 

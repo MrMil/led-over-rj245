@@ -25,6 +25,19 @@ towers, and the logic power for all of it.
 - **ESP32 sits in a socket (female headers) on its perfboard** (agent, 2026-10-09). It is the
   one component whose failure stops both statues; a socket lets the crew swap in the
   pre-flashed spare without soldering.
+- **Board: 30-pin HW-394 dev board (WROOM-32, USB-C, CH340C)** (owner, 2026-10-11). It is the
+  board the owner bought; it breaks out all 15 usable output pins
+  ([gpio_assignment.md](gpio_assignment.md)), and a WROOM-32 has no PSRAM. Its socket is two
+  1 × 15 female headers (Assmann A-BL254-EG-Z15D); a 38-pin board would need 1 × 19 instead.
+- **ESP32 board layout: ESP32 over one mounting hole, 74AHCT125 #2 on 1 × 7 female headers
+  over the other** (owner, 2026-10-11). The DIKAVS board is breadboard-style: every DIP-width
+  part straddles the centre channel, and both M3 mounting holes are in that channel. The ESP32
+  (15 rows) and two chips (7 each) take 29 of the 30 rows, so nothing can be moved off the
+  holes. An M3 socket head is 3 mm tall; a DIP socket sits < 1 mm off the board, but 8.5 mm
+  female headers clear it, and pulling the part gives the hex key a way in. **Unverified:**
+  the strips are ~5.1 mm apart on the inside and the head is 5.5 mm across, so they may need
+  filing. **Rejected:** a countersunk bolt under a socket, which breaks the enclosure repo's
+  one-bolt-type rule.
 - **Logic power from the box's PSU on its own wire pair** (agent, 2026-10-09), so tower
   current never flows through the perfboard. Budget ≤ 0.75 A: ESP32 with its access point
   (~0.25 A average, ~0.5 A peak) plus 7 MAX485 at ~40 mA into the 60 Ω terminated line.
