@@ -10,6 +10,7 @@
 - [ ] **Layout:** tower spacing along each arm, and the distance between the two apexes.
   Gives the lengths of the 5 V runs, tower data cables, ground bonds, and whether 10 m CAT5e
   reaches. See [trenches](docs/strips_and_power/trenches.md).
+  3D sightline check and the spacing/height conflict: [statue geometry](docs/strips_and_power/statue_geometry.md).
 - [ ] **Tower order and heights T1–T7** with the artist (currently read off the model photo:
   800, 1150, 1550, 2000, 1150, 800, 500).
 - [ ] **With the artist:** strips run bottom to top; 15 cm dark base; LED count per face as

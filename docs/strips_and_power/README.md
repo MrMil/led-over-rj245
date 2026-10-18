@@ -31,6 +31,7 @@ and timing.
 ### Pages
 
 - [`tower_layout.md`](tower_layout.md) — 7 towers per statue, 4 faces per tower, same data on all faces, strips on the central post, no dividers.
+- [`statue_geometry.md`](statue_geometry.md) — where the towers stand in the 8 m circle, what the eye at the centre sees, the 3D sightline check and LED/supply calculator (`tools/statue_render.html`, `renders/`).
 - [`tower_base.md`](tower_base.md) — the 74AHCT125 splitter in each tower base: one channel in, four faces out.
 - [`power_distribution.md`](power_distribution.md) — five supplies per statue, mains from the apex, 5 V feeds per tower, cable types.
 - [`trenches.md`](trenches.md) — what runs in each trench segment.

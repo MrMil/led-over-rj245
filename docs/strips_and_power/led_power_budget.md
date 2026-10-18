@@ -66,3 +66,4 @@ PSU efficiency): ~700–935 W worst case, inside the 1.5 kW generator budget (ow
 
 - [power_distribution.md](power_distribution.md) — where the current flows.
 - [tower_layout.md](tower_layout.md) — LED counts per tower.
+- [statue_geometry.md](statue_geometry.md) — the LED/reel/supply calculator in `tools/statue_render.html`, which uses these numbers.

@@ -1,0 +1,660 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Statue Tower Sightlines</title>
+<style>
+/* Layout: a full-window 3D viewport; one control/readout panel floats top-left, view buttons top-right. */
+:root {
+  --bg: #16130f;            /* viewport fallback behind the canvas */
+  --panel: rgba(24, 20, 16, 0.9);
+  --fg: #f3ebdf;
+  --muted: #b2a493;
+  --accent: #ffb347;        /* the amber of the lit cuts */
+  --line: #4a4036;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: dark;
+}
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font-family: var(--font); }
+#view { position: fixed; inset: 0; }
+#view canvas { display: block; width: 100%; height: 100%; }
+.panel {
+  position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); left: 12px;
+  width: min(380px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow: auto;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+  padding: 12px 14px; font-size: 13px; line-height: 1.4; backdrop-filter: blur(6px);
+  box-sizing: border-box;
+}
+.panel h1 { font-size: 15px; margin: 0 0 8px; letter-spacing: 0.01em; }
+.panel h2 { font-size: 11px; margin: 12px 0 6px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.param { display: grid; grid-template-columns: 1fr 96px; gap: 4px 8px; align-items: center; margin: 3px 0; }
+.param label { color: var(--fg); }
+.param .num { display: flex; align-items: center; gap: 4px; justify-content: flex-end; }
+.param input[type=number] { width: 66px; background: #241f19; color: var(--accent); border: 1px solid var(--line); border-radius: 6px; padding: 3px 5px; font: inherit; font-variant-numeric: tabular-nums; text-align: right; }
+.param .unit { color: var(--muted); font-size: 11px; min-width: 2ch; }
+.param input[type=range] { grid-column: 1 / -1; width: 100%; margin: 0 0 2px; accent-color: var(--accent); }
+.param select { grid-column: 1 / -1; background: #241f19; color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; font: inherit; }
+.views { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: 12px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+button {
+  background: #2b241d; color: var(--fg); border: 1px solid var(--line); border-radius: 8px;
+  padding: 7px 11px; font: inherit; font-size: 13px; cursor: pointer;
+}
+button:hover { border-color: var(--accent); }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button[aria-pressed="true"] { background: var(--accent); color: #1a1208; border-color: var(--accent); font-weight: 600; }
+button.small { padding: 4px 8px; font-size: 12px; margin-top: 4px; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 2px 4px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { color: var(--muted); font-weight: 500; font-size: 11px; }
+td.bad { color: #ff7a6b; }
+td.ok { color: #9be38a; }
+.note { color: var(--muted); font-size: 12px; margin: 6px 0 0; }
+.warn { color: #ffb08a; font-size: 12px; margin: 6px 0 0; }
+.result { font-size: 13px; margin: 6px 0 0; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; }
+.check { display: flex; gap: 8px; align-items: center; margin: 6px 0; }
+#shotOverlay[hidden] { display: none; }
+#shotOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.78); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px; box-sizing: border-box; z-index: 10; }
+#shotOverlay img { max-width: 100%; max-height: calc(100vh - 90px); border: 1px solid var(--line); border-radius: 6px; }
+#shotOverlay .bar { display: flex; gap: 10px; align-items: center; color: var(--fg); font-size: 13px; flex-wrap: wrap; justify-content: center; }
+body.shot .panel, body.shot .views { display: none; }
+@media (max-width: 600px) { .panel { font-size: 12px; } .views { top: auto; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div id="view"></div>
+
+<div class="views" role="group" aria-label="Viewpoint">
+  <button id="btnCentre" aria-pressed="true">Centre view (eye)</button>
+  <button id="btnDrone" aria-pressed="false">Drone view</button>
+  <button id="btnPng">Save PNG</button>
+</div>
+
+<div id="shotOverlay" hidden>
+  <img id="shotImg" alt="Rendered frame">
+  <div class="bar"><span>Right-click or long-press the image to save it if no download started.</span><button id="shotClose">Close</button></div>
+</div>
+
+<div class="panel">
+  <h1>Statue tower sightlines</h1>
+  <div class="note">Two statues of 7 towers, corner to the centre of the circle. Towers are placed so that, seen from the centre, neighbouring silhouettes exactly touch; the cut pattern is a smiley projected from that eye point. Lengths in mm.</div>
+
+  <h2>Towers</h2>
+  <div id="towerParams"></div>
+  <button id="btnLevel" class="small">Compute heights for a level top line</button>
+  <div id="levelNote" class="note">Keeps T4 and sets the others so every top sits on one line from the eye at the centre, for the spacing, side, circle and eye height above.</div>
+
+  <h2>Spacing between towers (centre to centre)</h2>
+  <div id="spacingParams"></div>
+  <div id="result" class="result"></div>
+
+  <h2>Circle</h2>
+  <div id="circleParams"></div>
+
+  <h2>Arm shape</h2>
+  <div class="param"><label for="mode">Method</label><span></span>
+    <select id="mode">
+      <option value="touch">Solved: silhouettes exactly touch from the centre</option>
+      <option value="straight">Straight arm at an angle (spacing = chosen value)</option>
+    </select></div>
+  <div id="armParams"></div>
+
+  <h2>Viewer</h2>
+  <div id="viewerParams"></div>
+  <div class="check"><input id="labels" type="checkbox"><label for="labels">Tower labels</label></div>
+
+  <h2>LEDs and power supplies</h2>
+  <div id="powerParams"></div>
+  <button id="btnPower" class="small">Compute LEDs and power supplies</button>
+  <div id="powerOut"></div>
+
+  <h2>Readout, statue 1 (statue 2 is identical, rotated 180°)</h2>
+  <div id="readout"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function () {
+  'use strict';
+  const NAMES = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+  const BASE = 0.15;                  // dark base, m, no LEDs
+  const DEG = 180 / Math.PI;
+
+  // ---------- State: lengths in mm, as the owner and artist think. URL params override defaults. ----------
+  const q = new URLSearchParams(location.search);
+  const num = (k, d) => (q.has(k) && !isNaN(parseFloat(q.get(k)))) ? parseFloat(q.get(k)) : d;
+  const state = {
+    side: num('side', 400),
+    h: [950, 1250, 1600, 2000, 1600, 1250, 950].map((v, i) => num('h' + (i + 1), v)),
+    smin: num('smin', 1000), smax: num('smax', 2000), sopt: num('sopt', 1500),
+    diam: num('d', 8000),
+    clear: num('clear', 900),         // smallest radius the viewer must have free at the centre
+    mode: q.get('mode') === 'straight' ? 'straight' : 'touch',
+    arm: num('arm', 25),
+    eye: num('eye', 1600),
+    hfov: num('fov', 100),
+    labels: q.get('labels') !== '0',
+    unlit: num('unlit', 150),          // dark base at the foot of every face, mm, no LEDs
+    lpm: num('lpm', 60),               // LEDs per metre
+    mA: num('ma', 29.4),               // current per LED at full white, measured on the bought strip
+    psuA: num('psua', 18),             // current ceiling per supply
+    reel: num('reel', 5000),           // reel length, mm
+  };
+  let powerShown = false;
+  let view = q.get('view') === 'drone' ? 'drone' : 'centre';
+  if (q.get('shot') === '1') document.body.classList.add('shot');
+
+  // ---------- Geometry (metres inside) ----------
+  const W = () => state.side / 1000;
+  const HALF = () => W() * Math.SQRT1_2;           // half-diagonal: half the silhouette width seen from the centre
+  const R = () => state.diam / 2000;               // the apex tower's far corner sits on this radius
+  const hw = r => Math.atan(HALF() / r);           // angular half-width of a tower at distance r
+
+  // Arm from the apex (k = 0) towards the tip (k = 3): each step a chord of s, each silhouette touching the last.
+  function solveTouch(s) {
+    const r = [R() - HALF()], th = [0];
+    let solved = true;
+    for (let k = 0; k < 3; k++) {
+      const rk = r[k];
+      const f = rn => Math.sqrt(rk * rk + rn * rn - 2 * rk * rn * Math.cos(hw(rk) + hw(rn))) - s;
+      let lo = 0.2, hi = rk;
+      if (f(lo) < 0) { solved = false; r.push(lo); th.push(th[k] + hw(rk) + hw(lo)); continue; }
+      for (let i = 0; i < 60; i++) { const m = (lo + hi) / 2; if (f(m) > 0) lo = m; else hi = m; }
+      const rn = (lo + hi) / 2;
+      r.push(rn); th.push(th[k] + hw(rk) + hw(rn));
+    }
+    return { r, th, solved };
+  }
+  function solveStraight(s) {
+    const r = [R() - HALF()], th = [0];
+    const phi = state.arm / DEG;
+    let solved = true;
+    for (let k = 1; k <= 3; k++) {
+      const x = k * s * Math.sin(phi), y = r[0] - k * s * Math.cos(phi);
+      const rn = Math.hypot(x, y);
+      if (rn < 0.2) solved = false;
+      r.push(Math.max(rn, 0.2)); th.push(Math.atan2(x, y));
+    }
+    return { r, th, solved };
+  }
+  const solver = () => state.mode === 'touch' ? solveTouch : solveStraight;
+  const valid = arm => arm.solved && (arm.r[3] - HALF()) >= state.clear / 1000 - 1e-9
+    && Math.max(...arm.r) + HALF() <= R() + 1e-9;
+
+  // Spacing choice: the optimum if it works, else the largest working spacing below it (every step eats
+  // radius, so validity only shrinks as spacing grows), clamped to [min, max].
+  function chooseSpacing() {
+    const solve = solver();
+    const smin = state.smin / 1000, smax = state.smax / 1000;
+    const sopt = Math.min(Math.max(state.sopt, state.smin), state.smax) / 1000;
+    const out = { s: sopt, reason: 'optimum', sMaxValid: null };
+    if (valid(solve(sopt))) return out;
+    let lo = 0.1, hi = sopt;
+    if (!valid(solve(lo))) { out.s = smin; out.reason = 'none'; return out; }
+    for (let i = 0; i < 50; i++) { const m = (lo + hi) / 2; if (valid(solve(m))) lo = m; else hi = m; }
+    out.sMaxValid = Math.floor(lo * 1000) / 1000;
+    if (out.sMaxValid >= smin) { out.s = out.sMaxValid; out.reason = 'capped'; }
+    else { out.s = smin; out.reason = 'below-min'; }
+    return out;
+  }
+
+  function layout() {
+    const choice = chooseSpacing();
+    const arm = solver()(choice.s);
+    const towers = [];
+    for (let s = 0; s < 2; s++) {
+      const off = s * Math.PI;
+      NAMES.forEach((n, i) => {
+        const k = Math.abs(i - 3), side = i < 3 ? -1 : 1;
+        const r = arm.r[k], th = side * arm.th[k] + off;
+        towers.push({ name: n, statue: s + 1, h: state.h[i] / 1000, r, th, x: r * Math.sin(th), z: -r * Math.cos(th) });
+      });
+    }
+    return { towers, arm, choice };
+  }
+
+  // Heights (mm) that put every top on one line from the eye: (h − eye)/r equal to the apex tower's.
+  function levelHeights(arm) {
+    const eye = state.eye / 1000, rf = k => arm.r[k] - HALF() / 2;
+    const c = (state.h[3] / 1000 - eye) / rf(0);
+    return NAMES.map((n, i) => Math.round((eye + c * rf(Math.abs(i - 3))) * 100) * 10);
+  }
+
+  // Per-statue mural in the viewer's angular space (azimuth relative to the statue, elevation).
+  function muralSpec(arm) {
+    const eye = state.eye / 1000, rf = k => arm.r[k] - HALF() / 2;
+    const span = arm.th[3] + hw(arm.r[3]);
+    // the band every tower from T2 to T6 can show: lowest top among them, the apex tower's (highest) bottom
+    const elTop = Math.min(...[1, 2, 3, 4, 5].map(i => Math.atan((state.h[i] / 1000 - eye) / rf(Math.abs(i - 3)))));
+    const elBot = Math.atan((BASE - eye) / rf(0));
+    const cy = (elTop + elBot) / 2;
+    return { cx: 0, cy, rx: span * 0.90, ry: Math.max(0.02, (elTop - elBot) / 2 * 0.84), stroke: 2.0 / DEG };
+  }
+  // 0 wood, 1 outline, 2 eyes, 3 mouth
+  function muralAt(spec, az, el) {
+    const ex = (az - spec.cx) / spec.rx, ey = (el - spec.cy) / spec.ry;
+    const d = (Math.hypot(ex, ey) - 1) * Math.min(spec.rx, spec.ry);
+    if (Math.abs(d) < spec.stroke / 2) return 1;
+    for (const sx of [-0.36, 0.36]) {
+      const dx = (ex - sx) / 0.10, dy = (ey - 0.28) / 0.22;
+      if (dx * dx + dy * dy < 1) return 2;
+    }
+    const mx = ex / 0.56, my = (ey - 0.12) / 0.62;
+    const md = (Math.hypot(mx, my) - 1) * Math.min(spec.rx * 0.56, spec.ry * 0.62);
+    if (Math.abs(md) < spec.stroke / 2 && ey < -0.08) return 3;
+    return 0;
+  }
+
+  // ---------- Three.js scene ----------
+  const viewEl = document.getElementById('view');
+  const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  viewEl.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xc9dbea);
+  scene.fog = new THREE.Fog(0xc9dbea, 30, 90);
+  scene.add(new THREE.HemisphereLight(0xdfe9f3, 0x9a7f5c, 0.5));
+  const sun = new THREE.DirectionalLight(0xfff1dc, 1.05);
+  sun.position.set(-9, 13, 7); sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  Object.assign(sun.shadow.camera, { left: -12, right: 12, top: 12, bottom: -12, near: 1, far: 40 });
+  sun.shadow.bias = -0.0005;
+  scene.add(sun);
+
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(160, 160), new THREE.MeshStandardMaterial({ color: 0xc9ad83, roughness: 1 }));
+  ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+  const grid = new THREE.GridHelper(60, 60, 0xa8926a, 0xb8a07a); grid.position.y = 0.002; scene.add(grid);
+  const ringMat = new THREE.MeshBasicMaterial({ color: 0x5a3a1e, side: THREE.DoubleSide });
+  let ring = null;
+  const mark = new THREE.Mesh(new THREE.RingGeometry(0.0, 0.08, 32), ringMat);
+  mark.rotation.x = -Math.PI / 2; mark.position.y = 0.004; scene.add(mark);
+
+  // Human figure for scale, 1.75 m, at the centre. Hidden in the centre view (the camera is its eye).
+  const person = new THREE.Group();
+  {
+    const cloth = new THREE.MeshStandardMaterial({ color: 0x2f5fb8, roughness: 0.9 });
+    const skin = new THREE.MeshStandardMaterial({ color: 0xe3b48f, roughness: 0.8 });
+    const add = (geo, mat, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; person.add(m); };
+    add(new THREE.CylinderGeometry(0.07, 0.06, 0.82, 12), cloth, -0.1, 0.41, 0);
+    add(new THREE.CylinderGeometry(0.07, 0.06, 0.82, 12), cloth, 0.1, 0.41, 0);
+    add(new THREE.CylinderGeometry(0.17, 0.15, 0.62, 14), new THREE.MeshStandardMaterial({ color: 0xd9d2c3, roughness: 0.9 }), 0, 1.13, 0);
+    add(new THREE.CylinderGeometry(0.045, 0.04, 0.62, 10), skin, -0.23, 1.1, 0);
+    add(new THREE.CylinderGeometry(0.045, 0.04, 0.62, 10), skin, 0.23, 1.1, 0);
+    add(new THREE.SphereGeometry(0.11, 18, 14), skin, 0, 1.62, 0);
+  }
+  scene.add(person);
+  const towersGroup = new THREE.Group(); scene.add(towersGroup);
+
+  // ---------- Textures ----------
+  const PX_PER_M = 160;
+  function hash(x, y, s) { const v = Math.sin(x * 12.9898 + y * 78.233 + s * 37.719) * 43758.5453; return v - Math.floor(v); }
+  const FEATURE_RGB = { 1: [255, 177, 59], 2: [79, 216, 255], 3: [255, 95, 168] };
+
+  function faceTextures(h, worldAt, statueAz, spec, seed, lit) {
+    const w = W();
+    const cols = Math.max(8, Math.round(w * PX_PER_M)), rows = Math.max(8, Math.round(h * PX_PER_M));
+    const c1 = document.createElement('canvas'), c2 = document.createElement('canvas');
+    c1.width = c2.width = cols; c1.height = c2.height = rows;
+    const g1 = c1.getContext('2d'), g2 = c2.getContext('2d');
+    const d1 = g1.createImageData(cols, rows), d2 = g2.createImageData(cols, rows);
+    const eye = new THREE.Vector3(0, state.eye / 1000, 0);
+    const p = new THREE.Vector3();
+    const tint = 0.9 + 0.2 * hash(seed, 1, 2);
+    for (let j = 0; j < rows; j++) {
+      const v = 1 - (j + 0.5) / rows, y = v * h;
+      for (let i = 0; i < cols; i++) {
+        const u = (i + 0.5) / cols;
+        const wave = Math.sin(u * 26 * (w / 0.4) + 4 * Math.sin(y * 1.7 + seed) + 1.5 * Math.sin(y * 7 + u * 3)) * 0.5 + 0.5;
+        const g = Math.pow(wave, 1.6) * 0.55 + hash(i, j, seed) * 0.12;
+        let r = (178 + 55 * g) * tint, gg = (122 + 48 * g) * tint, b = (72 + 32 * g) * tint;
+        if (y < BASE) { r *= 0.62; gg *= 0.58; b *= 0.55; }
+        let f = 0;
+        if (lit && y >= BASE) {
+          worldAt(u, v, p); p.sub(eye);
+          let az = Math.atan2(p.x, -p.z) - statueAz;
+          az = Math.atan2(Math.sin(az), Math.cos(az));
+          f = muralAt(spec, az, Math.atan2(p.y, Math.hypot(p.x, p.z)));
+        }
+        const k = (j * cols + i) * 4;
+        if (f) {
+          const c = FEATURE_RGB[f], glow = 0.85 + 0.15 * (0.5 + 0.5 * Math.sin(y * 9));
+          d1.data[k] = c[0]; d1.data[k + 1] = c[1]; d1.data[k + 2] = c[2];
+          d2.data[k] = c[0] * glow; d2.data[k + 1] = c[1] * glow; d2.data[k + 2] = c[2] * glow;
+        } else {
+          d1.data[k] = r; d1.data[k + 1] = gg; d1.data[k + 2] = b;
+          d2.data[k] = 0; d2.data[k + 1] = 0; d2.data[k + 2] = 0;
+        }
+        d1.data[k + 3] = 255; d2.data[k + 3] = 255;
+      }
+    }
+    g1.putImageData(d1, 0, 0); g2.putImageData(d2, 0, 0);
+    const t1 = new THREE.CanvasTexture(c1), t2 = new THREE.CanvasTexture(c2);
+    t1.encoding = t2.encoding = THREE.sRGBEncoding;
+    t1.anisotropy = t2.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    return { map: t1, emissiveMap: t2 };
+  }
+
+  function labelTexture(text) {
+    const c = document.createElement('canvas'); c.width = 256; c.height = 96;
+    const g = c.getContext('2d');
+    g.fillStyle = 'rgba(24,20,16,0.82)'; g.beginPath();
+    g.roundRect ? g.roundRect(4, 4, 248, 88, 14) : g.rect(4, 4, 248, 88); g.fill();
+    g.fillStyle = '#f3ebdf'; g.font = 'bold 44px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(text, 128, 50);
+    const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding;
+    return t;
+  }
+  function labelSprite(text) {
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTexture(text), depthTest: false, transparent: true }));
+    s.userData.ratio = 256 / 96;
+    return s;
+  }
+  const dimLabel = labelSprite('Ø 8 m'); dimLabel.scale.set(1.2, 0.45, 1); scene.add(dimLabel);
+  let dimText = 'Ø 8 m';
+
+  const labels = [];
+  const disposeGroup = g => g.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) { const m = o.material; ['map', 'emissiveMap'].forEach(k => m[k] && m[k].dispose()); m.dispose(); } });
+
+  let current = null, levelPending = null;
+  function build() {
+    disposeGroup(towersGroup); towersGroup.clear(); labels.length = 0;
+    if (ring) { scene.remove(ring); ring.geometry.dispose(); }
+    ring = new THREE.Mesh(new THREE.RingGeometry(R() - 0.025, R() + 0.025, 160), ringMat);
+    ring.rotation.x = -Math.PI / 2; ring.position.y = 0.004; scene.add(ring);
+    const txt = `Ø ${(state.diam / 1000).toFixed(state.diam % 1000 ? 1 : 0)} m`;
+    if (txt !== dimText) { dimText = txt; dimLabel.material.map.dispose(); dimLabel.material.map = labelTexture(txt); dimLabel.material.needsUpdate = true; }
+    dimLabel.position.set(0, 0.35, R() + 0.6);
+
+    const L = layout(); current = L;
+    const spec = muralSpec(L.arm);
+    const w = W();
+    const edgeMat = new THREE.LineBasicMaterial({ color: 0x2a1a0e });
+    const hullMat = new THREE.MeshBasicMaterial({ color: 0x1e120a, side: THREE.BackSide });
+    const faces = [{ c: [0, 0, w / 2], ry: 0 }, { c: [w / 2, 0, 0], ry: Math.PI / 2 }, { c: [0, 0, -w / 2], ry: Math.PI }, { c: [-w / 2, 0, 0], ry: -Math.PI / 2 }];
+    const Y = new THREE.Vector3(0, 1, 0);
+    L.towers.forEach((t, idx) => {
+      const g = new THREE.Group();
+      g.position.set(t.x, 0, t.z);
+      g.rotation.y = Math.atan2(-t.x, -t.z) - Math.PI / 4;   // one corner points at the centre
+      g.updateMatrixWorld(true);
+      const toCentre = new THREE.Vector3(-t.x, 0, -t.z).normalize();
+      const statueAz = (t.statue - 1) * Math.PI;
+      const texCache = {};
+      faces.forEach((f, fi) => {
+        const normal = new THREE.Vector3(0, 0, 1).applyAxisAngle(Y, f.ry).applyAxisAngle(Y, g.rotation.y);
+        const inner = normal.dot(toCentre) > 0.01;
+        const right = new THREE.Vector3(Math.cos(f.ry), 0, -Math.sin(f.ry));
+        const centre = new THREE.Vector3(f.c[0], t.h / 2, f.c[2]);
+        const worldAt = (u, v, out) => { out.copy(centre).addScaledVector(right, (u - 0.5) * w); out.y = v * t.h; return g.localToWorld(out); };
+        const key = inner ? fi : (fi + 2) % 4;      // outer faces repeat the face opposite: all faces show the same pixels
+        if (!texCache[key]) texCache[key] = faceTextures(t.h, worldAt, statueAz, spec, idx * 7 + fi, inner);
+        const tex = texCache[key];
+        const mat = new THREE.MeshStandardMaterial({ map: tex.map, emissiveMap: tex.emissiveMap, emissive: 0xffffff, emissiveIntensity: 1.1, roughness: 0.9, metalness: 0 });
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(w, t.h), mat);
+        m.position.copy(centre); m.rotation.y = f.ry; m.castShadow = true; m.receiveShadow = true;
+        g.add(m);
+      });
+      const cap = new THREE.Mesh(new THREE.PlaneGeometry(w, w), new THREE.MeshStandardMaterial({ color: 0xa87a4a, roughness: 0.95 }));
+      cap.rotation.x = -Math.PI / 2; cap.position.y = t.h; cap.castShadow = true; g.add(cap);
+      const hull = new THREE.Mesh(new THREE.BoxGeometry(w, t.h, w), hullMat);
+      hull.position.y = t.h / 2; hull.scale.set(1.035, 1.008, 1.035); g.add(hull);
+      const edges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w, t.h, w)), edgeMat);
+      edges.position.y = t.h / 2; g.add(edges);
+      const lab = labelSprite(`${t.name} · ${Math.round(t.h * 1000)}`);
+      lab.position.set(0, t.h + 0.22, 0); lab.visible = state.labels; g.add(lab); labels.push(lab);
+      towersGroup.add(g);
+    });
+    updateReadout(L);
+    aimCentre();
+    if (powerShown) computePower();
+  }
+
+  // ---------- Readout ----------
+  const mm = m => Math.round(m * 1000);
+  function updateReadout(L) {
+    const arm = L.arm, c = L.choice, eye = state.eye / 1000;
+    const s1 = L.towers.filter(t => t.statue === 1);
+    const rows = s1.map((t, i) => {
+      const rf = t.r - HALF() / 2;
+      const appH = (Math.atan((t.h - eye) / rf) - Math.atan((BASE - eye) / rf)) * DEG;
+      const top = Math.atan((t.h - eye) / rf) * DEG;
+      let gap = '', cls = '';
+      if (i < 6) {
+        const n = s1[i + 1], gv = ((n.th - t.th) - hw(t.r) - hw(n.r)) * DEG;
+        gap = (gv >= 0 ? '+' : '') + gv.toFixed(1);
+        cls = Math.abs(gv) < 0.3 ? 'ok' : (gv < 0 ? 'bad' : '');
+      }
+      return `<tr><td>${t.name} · ${mm(t.h)}</td><td>${mm(t.r)}</td><td>${(t.th * DEG).toFixed(1)}</td><td class="${cls}">${gap}</td><td>${top.toFixed(1)}</td><td>${appH.toFixed(1)}</td></tr>`;
+    }).join('');
+    const clear = s1[0].r - HALF();
+    const farMax = Math.max(...s1.map(t => t.r + HALF()));
+    const span = (arm.th[3] + hw(arm.r[3])) * DEG;
+    const spacings = [0, 1, 2].map(k => Math.sqrt(arm.r[k] ** 2 + arm.r[k + 1] ** 2 - 2 * arm.r[k] * arm.r[k + 1] * Math.cos(arm.th[k + 1] - arm.th[k])));
+    const lv = levelHeights(arm);
+    document.getElementById('readout').innerHTML = `
+      <table><thead><tr><th>Tower</th><th>r</th><th>az °</th><th>gap °</th><th>top °</th><th>lit °</th></tr></thead><tbody>${rows}</tbody></table>
+      <p class="note">r: tower centre to the circle centre, mm. az: azimuth from the apex. gap: angular gap to the next silhouette from the eye; negative = the nearer tower hides part of the next (green = touching). top: elevation of the tower top above the eye line. lit: angle the lit part subtends.</p>
+      <p class="note">Each statue spans ±${span.toFixed(0)}° of the view. Free radius at the centre (nearest corner of T1/T7): <b>${mm(clear)} mm</b>. Farthest corner: ${mm(farMax)} mm from the centre (${farMax <= R() + 0.0005 ? 'inside' : 'outside'} the Ø ${state.diam} circle). Spacing T4→T3→T2→T1: ${spacings.map(mm).join(' / ')} mm.</p>
+      ${arm.solved ? '' : '<p class="warn">No solution: the arm reaches the centre before the tip tower. The tip is clamped at 200 mm.</p>'}`;
+    const same = lv.every((v, i) => v === state.h[i]);
+    document.getElementById('levelNote').innerHTML = same
+      ? 'These heights put every top on one line from the eye at the centre.'
+      : `Level-top heights for the current spacing, side, circle and eye height (T4 kept): ${NAMES.map((n, i) => `${n} ${lv[i]}`).join(' · ')} mm.`;
+    levelPending = lv;
+
+    const res = document.getElementById('result');
+    const sUsed = `<b>${mm(c.s)} mm</b>`;
+    if (c.reason === 'optimum') res.innerHTML = `Spacing used: ${sUsed}, the optimum. Touching silhouettes fit inside the circle with ${mm(clear)} mm free at the centre.`;
+    else if (c.reason === 'capped') res.innerHTML = `Spacing used: ${sUsed}. The optimum (${state.sopt} mm) does not fit: with touching silhouettes inside the circle and ${state.clear} mm free at the centre, the largest spacing is ${mm(c.sMaxValid)} mm.`;
+    else if (c.reason === 'below-min') res.innerHTML = `<span class="warn">Spacing used: ${sUsed}, the minimum, but even that does not fit: the largest spacing that keeps ${state.clear} mm free at the centre is ${mm(c.sMaxValid)} mm. Widen the circle, shrink the towers, lower the minimum spacing, or accept less room at the centre.</span>`;
+    else res.innerHTML = `<span class="warn">No spacing works with these numbers: the towers do not fit between the circle and the free radius at the centre.</span>`;
+  }
+
+
+  // ---------- LEDs and power supplies ----------
+  // Every face is one strip cut whole from one reel (no joins), so reels are bin-packed with whole strips.
+  // A tower is never split between two supplies (owner, 2026-10-19), so supplies are bin-packed with whole towers.
+  function packBins(items, cap) {                      // first-fit decreasing; items: [{len, tag}]
+    const bins = [];
+    [...items].sort((a, b) => b.len - a.len).forEach(it => {
+      let b = bins.find(x => x.used + it.len <= cap + 1e-9);
+      if (!b) { b = { used: 0, items: [] }; bins.push(b); }
+      b.used += it.len; b.items.push(it);
+    });
+    return bins;
+  }
+  function minBins(items, cap) {                       // exact minimum for a handful of items (7 towers)
+    const sorted = [...items].sort((a, b) => b.len - a.len);
+    if (sorted.some(it => it.len > cap + 1e-9)) return null;
+    for (let k = 1; k <= sorted.length; k++) {
+      const bins = new Array(k).fill(0), assign = new Array(sorted.length);
+      const dfs = i => {
+        if (i === sorted.length) return true;
+        const seen = new Set();
+        for (let b = 0; b < k; b++) {
+          if (seen.has(bins[b])) continue; seen.add(bins[b]);
+          if (bins[b] + sorted[i].len <= cap + 1e-9) {
+            bins[b] += sorted[i].len; assign[i] = b;
+            if (dfs(i + 1)) return true;
+            bins[b] -= sorted[i].len;
+          }
+        }
+        return false;
+      };
+      if (dfs(0)) {
+        const groups = Array.from({ length: k }, () => ({ used: 0, items: [] }));
+        sorted.forEach((it, i) => { groups[assign[i]].items.push(it); groups[assign[i]].used += it.len; });
+        return groups;
+      }
+    }
+    return null;
+  }
+  function contiguousBins(items, cap, k) {             // k contiguous groups along the V (short cable runs), or null
+    const n = items.length, best = {};
+    const rec = (i, left) => {
+      if (i === n) return left === 0 ? [] : null;
+      if (left === 0) return null;
+      const key = i + ',' + left; if (key in best) return best[key];
+      let sum = 0;
+      for (let j = i; j < n; j++) {
+        sum += items[j].len; if (sum > cap + 1e-9) break;
+        const rest = rec(j + 1, left - 1);
+        if (rest) { best[key] = [{ used: sum, items: items.slice(i, j + 1) }, ...rest]; return best[key]; }
+      }
+      best[key] = null; return null;
+    };
+    return rec(0, k);
+  }
+  function computePower() {
+    powerShown = true;
+    const lit = state.h.map(h => Math.max(0, h - state.unlit) / 1000);           // m per face
+    const leds = lit.map(l => Math.floor(l * state.lpm + 1e-9));
+    const amps = leds.map(n => 4 * n * state.mA / 1000);
+    const towers = NAMES.map((n, i) => ({ tag: n, len: amps[i] }));
+    const metresSide = lit.reduce((a, l) => a + 4 * l, 0);
+    const stripsSide = NAMES.flatMap((n, i) => [0, 1, 2, 3].map(f => ({ tag: `${n}`, len: lit[i] * 1000 })));
+    const reelsSide = packBins(stripsSide, state.reel);
+    const reelsBoth = packBins([...stripsSide, ...stripsSide], state.reel);
+    const fmtGroups = g => g.map(b => `${b.items.map(it => it.tag).join('+')} (${b.used.toFixed(1)} A)`).join(' · ');
+    const exact = minBins(towers, state.psuA);
+    let groups = exact, note = '';
+    if (exact) {
+      const cont = contiguousBins(towers, state.psuA, exact.length);
+      if (cont) { groups = cont; note = 'grouped along the V so each supply sits by its towers'; }
+      else {
+        let alt = null;
+        for (let k = exact.length + 1; k <= towers.length && !alt; k++) alt = contiguousBins(towers, state.psuA, k);
+        note = `${exact.length} supplies only work with non-neighbouring towers sharing a supply` + (alt ? `; neighbours only: ${alt.length} — ${fmtGroups(alt)}` : '');
+      }
+    }
+    const tooBig = NAMES.filter((n, i) => amps[i] > state.psuA + 1e-9);
+    const rows = NAMES.map((n, i) => `<tr><td>${n} · ${state.h[i]}</td><td>${Math.round(lit[i] * 1000)}</td><td>${leds[i]}</td><td>${4 * leds[i]}</td><td class="${amps[i] > state.psuA ? 'bad' : ''}">${amps[i].toFixed(1)}</td></tr>`).join('');
+    document.getElementById('powerOut').innerHTML = `
+      <table><thead><tr><th>Tower</th><th>lit mm</th><th>LEDs/face</th><th>LEDs</th><th>A full white</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="result" style="margin-top:8px">
+        <b>Per side (one statue, 7 towers):</b><br>
+        LED strip: <b>${metresSide.toFixed(1)} m</b> (${leds.reduce((a, n) => a + 4 * n, 0)} LEDs, ${amps.reduce((a, x) => a + x, 0).toFixed(1)} A at full white)<br>
+        Reels of ${(state.reel / 1000).toFixed(1)} m, every face strip cut whole from one reel: <b>${reelsSide.length}</b>
+        (${(reelsSide.length * state.reel / 1000 - metresSide).toFixed(1)} m left over)<br>
+        Power supplies at ≤ ${state.psuA} A each, no tower split: <b>${exact ? exact.length : 'impossible'}</b>${exact ? ` — ${fmtGroups(groups)}; ${note}` : ''}
+      </div>
+      <div class="result" style="margin-top:6px">
+        <b>Both sides:</b> ${(2 * metresSide).toFixed(1)} m of strip, ${2 * reelsSide.length} reels
+        (${reelsBoth.length} if the cutting plan pools both sides' offcuts), ${exact ? 2 * exact.length : '—'} supplies.
+      </div>
+      ${tooBig.length ? `<p class="warn">${tooBig.join(', ')} alone draw${tooBig.length > 1 ? '' : 's'} more than ${state.psuA} A: no single supply can carry the tower. Raise the ceiling, lower the per-LED current (the firmware current cap), or shorten the tower.</p>` : ''}
+      <p class="note">Full-white worst case. Lit length = height − unlit base. LEDs per face rounded down to whole LEDs at ${state.lpm}/m. A tower's 4 faces draw 4 × its LEDs × ${state.mA} mA.</p>`;
+  }
+
+  // ---------- Cameras and controls ----------
+  const camCentre = new THREE.PerspectiveCamera(60, 1, 0.05, 200);
+  const camDrone = new THREE.PerspectiveCamera(40, 1, 0.1, 300);
+  camDrone.position.set(5.2, 6.2, 7.6);
+  const controls = new THREE.OrbitControls(camDrone, renderer.domElement);
+  controls.target.set(0, 0.5, 0); controls.maxPolarAngle = Math.PI / 2 - 0.02; controls.update();
+  const look = new THREE.OrbitControls(camCentre, renderer.domElement);
+  look.enablePan = false; look.enableZoom = false; look.rotateSpeed = -0.4;
+
+  let droneScale = 1;
+  function applyView() {
+    const aspect = viewEl.clientWidth / Math.max(1, viewEl.clientHeight);
+    camCentre.fov = 2 * Math.atan(Math.tan(state.hfov / 2 / DEG) / aspect) * DEG;
+    camCentre.aspect = aspect; camCentre.updateProjectionMatrix();
+    camDrone.aspect = aspect; camDrone.updateProjectionMatrix();
+    camCentre.position.set(0, state.eye / 1000, 0);
+    const k = Math.max(1, R() / 4);                       // the drone backs off for a bigger circle
+    if (k !== droneScale) { camDrone.position.multiplyScalar(k / droneScale); droneScale = k; }
+    person.visible = view === 'drone';
+    controls.enabled = view === 'drone';
+    look.enabled = view === 'centre';
+    document.getElementById('btnCentre').setAttribute('aria-pressed', view === 'centre');
+    document.getElementById('btnDrone').setAttribute('aria-pressed', view === 'drone');
+  }
+  function aimCentre() {
+    if (!current) return;
+    const target = new THREE.Vector3(0, (state.h[3] / 1000 + BASE) / 2 * 0.9 + state.eye / 1000 * 0.1, -current.arm.r[0]);
+    const dir = target.clone().sub(camCentre.position).normalize();
+    look.target.copy(camCentre.position).addScaledVector(dir, 0.5);
+    look.update();
+  }
+  function resize() { renderer.setSize(viewEl.clientWidth, viewEl.clientHeight, false); applyView(); }
+  window.addEventListener('resize', resize);
+
+  const tmp = new THREE.Vector3();
+  function render() {
+    const cam = view === 'centre' ? camCentre : camDrone;
+    if (view === 'drone') controls.update();
+    const base = view === 'centre' ? 0.09 : 0.032;        // small in the drone view so labels never hide towers
+    labels.forEach(l => { l.getWorldPosition(tmp); const w = tmp.distanceTo(cam.position) * base; l.scale.set(w, w / l.userData.ratio, 1); });
+    renderer.render(scene, cam);
+    requestAnimationFrame(render);
+  }
+
+  // ---------- Parameter rows: slider + text box, kept in step ----------
+  const inputs = {};
+  function paramRow(host, key, label, min, max, step, unit, getter, setter, after) {
+    const id = 'p_' + key;
+    const row = document.createElement('div'); row.className = 'param';
+    row.innerHTML = `<label for="${id}">${label}</label><span class="num"><input type="number" id="${id}" min="${min}" max="${max}" step="${step}"><span class="unit">${unit}</span></span>
+      <input type="range" id="${id}_r" min="${min}" max="${max}" step="${step}" aria-label="${label}">`;
+    host.appendChild(row);
+    const n = row.querySelector('input[type=number]'), r = row.querySelector('input[type=range]');
+    const show = () => { n.value = getter(); r.value = getter(); };
+    show();
+    const commit = v => { if (isNaN(v)) return; setter(Math.min(max, Math.max(min, v))); show(); after(); };
+    r.addEventListener('input', () => commit(parseFloat(r.value)));
+    n.addEventListener('change', () => commit(parseFloat(n.value)));
+    inputs[key] = show;
+  }
+  function setParam(key, v) {
+    if (/^h\d$/.test(key)) state.h[parseInt(key.slice(1), 10) - 1] = v; else state[key] = v;
+    if (inputs[key]) inputs[key]();
+  }
+  const $ = id => document.getElementById(id);
+  const rebuild = () => build();
+  paramRow($('towerParams'), 'side', 'Tower side length', 200, 1000, 10, 'mm', () => state.side, v => state.side = v, rebuild);
+  NAMES.forEach((n, i) => paramRow($('towerParams'), 'h' + (i + 1), `${n} height${i === 3 ? ' (apex)' : (i === 0 || i === 6) ? ' (tip)' : ''}`, 300, 3000, 10, 'mm', () => state.h[i], v => state.h[i] = v, rebuild));
+  paramRow($('spacingParams'), 'smin', 'Minimum', 300, 3000, 10, 'mm', () => state.smin, v => { state.smin = v; if (state.smax < v) setParam('smax', v); if (state.sopt < v) setParam('sopt', v); }, rebuild);
+  paramRow($('spacingParams'), 'smax', 'Maximum', 300, 3000, 10, 'mm', () => state.smax, v => { state.smax = v; if (state.smin > v) setParam('smin', v); if (state.sopt > v) setParam('sopt', v); }, rebuild);
+  paramRow($('spacingParams'), 'sopt', 'Optimum', 300, 3000, 10, 'mm', () => state.sopt, v => { state.sopt = v; if (v < state.smin) setParam('smin', v); if (v > state.smax) setParam('smax', v); }, rebuild);
+  paramRow($('circleParams'), 'diam', 'Circle diameter (to the farthest corners)', 3000, 20000, 100, 'mm', () => state.diam, v => state.diam = v, () => { applyView(); build(); });
+  paramRow($('circleParams'), 'clear', 'Free radius the viewer keeps at the centre', 0, 3000, 50, 'mm', () => state.clear, v => state.clear = v, rebuild);
+  const repower = () => { if (powerShown) computePower(); };
+  paramRow($('powerParams'), 'unlit', 'Unlit base at the foot of each face', 0, 500, 10, 'mm', () => state.unlit, v => state.unlit = v, repower);
+  paramRow($('powerParams'), 'lpm', 'LEDs per metre', 30, 144, 1, '/m', () => state.lpm, v => state.lpm = v, repower);
+  paramRow($('powerParams'), 'mA', 'Current per LED at full white', 5, 60, 0.1, 'mA', () => state.mA, v => state.mA = v, repower);
+  paramRow($('powerParams'), 'psuA', 'Max current per power supply', 5, 60, 0.5, 'A', () => state.psuA, v => state.psuA = v, repower);
+  paramRow($('powerParams'), 'reel', 'Reel length', 1000, 10000, 100, 'mm', () => state.reel, v => state.reel = v, repower);
+  $('btnPower').addEventListener('click', computePower);
+  paramRow($('armParams'), 'arm', 'Arm angle from the radial line', 0, 80, 1, '°', () => state.arm, v => state.arm = v, rebuild);
+  paramRow($('viewerParams'), 'eye', 'Eye height', 1000, 2000, 10, 'mm', () => state.eye, v => state.eye = v, () => { applyView(); build(); });
+  paramRow($('viewerParams'), 'hfov', 'Horizontal field of view', 60, 140, 5, '°', () => state.hfov, v => state.hfov = v, applyView);
+  $('mode').value = state.mode; $('armParams').hidden = state.mode !== 'straight';
+  $('mode').addEventListener('change', () => { state.mode = $('mode').value; $('armParams').hidden = state.mode !== 'straight'; build(); });
+  $('labels').checked = state.labels;
+  $('labels').addEventListener('change', () => { state.labels = $('labels').checked; labels.forEach(l => l.visible = state.labels); });
+  $('btnLevel').addEventListener('click', () => { if (!levelPending) return; levelPending.forEach((v, i) => setParam('h' + (i + 1), v)); build(); });
+  $('btnCentre').addEventListener('click', () => { view = 'centre'; applyView(); aimCentre(); });
+  $('btnDrone').addEventListener('click', () => { view = 'drone'; applyView(); });
+  // Save PNG: a download where the host allows it; the frame is also shown full-size so it can be saved
+  // by right-click or long-press where downloads are blocked (hosted viewers).
+  $('btnPng').addEventListener('click', () => {
+    const url = renderer.domElement.toDataURL('image/png');
+    $('shotImg').src = url; $('shotOverlay').hidden = false;
+    try {
+      const a = document.createElement('a');
+      a.download = `statue-${view}-${Math.round(current.choice.s * 1000)}mm.png`;
+      a.href = url; a.click();
+    } catch (e) { /* downloads blocked: the overlay remains */ }
+  });
+  $('shotClose').addEventListener('click', () => { $('shotOverlay').hidden = true; $('shotImg').src = ''; });
+
+  resize();
+  build();
+  render();
+})();
+</script>
