@@ -106,6 +106,9 @@ build time and surprises. The same file is also published as a private claude.ai
   defaults" clears them and reloads** (owner, 2026-10-19). URL parameters win over the store and
   are never saved, so headless renders and shared links stay deterministic. The store is a
   per-browser convenience: the page works without it, and the JSON export is the real record.
+- **Eye height runs from 400 mm** (owner, 2026-10-19: the piece should work for people sitting).
+  The level-top heights and the mural band follow the eye height, so a seated eye gives a different
+  height set; the export records which eye height it was computed for.
 - **The settings panel folds to a tab at the left edge** (owner, 2026-10-19) so the render can be
   seen whole; the folded state is kept in `localStorage` only, a per-browser convenience that the
   page works without.
