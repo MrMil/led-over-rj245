@@ -102,6 +102,9 @@ build time and surprises. The same file is also published as a private claude.ai
 - **Labels sit beside the towers, on the outer side, in the drone and top views; above the top
   only in the eye view** (owner, 2026-10-19: on the towers they hid them). Outward because the
   inner side is where the next tower stands.
+- **The settings panel folds to a tab at the left edge** (owner, 2026-10-19) so the render can be
+  seen whole; the folded state is kept in `localStorage` only, a per-browser convenience that the
+  page works without.
 - **The top-down camera sits at 25 m, under the fog start** (agent, 2026-10-19): at 60 m the
   scene fog greyed the plan out.
 - **The 4 m radius is the apex tower's far corner, not its centre** (agent, 2026-10-19). "The

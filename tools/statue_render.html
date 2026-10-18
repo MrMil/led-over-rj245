@@ -24,7 +24,10 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); f
   padding: 12px 14px; font-size: 13px; line-height: 1.4; backdrop-filter: blur(6px);
   box-sizing: border-box;
 }
-.panel h1 { font-size: 15px; margin: 0 0 8px; letter-spacing: 0.01em; }
+.panel h1 { font-size: 15px; margin: 0 0 8px; letter-spacing: 0.01em; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.panel.folded { display: none; }
+#btnUnfold { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); left: 0; border-radius: 0 8px 8px 0; border-left: none; padding: 10px 10px; writing-mode: vertical-rl; }
+#btnUnfold[hidden] { display: none; }
 .panel h2 { font-size: 11px; margin: 12px 0 6px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .param { display: grid; grid-template-columns: 1fr 96px; gap: 4px 8px; align-items: center; margin: 3px 0; }
 .param label { color: var(--fg); }
@@ -79,8 +82,9 @@ body.shot .panel, body.shot .views { display: none; }
   <div class="bar"><span>Right-click or long-press the image to save it if no download started.</span><button id="shotClose">Close</button></div>
 </div>
 
-<div class="panel">
-  <h1>Statue tower sightlines</h1>
+<button id="btnUnfold" hidden aria-label="Show the settings panel">Settings ▸</button>
+<div class="panel" id="panel">
+  <h1>Statue tower sightlines <button id="btnFold" class="small" title="Fold the panel to the side" aria-label="Hide the settings panel">◂ Hide</button></h1>
   <div class="note">Two statues of 7 towers, corner to the centre of the circle. Towers are placed so that, seen from the centre, neighbouring silhouettes exactly touch; the cut pattern is a smiley projected from that eye point. Lengths in mm.</div>
 
   <h2>Towers</h2>
@@ -832,6 +836,11 @@ body.shot .panel, body.shot .views { display: none; }
   });
   $('btnApplyJson').addEventListener('click', () => { try { applyObject(JSON.parse($('jsonBox').value)); jsonMsg('Applied.'); } catch (e) { jsonMsg('Could not apply: ' + e.message); } });
 
+  // Fold the panel to the side so the render is unobstructed; remembered per browser (a convenience only).
+  const setFolded = f => { $('panel').classList.toggle('folded', f); $('btnUnfold').hidden = !f; try { localStorage.setItem('panelFolded', f ? '1' : '0'); } catch (e) { /* storage unavailable */ } };
+  $('btnFold').addEventListener('click', () => setFolded(true));
+  $('btnUnfold').addEventListener('click', () => setFolded(false));
+  try { if (localStorage.getItem('panelFolded') === '1') setFolded(true); } catch (e) { /* storage unavailable */ }
   $('shotClose').addEventListener('click', () => { $('shotOverlay').hidden = true; $('shotImg').src = ''; });
 
   resize();
