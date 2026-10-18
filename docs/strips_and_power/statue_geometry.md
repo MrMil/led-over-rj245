@@ -2,7 +2,7 @@
 
 Path: [docs](../README.md) › [strips_and_power](README.md) › **statue_geometry**
 Parent: [README.md](README.md)
-**Code:** `tools/statue_render.html` (layout solver, mural projection, two camera views), `renders/*.png`
+**Code:** `tools/statue_render.html` (layout solver, mural projection, three camera views, LED/supply calculator, JSON export/load), `layout/statue-layout.json` (the handoff file), `renders/*.png`, `index.html`, `.nojekyll`
 **Covers:** where the 14 towers stand inside the 8 m circle, what a viewer at the centre sees, and
 the 3D check that the owner and the artist use to judge the tower heights. Not the wiring between
 towers ([trenches.md](trenches.md)).
@@ -25,10 +25,36 @@ radius), otherwise the largest spacing that fits, clamped to the minimum; the pa
 **Compute heights for a level top line** sets T1–T3 and T5–T7 so every top sits on one line from
 the eye, keeping T4; this is the artist's actual goal (owner, 2026-10-19). The page then projects
 the smiley from the eye point onto the faces that look at the centre, renders the eye view
-(horizontal field of view 100°, eye 1.6 m) and a drone view with a 1.75 m figure at the centre,
-and prints per tower: distance, azimuth, angular gap to the neighbour, top elevation and the angle
-its lit part subtends. Headless Chrome produced `renders/*.png` from URL parameters (`view`,
-`side`, `h1`–`h7`, `smin`, `smax`, `sopt`, `d`, `clear`, `eye`, `fov`, `shot=1`).
+(horizontal field of view 100°, eye 1.6 m), a drone view with a 1.75 m figure at the centre and a
+top-down plan (orthographic, 1 m grid, a "1 m" bar at the bottom right), and prints per tower:
+distance, azimuth, angular gap to the neighbour, top elevation and the angle its lit part
+subtends. Headless Chrome produced `renders/*.png` from URL parameters (`view=centre|drone|top`,
+`side`, `h1`–`h7`, `smin`, `smax`, `sopt`, `p1`–`p6` with `manual=1`, `d`, `clear`, `eye`,
+`fov`, `shot=1`), and `?dump=1` prints the export JSON instead of the page.
+
+### Individual spacings
+
+The six pairs T1–T2 … T6–T7 each have their own control (owner, 2026-10-19). Until one is
+touched they show the solved spacing; once the user edits one, the layout is "set by hand": the
+solver no longer overwrites the pairs, and each arm is solved with its own three chords (left
+arm T4→T3→T2→T1, right arm T4→T5→T6→T7), so the two arms may differ. Changing minimum, maximum
+or optimum then asks before resetting the pairs, because hand-set values are deliberate; "keep
+mine" also puts the three range values back. The page's own confirmation box is used because
+`confirm()` returns false inside hosted viewers.
+
+### The JSON handoff file
+
+**Export / Load** writes and reads `led-over-rj245/statue-layout` version 1 (owner, 2026-10-19:
+the file comes back into this repository for the field blueprints and the LED order). It holds
+every input under `params` (so a load restores the page exactly), the solved layout under
+`layout` (per tower: height, lit length, LEDs per face, `r_mm`, `azimuth_deg`, plan `x_mm`/`y_mm`
+with statue 1's apex on +y and azimuth clockwise from it, box yaw, spacing to the next tower,
+full-white current) and the per-side and both-sides totals under `leds_power`. Derived values
+are ignored on load. The current export lives at `layout/statue-layout.json`; regenerate it
+with `?dump=1` (see the Hosting section's headless command in git history, or the dump line in
+the page) rather than by hand. **Not done yet:** `tools/wiring_diagrams.py` still carries its own
+`TOWER_H`; reading heights from this file is the natural next step once the artist's layout is
+final.
 
 ### LEDs and power supplies
 
@@ -73,8 +99,11 @@ build time and surprises. The same file is also published as a private claude.ai
 - **The free radius at the centre is a parameter (default 900 mm)** (agent, 2026-10-19). Without
   it "closest to the optimum" would pick a spacing that leaves the tip towers 0.3 m from the
   viewer; the owner did not name this limit, so it is exposed rather than fixed.
-- **Drone-view labels are a third the size of eye-view labels** (owner, 2026-10-19): at full size
-  they hid the towers.
+- **Labels sit beside the towers, on the outer side, in the drone and top views; above the top
+  only in the eye view** (owner, 2026-10-19: on the towers they hid them). Outward because the
+  inner side is where the next tower stands.
+- **The top-down camera sits at 25 m, under the fog start** (agent, 2026-10-19): at 60 m the
+  scene fog greyed the plan out.
 - **The 4 m radius is the apex tower's far corner, not its centre** (agent, 2026-10-19). "The
   diameter of the whole circle is exactly 8 m" reads as the footprint; the centre would put the
   corner at 4.28 m.

@@ -52,6 +52,10 @@ td.ok { color: #9be38a; }
 .warn { color: #ffb08a; font-size: 12px; margin: 6px 0 0; }
 .result { font-size: 13px; margin: 6px 0 0; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; }
 .check { display: flex; gap: 8px; align-items: center; margin: 6px 0; }
+.bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 6px 0 0; }
+.badge { font-size: 10px; letter-spacing: 0.04em; background: var(--accent); color: #1a1208; border-radius: 10px; padding: 1px 7px; margin-left: 6px; vertical-align: middle; }
+.confirm { margin-top: 8px; padding: 8px 10px; border: 1px solid var(--accent); border-radius: 8px; background: #2b2217; }
+textarea { width: 100%; box-sizing: border-box; margin-top: 6px; background: #241f19; color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 6px; font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; resize: vertical; }
 #shotOverlay[hidden] { display: none; }
 #shotOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.78); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px; box-sizing: border-box; z-index: 10; }
 #shotOverlay img { max-width: 100%; max-height: calc(100vh - 90px); border: 1px solid var(--line); border-radius: 6px; }
@@ -66,6 +70,7 @@ body.shot .panel, body.shot .views { display: none; }
 <div class="views" role="group" aria-label="Viewpoint">
   <button id="btnCentre" aria-pressed="true">Centre view (eye)</button>
   <button id="btnDrone" aria-pressed="false">Drone view</button>
+  <button id="btnTop" aria-pressed="false">Top-down view</button>
   <button id="btnPng">Save PNG</button>
 </div>
 
@@ -86,6 +91,14 @@ body.shot .panel, body.shot .views { display: none; }
   <h2>Spacing between towers (centre to centre)</h2>
   <div id="spacingParams"></div>
   <div id="result" class="result"></div>
+  <h2>Individual spacings <span id="manualBadge" class="badge" hidden>set by hand</span></h2>
+  <div class="note">Solved from the values above until you change one here. Min / max / optimum then ask before overwriting them.</div>
+  <div id="pairParams"></div>
+  <button id="btnPairsReset" class="small">Reset to the solved spacing</button>
+  <div id="confirmBox" class="confirm" hidden>
+    <div>You set individual spacings by hand. Reset them to the solved spacing?</div>
+    <div class="bar"><button id="confirmReset">Reset them</button><button id="confirmKeep">Keep mine</button></div>
+  </div>
 
   <h2>Circle</h2>
   <div id="circleParams"></div>
@@ -106,6 +119,12 @@ body.shot .panel, body.shot .views { display: none; }
   <div id="powerParams"></div>
   <button id="btnPower" class="small">Compute LEDs and power supplies</button>
   <div id="powerOut"></div>
+
+  <h2>Export and load</h2>
+  <div class="note">The JSON carries every input and the solved layout (positions in mm, LED counts, supplies) for the blueprints and the LED order in the led-over-rj245 repository.</div>
+  <div class="bar"><button id="btnExport" class="small">Export JSON</button><button id="btnLoadFile" class="small">Load JSON file</button><input id="fileIn" type="file" accept="application/json,.json" hidden></div>
+  <textarea id="jsonBox" rows="6" spellcheck="false" placeholder="Exported JSON appears here. Paste JSON here and press Apply to load it."></textarea>
+  <div class="bar"><button id="btnApplyJson" class="small">Apply pasted JSON</button><button id="btnCopyJson" class="small">Copy</button><span id="jsonMsg" class="note"></span></div>
 
   <h2>Readout, statue 1 (statue 2 is identical, rotated 180°)</h2>
   <div id="readout"></div>
@@ -139,9 +158,12 @@ body.shot .panel, body.shot .views { display: none; }
     mA: num('ma', 29.4),               // current per LED at full white, measured on the bought strip
     psuA: num('psua', 18),             // current ceiling per supply
     reel: num('reel', 5000),           // reel length, mm
+    pairs: [1, 2, 3, 4, 5, 6].map(i => num('p' + i, 0)),   // T1–T2 … T6–T7, mm; 0 = not yet solved
+    manual: q.get('manual') === '1',   // true once the user edits a pair by hand; the solver then leaves them alone
   };
+  if (state.pairs.some(v => !v)) state.manual = false;
   let powerShown = false;
-  let view = q.get('view') === 'drone' ? 'drone' : 'centre';
+  let view = ['drone', 'top'].includes(q.get('view')) ? q.get('view') : 'centre';
   if (q.get('shot') === '1') document.body.classList.add('shot');
 
   // ---------- Geometry (metres inside) ----------
@@ -150,12 +172,12 @@ body.shot .panel, body.shot .views { display: none; }
   const R = () => state.diam / 2000;               // the apex tower's far corner sits on this radius
   const hw = r => Math.atan(HALF() / r);           // angular half-width of a tower at distance r
 
-  // Arm from the apex (k = 0) towards the tip (k = 3): each step a chord of s, each silhouette touching the last.
-  function solveTouch(s) {
+  // Arm from the apex (k = 0) towards the tip (k = 3): step k is a chord of chords[k] (m), each silhouette touching the last.
+  function solveTouch(chords) {
     const r = [R() - HALF()], th = [0];
     let solved = true;
     for (let k = 0; k < 3; k++) {
-      const rk = r[k];
+      const rk = r[k], s = chords[k];
       const f = rn => Math.sqrt(rk * rk + rn * rn - 2 * rk * rn * Math.cos(hw(rk) + hw(rn))) - s;
       let lo = 0.2, hi = rk;
       if (f(lo) < 0) { solved = false; r.push(lo); th.push(th[k] + hw(rk) + hw(lo)); continue; }
@@ -165,12 +187,13 @@ body.shot .panel, body.shot .views { display: none; }
     }
     return { r, th, solved };
   }
-  function solveStraight(s) {
+  function solveStraight(chords) {
     const r = [R() - HALF()], th = [0];
     const phi = state.arm / DEG;
-    let solved = true;
+    let solved = true, along = 0;
     for (let k = 1; k <= 3; k++) {
-      const x = k * s * Math.sin(phi), y = r[0] - k * s * Math.cos(phi);
+      along += chords[k - 1];
+      const x = along * Math.sin(phi), y = r[0] - along * Math.cos(phi);
       const rn = Math.hypot(x, y);
       if (rn < 0.2) solved = false;
       r.push(Math.max(rn, 0.2)); th.push(Math.atan2(x, y));
@@ -178,55 +201,63 @@ body.shot .panel, body.shot .views { display: none; }
     return { r, th, solved };
   }
   const solver = () => state.mode === 'touch' ? solveTouch : solveStraight;
+  const uniform = s => solver()([s, s, s]);
   const valid = arm => arm.solved && (arm.r[3] - HALF()) >= state.clear / 1000 - 1e-9
     && Math.max(...arm.r) + HALF() <= R() + 1e-9;
 
   // Spacing choice: the optimum if it works, else the largest working spacing below it (every step eats
   // radius, so validity only shrinks as spacing grows), clamped to [min, max].
   function chooseSpacing() {
-    const solve = solver();
     const smin = state.smin / 1000, smax = state.smax / 1000;
     const sopt = Math.min(Math.max(state.sopt, state.smin), state.smax) / 1000;
     const out = { s: sopt, reason: 'optimum', sMaxValid: null };
-    if (valid(solve(sopt))) return out;
+    if (valid(uniform(sopt))) return out;
     let lo = 0.1, hi = sopt;
-    if (!valid(solve(lo))) { out.s = smin; out.reason = 'none'; return out; }
-    for (let i = 0; i < 50; i++) { const m = (lo + hi) / 2; if (valid(solve(m))) lo = m; else hi = m; }
+    if (!valid(uniform(lo))) { out.s = smin; out.reason = 'none'; return out; }
+    for (let i = 0; i < 50; i++) { const m = (lo + hi) / 2; if (valid(uniform(m))) lo = m; else hi = m; }
     out.sMaxValid = Math.floor(lo * 1000) / 1000;
     if (out.sMaxValid >= smin) { out.s = out.sMaxValid; out.reason = 'capped'; }
     else { out.s = smin; out.reason = 'below-min'; }
     return out;
   }
 
+  // Pairs are T1–T2 … T6–T7. The left arm runs T4→T3→T2→T1 (pairs 2, 1, 0), the right arm T4→T5→T6→T7 (pairs 3, 4, 5).
   function layout() {
-    const choice = chooseSpacing();
-    const arm = solver()(choice.s);
+    let choice = null;
+    if (!state.manual) {
+      choice = chooseSpacing();
+      state.pairs = state.pairs.map(() => Math.round(choice.s * 1000));
+      if (typeof showPairs === 'function') showPairs();
+    }
+    const pm = state.pairs.map(v => v / 1000);
+    const left = solver()([pm[2], pm[1], pm[0]]), right = solver()([pm[3], pm[4], pm[5]]);
     const towers = [];
     for (let s = 0; s < 2; s++) {
       const off = s * Math.PI;
       NAMES.forEach((n, i) => {
-        const k = Math.abs(i - 3), side = i < 3 ? -1 : 1;
+        const k = Math.abs(i - 3), arm = i < 3 ? left : right, side = i < 3 ? -1 : 1;
         const r = arm.r[k], th = side * arm.th[k] + off;
         towers.push({ name: n, statue: s + 1, h: state.h[i] / 1000, r, th, x: r * Math.sin(th), z: -r * Math.cos(th) });
       });
     }
-    return { towers, arm, choice };
+    const fits = left.solved && right.solved && valid(left) && valid(right);
+    return { towers, left, right, choice, fits };
   }
 
   // Heights (mm) that put every top on one line from the eye: (h − eye)/r equal to the apex tower's.
-  function levelHeights(arm) {
-    const eye = state.eye / 1000, rf = k => arm.r[k] - HALF() / 2;
-    const c = (state.h[3] / 1000 - eye) / rf(0);
-    return NAMES.map((n, i) => Math.round((eye + c * rf(Math.abs(i - 3))) * 100) * 10);
+  function levelHeights(L) {
+    const eye = state.eye / 1000, s1 = L.towers.slice(0, 7), rf = t => t.r - HALF() / 2;
+    const c = (state.h[3] / 1000 - eye) / rf(s1[3]);
+    return s1.map(t => Math.round((eye + c * rf(t)) * 100) * 10);
   }
 
   // Per-statue mural in the viewer's angular space (azimuth relative to the statue, elevation).
-  function muralSpec(arm) {
-    const eye = state.eye / 1000, rf = k => arm.r[k] - HALF() / 2;
-    const span = arm.th[3] + hw(arm.r[3]);
+  function muralSpec(L) {
+    const eye = state.eye / 1000, s1 = L.towers.slice(0, 7), rf = t => t.r - HALF() / 2;
+    const span = Math.max(L.left.th[3] + hw(L.left.r[3]), L.right.th[3] + hw(L.right.r[3]));
     // the band every tower from T2 to T6 can show: lowest top among them, the apex tower's (highest) bottom
-    const elTop = Math.min(...[1, 2, 3, 4, 5].map(i => Math.atan((state.h[i] / 1000 - eye) / rf(Math.abs(i - 3)))));
-    const elBot = Math.atan((BASE - eye) / rf(0));
+    const elTop = Math.min(...[1, 2, 3, 4, 5].map(i => Math.atan((s1[i].h - eye) / rf(s1[i]))));
+    const elBot = Math.atan((BASE - eye) / rf(s1[3]));
     const cy = (elTop + elBot) / 2;
     return { cx: 0, cy, rx: span * 0.90, ry: Math.max(0.02, (elTop - elBot) / 2 * 0.84), stroke: 2.0 / DEG };
   }
@@ -267,7 +298,20 @@ body.shot .panel, body.shot .views { display: none; }
 
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(160, 160), new THREE.MeshStandardMaterial({ color: 0xc9ad83, roughness: 1 }));
   ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
-  const grid = new THREE.GridHelper(60, 60, 0xa8926a, 0xb8a07a); grid.position.y = 0.002; scene.add(grid);
+  const grid = new THREE.GridHelper(60, 60, 0xa8926a, 0xb8a07a); grid.position.y = 0.002; scene.add(grid); // 1 m cells
+  // "1 m" scale bar, flat on the floor, shown at the bottom-right of the top-down view
+  const scaleBar = new THREE.Group();
+  {
+    const bar = new THREE.Mesh(new THREE.PlaneGeometry(1, 0.08), new THREE.MeshBasicMaterial({ color: 0x3a2412 }));
+    bar.rotation.x = -Math.PI / 2; bar.position.y = 0.006; scaleBar.add(bar);
+    [-0.5, 0.5].forEach(x => { const tick = new THREE.Mesh(new THREE.PlaneGeometry(0.06, 0.3), new THREE.MeshBasicMaterial({ color: 0x3a2412 })); tick.rotation.x = -Math.PI / 2; tick.position.set(x, 0.006, 0); scaleBar.add(tick); });
+    const c = document.createElement('canvas'); c.width = 256; c.height = 96;
+    const g = c.getContext('2d'); g.fillStyle = '#3a2412'; g.font = 'bold 72px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('1 m', 128, 50);
+    const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding;
+    const txt = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.375), new THREE.MeshBasicMaterial({ map: t, transparent: true }));
+    txt.rotation.x = -Math.PI / 2; txt.position.set(0, 0.006, -0.32); scaleBar.add(txt);   // image up is −z
+  }
+  scaleBar.visible = false; scene.add(scaleBar);
   const ringMat = new THREE.MeshBasicMaterial({ color: 0x5a3a1e, side: THREE.DoubleSide });
   let ring = null;
   const mark = new THREE.Mesh(new THREE.RingGeometry(0.0, 0.08, 32), ringMat);
@@ -367,10 +411,10 @@ body.shot .panel, body.shot .views { display: none; }
     ring.rotation.x = -Math.PI / 2; ring.position.y = 0.004; scene.add(ring);
     const txt = `Ø ${(state.diam / 1000).toFixed(state.diam % 1000 ? 1 : 0)} m`;
     if (txt !== dimText) { dimText = txt; dimLabel.material.map.dispose(); dimLabel.material.map = labelTexture(txt); dimLabel.material.needsUpdate = true; }
-    dimLabel.position.set(0, 0.35, R() + 0.6);
+    dimLabel.position.set(-(R() + 0.9) * 0.707, 0.35, (R() + 0.9) * 0.707);   // bottom-left of the circle, clear of both apex labels
 
     const L = layout(); current = L;
-    const spec = muralSpec(L.arm);
+    const spec = muralSpec(L);
     const w = W();
     const edgeMat = new THREE.LineBasicMaterial({ color: 0x2a1a0e });
     const hullMat = new THREE.MeshBasicMaterial({ color: 0x1e120a, side: THREE.BackSide });
@@ -405,7 +449,10 @@ body.shot .panel, body.shot .views { display: none; }
       const edges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w, t.h, w)), edgeMat);
       edges.position.y = t.h / 2; g.add(edges);
       const lab = labelSprite(`${t.name} · ${Math.round(t.h * 1000)}`);
-      lab.position.set(0, t.h + 0.22, 0); lab.visible = state.labels; g.add(lab); labels.push(lab);
+      lab.userData.pos = new THREE.Vector3(t.x, 0, t.z);
+      lab.userData.out = new THREE.Vector3(t.x, 0, t.z).normalize();      // away from the circle centre
+      lab.userData.h = t.h;
+      lab.visible = state.labels; towersGroup.add(lab); labels.push(lab);
       towersGroup.add(g);
     });
     updateReadout(L);
@@ -416,7 +463,7 @@ body.shot .panel, body.shot .views { display: none; }
   // ---------- Readout ----------
   const mm = m => Math.round(m * 1000);
   function updateReadout(L) {
-    const arm = L.arm, c = L.choice, eye = state.eye / 1000;
+    const c = L.choice, eye = state.eye / 1000;
     const s1 = L.towers.filter(t => t.statue === 1);
     const rows = s1.map((t, i) => {
       const rf = t.r - HALF() / 2;
@@ -430,16 +477,17 @@ body.shot .panel, body.shot .views { display: none; }
       }
       return `<tr><td>${t.name} · ${mm(t.h)}</td><td>${mm(t.r)}</td><td>${(t.th * DEG).toFixed(1)}</td><td class="${cls}">${gap}</td><td>${top.toFixed(1)}</td><td>${appH.toFixed(1)}</td></tr>`;
     }).join('');
-    const clear = s1[0].r - HALF();
+    const clear = Math.min(s1[0].r, s1[6].r) - HALF();
     const farMax = Math.max(...s1.map(t => t.r + HALF()));
-    const span = (arm.th[3] + hw(arm.r[3])) * DEG;
-    const spacings = [0, 1, 2].map(k => Math.sqrt(arm.r[k] ** 2 + arm.r[k + 1] ** 2 - 2 * arm.r[k] * arm.r[k + 1] * Math.cos(arm.th[k + 1] - arm.th[k])));
-    const lv = levelHeights(arm);
+    const span = Math.max(L.left.th[3] + hw(L.left.r[3]), L.right.th[3] + hw(L.right.r[3])) * DEG;
+    const spacings = [0, 1, 2, 3, 4, 5].map(i => Math.hypot(s1[i].x - s1[i + 1].x, s1[i].z - s1[i + 1].z));
+    const lv = levelHeights(L);
+    const solved = L.left.solved && L.right.solved;
     document.getElementById('readout').innerHTML = `
       <table><thead><tr><th>Tower</th><th>r</th><th>az °</th><th>gap °</th><th>top °</th><th>lit °</th></tr></thead><tbody>${rows}</tbody></table>
       <p class="note">r: tower centre to the circle centre, mm. az: azimuth from the apex. gap: angular gap to the next silhouette from the eye; negative = the nearer tower hides part of the next (green = touching). top: elevation of the tower top above the eye line. lit: angle the lit part subtends.</p>
-      <p class="note">Each statue spans ±${span.toFixed(0)}° of the view. Free radius at the centre (nearest corner of T1/T7): <b>${mm(clear)} mm</b>. Farthest corner: ${mm(farMax)} mm from the centre (${farMax <= R() + 0.0005 ? 'inside' : 'outside'} the Ø ${state.diam} circle). Spacing T4→T3→T2→T1: ${spacings.map(mm).join(' / ')} mm.</p>
-      ${arm.solved ? '' : '<p class="warn">No solution: the arm reaches the centre before the tip tower. The tip is clamped at 200 mm.</p>'}`;
+      <p class="note">Each statue spans ±${span.toFixed(0)}° of the view. Free radius at the centre (nearest corner of T1/T7): <b>${mm(clear)} mm</b>. Farthest corner: ${mm(farMax)} mm from the centre (${farMax <= R() + 0.0005 ? 'inside' : 'outside'} the Ø ${state.diam} circle). Spacing T1–T2 … T6–T7: ${spacings.map(mm).join(' / ')} mm.</p>
+      ${solved ? '' : '<p class="warn">No solution: an arm reaches the centre before its tip tower. That tip is clamped at 200 mm.</p>'}`;
     const same = lv.every((v, i) => v === state.h[i]);
     document.getElementById('levelNote').innerHTML = same
       ? 'These heights put every top on one line from the eye at the centre.'
@@ -447,6 +495,13 @@ body.shot .panel, body.shot .views { display: none; }
     levelPending = lv;
 
     const res = document.getElementById('result');
+    document.getElementById('manualBadge').hidden = !state.manual;
+    if (state.manual) {
+      res.innerHTML = L.fits
+        ? `Individual spacings set by hand. They fit: inside the circle, with ${mm(clear)} mm free at the centre.`
+        : `<span class="warn">Individual spacings set by hand. They do not fit: ${farMax > R() + 0.0005 ? 'a tower crosses the circle; ' : ''}${clear < state.clear / 1000 - 1e-9 ? `only ${mm(clear)} mm free at the centre (wanted ${state.clear}); ` : ''}${solved ? '' : 'an arm reaches the centre.'}</span>`;
+      return;
+    }
     const sUsed = `<b>${mm(c.s)} mm</b>`;
     if (c.reason === 'optimum') res.innerHTML = `Spacing used: ${sUsed}, the optimum. Touching silhouettes fit inside the circle with ${mm(clear)} mm free at the centre.`;
     else if (c.reason === 'capped') res.innerHTML = `Spacing used: ${sUsed}. The optimum (${state.sopt} mm) does not fit: with touching silhouettes inside the circle and ${state.clear} mm free at the centre, the largest spacing is ${mm(c.sMaxValid)} mm.`;
@@ -509,8 +564,7 @@ body.shot .panel, body.shot .views { display: none; }
     };
     return rec(0, k);
   }
-  function computePower() {
-    powerShown = true;
+  function powerModel() {
     const lit = state.h.map(h => Math.max(0, h - state.unlit) / 1000);           // m per face
     const leds = lit.map(l => Math.floor(l * state.lpm + 1e-9));
     const amps = leds.map(n => 4 * n * state.mA / 1000);
@@ -532,6 +586,11 @@ body.shot .panel, body.shot .views { display: none; }
       }
     }
     const tooBig = NAMES.filter((n, i) => amps[i] > state.psuA + 1e-9);
+    return { lit, leds, amps, metresSide, reelsSide, reelsBoth, exact, groups, note, tooBig, fmtGroups };
+  }
+  function computePower() {
+    powerShown = true;
+    const { lit, leds, amps, metresSide, reelsSide, reelsBoth, exact, groups, note, tooBig, fmtGroups } = powerModel();
     const rows = NAMES.map((n, i) => `<tr><td>${n} · ${state.h[i]}</td><td>${Math.round(lit[i] * 1000)}</td><td>${leds[i]}</td><td>${4 * leds[i]}</td><td class="${amps[i] > state.psuA ? 'bad' : ''}">${amps[i].toFixed(1)}</td></tr>`).join('');
     document.getElementById('powerOut').innerHTML = `
       <table><thead><tr><th>Tower</th><th>lit mm</th><th>LEDs/face</th><th>LEDs</th><th>A full white</th></tr></thead><tbody>${rows}</tbody></table>
@@ -553,6 +612,8 @@ body.shot .panel, body.shot .views { display: none; }
   // ---------- Cameras and controls ----------
   const camCentre = new THREE.PerspectiveCamera(60, 1, 0.05, 200);
   const camDrone = new THREE.PerspectiveCamera(40, 1, 0.1, 300);
+  const camTop = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 200);
+  camTop.position.set(0, 25, 0); camTop.up.set(0, 0, -1); camTop.lookAt(0, 0, 0);   // below the fog start, else the view greys out   // statue 1's apex at the top of the image
   camDrone.position.set(5.2, 6.2, 7.6);
   const controls = new THREE.OrbitControls(camDrone, renderer.domElement);
   controls.target.set(0, 0.5, 0); controls.maxPolarAngle = Math.PI / 2 - 0.02; controls.update();
@@ -568,15 +629,18 @@ body.shot .panel, body.shot .views { display: none; }
     camCentre.position.set(0, state.eye / 1000, 0);
     const k = Math.max(1, R() / 4);                       // the drone backs off for a bigger circle
     if (k !== droneScale) { camDrone.position.multiplyScalar(k / droneScale); droneScale = k; }
-    person.visible = view === 'drone';
+    const hh = R() + 1.2, hwid = hh * aspect;                // top-down: the whole circle plus a margin
+    camTop.left = -hwid; camTop.right = hwid; camTop.top = hh; camTop.bottom = -hh; camTop.updateProjectionMatrix();
+    scaleBar.position.set(hwid - 1.0, 0, hh - 0.7);           // bottom-right of the top-down frame
+    scaleBar.visible = view === 'top';
+    person.visible = view !== 'centre';
     controls.enabled = view === 'drone';
     look.enabled = view === 'centre';
-    document.getElementById('btnCentre').setAttribute('aria-pressed', view === 'centre');
-    document.getElementById('btnDrone').setAttribute('aria-pressed', view === 'drone');
+    ['Centre', 'Drone', 'Top'].forEach(n => document.getElementById('btn' + n).setAttribute('aria-pressed', view === n.toLowerCase()));
   }
   function aimCentre() {
     if (!current) return;
-    const target = new THREE.Vector3(0, (state.h[3] / 1000 + BASE) / 2 * 0.9 + state.eye / 1000 * 0.1, -current.arm.r[0]);
+    const target = new THREE.Vector3(0, (state.h[3] / 1000 + BASE) / 2 * 0.9 + state.eye / 1000 * 0.1, -current.left.r[0]);
     const dir = target.clone().sub(camCentre.position).normalize();
     look.target.copy(camCentre.position).addScaledVector(dir, 0.5);
     look.update();
@@ -586,16 +650,24 @@ body.shot .panel, body.shot .views { display: none; }
 
   const tmp = new THREE.Vector3();
   function render() {
-    const cam = view === 'centre' ? camCentre : camDrone;
+    const cam = view === 'centre' ? camCentre : view === 'drone' ? camDrone : camTop;
     if (view === 'drone') controls.update();
     const base = view === 'centre' ? 0.09 : 0.032;        // small in the drone view so labels never hide towers
-    labels.forEach(l => { l.getWorldPosition(tmp); const w = tmp.distanceTo(cam.position) * base; l.scale.set(w, w / l.userData.ratio, 1); });
+    labels.forEach(l => {
+      const u = l.userData;
+      // centre view: above the tower top; drone and top views: beside the tower, on its outer side, so the label never covers it
+      if (view === 'centre') l.position.set(u.pos.x, u.h + 0.22, u.pos.z);
+      else l.position.set(u.pos.x + u.out.x * 0.8, view === 'drone' ? u.h * 0.5 : 0.05, u.pos.z + u.out.z * 0.8);
+      const w = view === 'top' ? 0.7 : l.position.distanceTo(cam.position) * base;
+      l.scale.set(w, w / u.ratio, 1);
+    });
     renderer.render(scene, cam);
     requestAnimationFrame(render);
   }
 
   // ---------- Parameter rows: slider + text box, kept in step ----------
   const inputs = {};
+  let showPairs = null;
   function paramRow(host, key, label, min, max, step, unit, getter, setter, after) {
     const id = 'p_' + key;
     const row = document.createElement('div'); row.className = 'param';
@@ -618,9 +690,30 @@ body.shot .panel, body.shot .views { display: none; }
   const rebuild = () => build();
   paramRow($('towerParams'), 'side', 'Tower side length', 200, 1000, 10, 'mm', () => state.side, v => state.side = v, rebuild);
   NAMES.forEach((n, i) => paramRow($('towerParams'), 'h' + (i + 1), `${n} height${i === 3 ? ' (apex)' : (i === 0 || i === 6) ? ' (tip)' : ''}`, 300, 3000, 10, 'mm', () => state.h[i], v => state.h[i] = v, rebuild));
-  paramRow($('spacingParams'), 'smin', 'Minimum', 300, 3000, 10, 'mm', () => state.smin, v => { state.smin = v; if (state.smax < v) setParam('smax', v); if (state.sopt < v) setParam('sopt', v); }, rebuild);
-  paramRow($('spacingParams'), 'smax', 'Maximum', 300, 3000, 10, 'mm', () => state.smax, v => { state.smax = v; if (state.smin > v) setParam('smin', v); if (state.sopt > v) setParam('sopt', v); }, rebuild);
-  paramRow($('spacingParams'), 'sopt', 'Optimum', 300, 3000, 10, 'mm', () => state.sopt, v => { state.sopt = v; if (v < state.smin) setParam('smin', v); if (v > state.smax) setParam('smax', v); }, rebuild);
+  // Changing min / max / optimum re-solves the pairs. If the user set pairs by hand, ask first; "keep mine"
+  // puts the three values back as they were. confirm() cannot be used: hosted viewers return false from it.
+  let pending = null;
+  const afterRange = () => {
+    if (!state.manual) { build(); return; }
+    if (!pending) { pending = { smin: pendingOld.smin, smax: pendingOld.smax, sopt: pendingOld.sopt }; $('confirmBox').hidden = false; }
+  };
+  let pendingOld = { smin: state.smin, smax: state.smax, sopt: state.sopt };
+  const rangeSetter = key => v => {
+    if (!pending) pendingOld = { smin: state.smin, smax: state.smax, sopt: state.sopt };
+    state[key] = v;
+    if (key === 'smin') { if (state.smax < v) setParam('smax', v); if (state.sopt < v) setParam('sopt', v); }
+    if (key === 'smax') { if (state.smin > v) setParam('smin', v); if (state.sopt > v) setParam('sopt', v); }
+    if (key === 'sopt') { if (v < state.smin) setParam('smin', v); if (v > state.smax) setParam('smax', v); }
+  };
+  paramRow($('spacingParams'), 'smin', 'Minimum', 300, 3000, 10, 'mm', () => state.smin, rangeSetter('smin'), afterRange);
+  paramRow($('spacingParams'), 'smax', 'Maximum', 300, 3000, 10, 'mm', () => state.smax, rangeSetter('smax'), afterRange);
+  paramRow($('spacingParams'), 'sopt', 'Optimum', 300, 3000, 10, 'mm', () => state.sopt, rangeSetter('sopt'), afterRange);
+  $('confirmReset').addEventListener('click', () => { pending = null; state.manual = false; $('confirmBox').hidden = true; build(); });
+  $('confirmKeep').addEventListener('click', () => { Object.assign(state, pending); pending = null; ['smin', 'smax', 'sopt'].forEach(k => inputs[k]()); $('confirmBox').hidden = true; build(); });
+  const PAIR_NAMES = ['T1–T2', 'T2–T3', 'T3–T4', 'T4–T5', 'T5–T6', 'T6–T7'];
+  PAIR_NAMES.forEach((n, i) => paramRow($('pairParams'), 'p' + (i + 1), n, 300, 3000, 10, 'mm', () => state.pairs[i], v => { state.pairs[i] = v; state.manual = true; }, rebuild));
+  showPairs = () => [1, 2, 3, 4, 5, 6].forEach(i => inputs['p' + i] && inputs['p' + i]());
+  $('btnPairsReset').addEventListener('click', () => { state.manual = false; build(); });
   paramRow($('circleParams'), 'diam', 'Circle diameter (to the farthest corners)', 3000, 20000, 100, 'mm', () => state.diam, v => state.diam = v, () => { applyView(); build(); });
   paramRow($('circleParams'), 'clear', 'Free radius the viewer keeps at the centre', 0, 3000, 50, 'mm', () => state.clear, v => state.clear = v, rebuild);
   const repower = () => { if (powerShown) computePower(); };
@@ -640,6 +733,7 @@ body.shot .panel, body.shot .views { display: none; }
   $('btnLevel').addEventListener('click', () => { if (!levelPending) return; levelPending.forEach((v, i) => setParam('h' + (i + 1), v)); build(); });
   $('btnCentre').addEventListener('click', () => { view = 'centre'; applyView(); aimCentre(); });
   $('btnDrone').addEventListener('click', () => { view = 'drone'; applyView(); });
+  $('btnTop').addEventListener('click', () => { view = 'top'; applyView(); });
   // Save PNG: a download where the host allows it; the frame is also shown full-size so it can be saved
   // by right-click or long-press where downloads are blocked (hosted viewers).
   $('btnPng').addEventListener('click', () => {
@@ -647,14 +741,102 @@ body.shot .panel, body.shot .views { display: none; }
     $('shotImg').src = url; $('shotOverlay').hidden = false;
     try {
       const a = document.createElement('a');
-      a.download = `statue-${view}-${Math.round(current.choice.s * 1000)}mm.png`;
+      a.download = `statue-${view}-${state.pairs.join('-')}mm.png`;
       a.href = url; a.click();
     } catch (e) { /* downloads blocked: the overlay remains */ }
   });
+  // ---------- JSON export / load: the handoff file for the led-over-rj245 repository ----------
+  const JSON_FORMAT = 'led-over-rj245/statue-layout';
+  function exportObject() {
+    const L = current, pw = powerModel(), r1 = v => Math.round(v * 10) / 10;
+    const statues = [1, 2].map(sn => ({
+      statue: sn,
+      apex_azimuth_deg: (sn - 1) * 180,
+      towers: L.towers.filter(t => t.statue === sn).map((t, i, arr) => ({
+        name: t.name, height_mm: Math.round(t.h * 1000), lit_mm: Math.round(pw.lit[i] * 1000), leds_per_face: pw.leds[i],
+        r_mm: mm(t.r), azimuth_deg: r1(t.th * DEG), x_mm: mm(t.x), y_mm: mm(-t.z),
+        corner_towards_centre: true, box_yaw_deg: r1(((t.th * DEG) + 45) % 360),
+        spacing_to_next_mm: i < 6 ? mm(Math.hypot(arr[i + 1].x - t.x, arr[i + 1].z - t.z)) : null,
+        full_white_A: r1(pw.amps[i]),
+      })),
+    }));
+    const s1 = L.towers.slice(0, 7);
+    return {
+      format: JSON_FORMAT, version: 1, generated: new Date().toISOString(),
+      units: 'mm, degrees, A; plan x east, y north with statue 1 apex on +y; azimuth clockwise from +y',
+      params: {
+        side_mm: state.side, heights_mm: [...state.h],
+        spacing_mm: { min: state.smin, max: state.smax, optimum: state.sopt, pairs: [...state.pairs], pair_names: PAIR_NAMES, manual: state.manual },
+        circle_diameter_mm: state.diam, free_radius_mm: state.clear,
+        arm: { method: state.mode, angle_deg: state.arm },
+        viewer: { eye_mm: state.eye, fov_deg: state.hfov },
+        leds: { unlit_base_mm: state.unlit, per_m: state.lpm, mA_per_led: state.mA, psu_max_A: state.psuA, reel_mm: state.reel },
+      },
+      layout: {
+        fits: L.fits, spacing_used_mm: L.choice ? mm(L.choice.s) : null, spacing_reason: L.choice ? L.choice.reason : 'manual',
+        free_radius_mm: mm(Math.min(s1[0].r, s1[6].r) - HALF()),
+        farthest_corner_mm: mm(Math.max(...s1.map(t => t.r + HALF()))),
+        statue_half_span_deg: r1(Math.max(L.left.th[3] + hw(L.left.r[3]), L.right.th[3] + hw(L.right.r[3])) * DEG),
+        level_top_heights_mm: levelHeights(L),
+        statues,
+      },
+      leds_power: {
+        per_side: {
+          strip_m: r1(pw.metresSide), leds: pw.leds.reduce((a, n) => a + 4 * n, 0), full_white_A: r1(pw.amps.reduce((a, x) => a + x, 0)),
+          reels: pw.reelsSide.length, supplies: pw.exact ? pw.exact.length : null,
+          supply_groups: pw.exact ? pw.groups.map(g => ({ towers: g.items.map(it => it.tag), A: r1(g.used) })) : null,
+          note: pw.note, towers_over_limit: pw.tooBig,
+        },
+        both_sides: { strip_m: r1(2 * pw.metresSide), reels: 2 * pw.reelsSide.length, reels_if_pooled: pw.reelsBoth.length, supplies: pw.exact ? 2 * pw.exact.length : null },
+      },
+    };
+  }
+  window.statueExport = () => JSON.stringify(exportObject(), null, 2);
+  function applyObject(o) {
+    if (!o || o.format !== JSON_FORMAT) throw new Error('not a ' + JSON_FORMAT + ' file');
+    const P = o.params || {};
+    const setIf = (key, v) => { if (typeof v === 'number' && !isNaN(v)) setParam(key, v); };
+    setIf('side', P.side_mm);
+    if (Array.isArray(P.heights_mm)) P.heights_mm.slice(0, 7).forEach((v, i) => setIf('h' + (i + 1), v));
+    const S = P.spacing_mm || {};
+    setIf('smin', S.min); setIf('smax', S.max); setIf('sopt', S.optimum);
+    if (Array.isArray(S.pairs) && S.pairs.length === 6 && S.manual) { state.pairs = S.pairs.map(Number); state.manual = true; } else state.manual = false;
+    setIf('diam', P.circle_diameter_mm); setIf('clear', P.free_radius_mm);
+    if (P.arm) { if (P.arm.method === 'touch' || P.arm.method === 'straight') { state.mode = P.arm.method; $('mode').value = state.mode; $('armParams').hidden = state.mode !== 'straight'; } setIf('arm', P.arm.angle_deg); }
+    if (P.viewer) { setIf('eye', P.viewer.eye_mm); setIf('hfov', P.viewer.fov_deg); }
+    if (P.leds) { setIf('unlit', P.leds.unlit_base_mm); setIf('lpm', P.leds.per_m); setIf('mA', P.leds.mA_per_led); setIf('psuA', P.leds.psu_max_A); setIf('reel', P.leds.reel_mm); }
+    pending = null; $('confirmBox').hidden = true;
+    applyView(); build(); if (state.manual) showPairs();
+  }
+  const jsonMsg = t => { $('jsonMsg').textContent = t; };
+  $('btnExport').addEventListener('click', () => {
+    const txt = window.statueExport();
+    $('jsonBox').value = txt; jsonMsg('Exported. If no download started, copy the text.');
+    try {
+      const a = document.createElement('a');
+      a.download = `statue-layout-${new Date().toISOString().slice(0, 10)}.json`;
+      a.href = URL.createObjectURL(new Blob([txt], { type: 'application/json' })); a.click();
+    } catch (e) { /* downloads blocked: the text box remains */ }
+  });
+  $('btnCopyJson').addEventListener('click', () => {
+    const txt = $('jsonBox').value || window.statueExport(); $('jsonBox').value = txt;
+    const fallback = () => { $('jsonBox').focus(); $('jsonBox').select(); jsonMsg('Select-all and copy from the box.'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(() => jsonMsg('Copied.'), fallback); else fallback();
+  });
+  $('btnLoadFile').addEventListener('click', () => $('fileIn').click());
+  $('fileIn').addEventListener('change', () => {
+    const f = $('fileIn').files[0]; if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => { $('jsonBox').value = rd.result; try { applyObject(JSON.parse(rd.result)); jsonMsg(`Loaded ${f.name}.`); } catch (e) { jsonMsg('Could not load: ' + e.message); } };
+    rd.readAsText(f); $('fileIn').value = '';
+  });
+  $('btnApplyJson').addEventListener('click', () => { try { applyObject(JSON.parse($('jsonBox').value)); jsonMsg('Applied.'); } catch (e) { jsonMsg('Could not apply: ' + e.message); } });
+
   $('shotClose').addEventListener('click', () => { $('shotOverlay').hidden = true; $('shotImg').src = ''; });
 
   resize();
   build();
+  if (q.get('dump') === '1') { document.body.textContent = ''; const pre = document.createElement('pre'); pre.id = 'dump'; pre.textContent = window.statueExport(); document.body.appendChild(pre); return; }
   render();
 })();
 </script>

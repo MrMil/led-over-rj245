@@ -1,0 +1,330 @@
+{
+  "format": "led-over-rj245/statue-layout",
+  "version": 1,
+  "generated": "2026-10-18T22:40:20.782Z",
+  "units": "mm, degrees, A; plan x east, y north with statue 1 apex on +y; azimuth clockwise from +y",
+  "params": {
+    "side_mm": 400,
+    "heights_mm": [
+      950,
+      1250,
+      1600,
+      2000,
+      1600,
+      1250,
+      950
+    ],
+    "spacing_mm": {
+      "min": 1000,
+      "max": 2000,
+      "optimum": 1500,
+      "pairs": [
+        1019,
+        1019,
+        1019,
+        1019,
+        1019,
+        1019
+      ],
+      "pair_names": [
+        "T1–T2",
+        "T2–T3",
+        "T3–T4",
+        "T4–T5",
+        "T5–T6",
+        "T6–T7"
+      ],
+      "manual": false
+    },
+    "circle_diameter_mm": 8000,
+    "free_radius_mm": 900,
+    "arm": {
+      "method": "touch",
+      "angle_deg": 25
+    },
+    "viewer": {
+      "eye_mm": 1600,
+      "fov_deg": 100
+    },
+    "leds": {
+      "unlit_base_mm": 150,
+      "per_m": 60,
+      "mA_per_led": 29.4,
+      "psu_max_A": 18,
+      "reel_mm": 5000
+    }
+  },
+  "layout": {
+    "fits": true,
+    "spacing_used_mm": 1019,
+    "spacing_reason": "capped",
+    "free_radius_mm": 902,
+    "farthest_corner_mm": 4000,
+    "statue_half_span_deg": 58.3,
+    "level_top_heights_mm": [
+      1720,
+      1810,
+      1910,
+      2000,
+      1910,
+      1810,
+      1720
+    ],
+    "statues": [
+      {
+        "statue": 1,
+        "apex_azimuth_deg": 0,
+        "towers": [
+          {
+            "name": "T1",
+            "height_mm": 950,
+            "lit_mm": 800,
+            "leds_per_face": 48,
+            "r_mm": 1185,
+            "azimuth_deg": -44.9,
+            "x_mm": -837,
+            "y_mm": 839,
+            "corner_towards_centre": true,
+            "box_yaw_deg": 0.1,
+            "spacing_to_next_mm": 1019,
+            "full_white_A": 5.6
+          },
+          {
+            "name": "T2",
+            "height_mm": 1250,
+            "lit_mm": 1100,
+            "leds_per_face": 66,
+            "r_mm": 2027,
+            "azimuth_deg": -23.5,
+            "x_mm": -810,
+            "y_mm": 1858,
+            "corner_towards_centre": true,
+            "box_yaw_deg": 21.5,
+            "spacing_to_next_mm": 1019,
+            "full_white_A": 7.8
+          },
+          {
+            "name": "T3",
+            "height_mm": 1600,
+            "lit_mm": 1450,
+            "leds_per_face": 87,
+            "r_mm": 2871,
+            "azimuth_deg": -10,
+            "x_mm": -497,
+            "y_mm": 2828,
+            "corner_towards_centre": true,
+            "box_yaw_deg": 35,
+            "spacing_to_next_mm": 1019,
+            "full_white_A": 10.2
+          },
+          {
+            "name": "T4",
+            "height_mm": 2000,
+            "lit_mm": 1850,
+            "leds_per_face": 111,
+            "r_mm": 3717,
+            "azimuth_deg": 0,
+            "x_mm": 0,
+            "y_mm": 3717,
+            "corner_towards_centre": true,
+            "box_yaw_deg": 45,
+            "spacing_to_next_mm": 1019,
+            "full_white_A": 13.1
+          },
+          {
+            "name": "T5",
+            "height_mm": 1600,
+            "lit_mm": 1450,
+            "leds_per_face": 87,
+            "r_mm": 2871,
+            "azimuth_deg": 10,
+            "x_mm": 497,
+            "y_mm": 2828,
+            "corner_towards_centre": true,
+            "box_yaw_deg": 55,
+            "spacing_to_next_mm": 1019,
+            "full_white_A": 10.2
+          },
+          {
+            "name": "T6",
+            "height_mm": 1250,
+            "lit_mm": 1100,
+            "leds_per_face": 66,
+            "r_mm": 2027,
+            "azimuth_deg": 23.5,
+            "x_mm": 810,
+            "y_mm": 1858,
+            "corner_towards_centre": true,
+            "box_yaw_deg": 68.5,
+            "spacing_to_next_mm": 1019,
+            "full_white_A": 7.8
+          },
+          {
+            "name": "T7",
+            "height_mm": 950,
+            "lit_mm": 800,
+            "leds_per_face": 48,
+            "r_mm": 1185,
+            "azimuth_deg": 44.9,
+            "x_mm": 837,
+            "y_mm": 839,
+            "corner_towards_centre": true,
+            "box_yaw_deg": 89.9,
+            "spacing_to_next_mm": null,
+            "full_white_A": 5.6
+          }
+        ]
+      },
+      {
+        "statue": 2,
+        "apex_azimuth_deg": 180,
+        "towers": [
+          {
+            "name": "T1",
+            "height_mm": 950,
+            "lit_mm": 800,
+            "leds_per_face": 48,
+            "r_mm": 1185,
+            "azimuth_deg": 135.1,
+            "x_mm": 837,
+            "y_mm": -839,
+            "corner_towards_centre": true,
+            "box_yaw_deg": 180.1,
+            "spacing_to_next_mm": 1019,
+            "full_white_A": 5.6
+          },
+          {
+            "name": "T2",
+            "height_mm": 1250,
+            "lit_mm": 1100,
+            "leds_per_face": 66,
+            "r_mm": 2027,
+            "azimuth_deg": 156.5,
+            "x_mm": 810,
+            "y_mm": -1858,
+            "corner_towards_centre": true,
+            "box_yaw_deg": 201.5,
+            "spacing_to_next_mm": 1019,
+            "full_white_A": 7.8
+          },
+          {
+            "name": "T3",
+            "height_mm": 1600,
+            "lit_mm": 1450,
+            "leds_per_face": 87,
+            "r_mm": 2871,
+            "azimuth_deg": 170,
+            "x_mm": 497,
+            "y_mm": -2828,
+            "corner_towards_centre": true,
+            "box_yaw_deg": 215,
+            "spacing_to_next_mm": 1019,
+            "full_white_A": 10.2
+          },
+          {
+            "name": "T4",
+            "height_mm": 2000,
+            "lit_mm": 1850,
+            "leds_per_face": 111,
+            "r_mm": 3717,
+            "azimuth_deg": 180,
+            "x_mm": 0,
+            "y_mm": -3717,
+            "corner_towards_centre": true,
+            "box_yaw_deg": 225,
+            "spacing_to_next_mm": 1019,
+            "full_white_A": 13.1
+          },
+          {
+            "name": "T5",
+            "height_mm": 1600,
+            "lit_mm": 1450,
+            "leds_per_face": 87,
+            "r_mm": 2871,
+            "azimuth_deg": 190,
+            "x_mm": -497,
+            "y_mm": -2828,
+            "corner_towards_centre": true,
+            "box_yaw_deg": 235,
+            "spacing_to_next_mm": 1019,
+            "full_white_A": 10.2
+          },
+          {
+            "name": "T6",
+            "height_mm": 1250,
+            "lit_mm": 1100,
+            "leds_per_face": 66,
+            "r_mm": 2027,
+            "azimuth_deg": 203.5,
+            "x_mm": -810,
+            "y_mm": -1858,
+            "corner_towards_centre": true,
+            "box_yaw_deg": 248.5,
+            "spacing_to_next_mm": 1019,
+            "full_white_A": 7.8
+          },
+          {
+            "name": "T7",
+            "height_mm": 950,
+            "lit_mm": 800,
+            "leds_per_face": 48,
+            "r_mm": 1185,
+            "azimuth_deg": 224.9,
+            "x_mm": -837,
+            "y_mm": -839,
+            "corner_towards_centre": true,
+            "box_yaw_deg": 269.9,
+            "spacing_to_next_mm": null,
+            "full_white_A": 5.6
+          }
+        ]
+      }
+    ]
+  },
+  "leds_power": {
+    "per_side": {
+      "strip_m": 34.2,
+      "leds": 2052,
+      "full_white_A": 60.3,
+      "reels": 8,
+      "supplies": 4,
+      "supply_groups": [
+        {
+          "towers": [
+            "T4"
+          ],
+          "A": 13.1
+        },
+        {
+          "towers": [
+            "T3",
+            "T2"
+          ],
+          "A": 18
+        },
+        {
+          "towers": [
+            "T5",
+            "T6"
+          ],
+          "A": 18
+        },
+        {
+          "towers": [
+            "T1",
+            "T7"
+          ],
+          "A": 11.3
+        }
+      ],
+      "note": "4 supplies only work with non-neighbouring towers sharing a supply; neighbours only: 5 — T1 (5.6 A) · T2+T3 (18.0 A) · T4 (13.1 A) · T5 (10.2 A) · T6+T7 (13.4 A)",
+      "towers_over_limit": []
+    },
+    "both_sides": {
+      "strip_m": 68.4,
+      "reels": 16,
+      "reels_if_pooled": 15,
+      "supplies": 8
+    }
+  }
+}
