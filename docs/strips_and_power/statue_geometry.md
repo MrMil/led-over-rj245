@@ -82,8 +82,8 @@ build time and surprises. The same file is also published as a private claude.ai
 - **Touching silhouettes, Ø 8 m and 1.5 m spacing cannot all hold.** Three steps of 1.5 m from a
   4 m radius cross the centre. With exact touching the arm must point almost at the viewer, so the
   spacing is capped: 1.0 m puts the tip tower's nearest corner 0.97 m from the centre, 1.1 m puts
-  it at 0.6 m, 1.3 m has no solution. With the defaults (optimum 1.5 m, 0.9 m free at the
-  centre) the solver settles on 1.0 m.
+  it at 0.6 m, 1.3 m has no solution. The owner then set the range to 500 / 750 / 1000 mm
+  (2026-10-19); 750 mm fits with room to spare, so the defaults now solve at the optimum.
 - **The artist's heights (950/1250/1600/2000) are proportional to distance only for an eye at
   ground level.** At 0.9 m spacing the ratio height/distance is nearly constant (0.53–0.59), which
   is what the heights seem designed for. But a standing viewer's eye is at 1.6 m, so a 950 tower
@@ -102,6 +102,10 @@ build time and surprises. The same file is also published as a private claude.ai
 - **Labels sit beside the towers, on the outer side, in the drone and top views; above the top
   only in the eye view** (owner, 2026-10-19: on the towers they hid them). Outward because the
   inner side is where the next tower stands.
+- **The last settings are kept in `localStorage` and restored on the next open; "Restore project
+  defaults" clears them and reloads** (owner, 2026-10-19). URL parameters win over the store and
+  are never saved, so headless renders and shared links stay deterministic. The store is a
+  per-browser convenience: the page works without it, and the JSON export is the real record.
 - **The settings panel folds to a tab at the left edge** (owner, 2026-10-19) so the render can be
   seen whole; the folded state is kept in `localStorage` only, a per-browser convenience that the
   page works without.

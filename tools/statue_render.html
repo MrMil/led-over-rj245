@@ -24,7 +24,8 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); f
   padding: 12px 14px; font-size: 13px; line-height: 1.4; backdrop-filter: blur(6px);
   box-sizing: border-box;
 }
-.panel h1 { font-size: 15px; margin: 0 0 8px; letter-spacing: 0.01em; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.panel h1 { font-size: 15px; letter-spacing: 0.01em; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  position: sticky; top: -12px; margin: -12px -14px 8px; padding: 12px 14px 8px; background: var(--panel); z-index: 1; }  /* the Hide button stays in view while the panel scrolls */
 .panel.folded { display: none; }
 #btnUnfold { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); left: 0; border-radius: 0 8px 8px 0; border-left: none; padding: 10px 10px; writing-mode: vertical-rl; }
 #btnUnfold[hidden] { display: none; }
@@ -129,6 +130,7 @@ body.shot .panel, body.shot .views { display: none; }
   <div class="bar"><button id="btnExport" class="small">Export JSON</button><button id="btnLoadFile" class="small">Load JSON file</button><input id="fileIn" type="file" accept="application/json,.json" hidden></div>
   <textarea id="jsonBox" rows="6" spellcheck="false" placeholder="Exported JSON appears here. Paste JSON here and press Apply to load it."></textarea>
   <div class="bar"><button id="btnApplyJson" class="small">Apply pasted JSON</button><button id="btnCopyJson" class="small">Copy</button><span id="jsonMsg" class="note"></span></div>
+  <div class="bar"><button id="btnDefaults" class="small">Restore project defaults</button><span class="note">Your last settings are kept in this browser and come back when you reopen the page.</span></div>
 
   <h2>Readout, statue 1 (statue 2 is identical, rotated 180°)</h2>
   <div id="readout"></div>
@@ -149,7 +151,7 @@ body.shot .panel, body.shot .views { display: none; }
   const state = {
     side: num('side', 400),
     h: [950, 1250, 1600, 2000, 1600, 1250, 950].map((v, i) => num('h' + (i + 1), v)),
-    smin: num('smin', 1000), smax: num('smax', 2000), sopt: num('sopt', 1500),
+    smin: num('smin', 500), smax: num('smax', 1000), sopt: num('sopt', 750),     // owner, 2026-10-19
     diam: num('d', 8000),
     clear: num('clear', 900),         // smallest radius the viewer must have free at the centre
     mode: q.get('mode') === 'straight' ? 'straight' : 'touch',
@@ -462,6 +464,7 @@ body.shot .panel, body.shot .views { display: none; }
     updateReadout(L);
     aimCentre();
     if (powerShown) computePower();
+    if (typeof saveSettings === 'function') saveSettings();
   }
 
   // ---------- Readout ----------
@@ -751,6 +754,26 @@ body.shot .panel, body.shot .views { display: none; }
   });
   // ---------- JSON export / load: the handoff file for the led-over-rj245 repository ----------
   const JSON_FORMAT = 'led-over-rj245/statue-layout';
+  function paramsObject() {
+    return {
+      side_mm: state.side, heights_mm: [...state.h],
+      spacing_mm: { min: state.smin, max: state.smax, optimum: state.sopt, pairs: [...state.pairs], pair_names: PAIR_NAMES, manual: state.manual },
+      circle_diameter_mm: state.diam, free_radius_mm: state.clear,
+      arm: { method: state.mode, angle_deg: state.arm },
+      viewer: { eye_mm: state.eye, fov_deg: state.hfov },
+      leds: { unlit_base_mm: state.unlit, per_m: state.lpm, mA_per_led: state.mA, psu_max_A: state.psuA, reel_mm: state.reel },
+    };
+  }
+  // Last settings live in this browser only. URL parameters win (headless renders and shared links stay
+  // deterministic), and nothing is saved in shot or dump mode.
+  const STORE_KEY = 'statueSettings';
+  const urlHasParams = [...q.keys()].some(k => !['view', 'shot', 'dump', 'labels'].includes(k));   // view flags alone still restore the store
+  let storedParams = null;
+  try { if (!urlHasParams) storedParams = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); } catch (e) { storedParams = null; }
+  function saveSettings() {
+    if (urlHasParams) return;
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(paramsObject())); } catch (e) { /* storage unavailable */ }
+  }
   function exportObject() {
     const L = current, pw = powerModel(), r1 = v => Math.round(v * 10) / 10;
     const statues = [1, 2].map(sn => ({
@@ -768,14 +791,7 @@ body.shot .panel, body.shot .views { display: none; }
     return {
       format: JSON_FORMAT, version: 1, generated: new Date().toISOString(),
       units: 'mm, degrees, A; plan x east, y north with statue 1 apex on +y; azimuth clockwise from +y',
-      params: {
-        side_mm: state.side, heights_mm: [...state.h],
-        spacing_mm: { min: state.smin, max: state.smax, optimum: state.sopt, pairs: [...state.pairs], pair_names: PAIR_NAMES, manual: state.manual },
-        circle_diameter_mm: state.diam, free_radius_mm: state.clear,
-        arm: { method: state.mode, angle_deg: state.arm },
-        viewer: { eye_mm: state.eye, fov_deg: state.hfov },
-        leds: { unlit_base_mm: state.unlit, per_m: state.lpm, mA_per_led: state.mA, psu_max_A: state.psuA, reel_mm: state.reel },
-      },
+      params: paramsObject(),
       layout: {
         fits: L.fits, spacing_used_mm: L.choice ? mm(L.choice.s) : null, spacing_reason: L.choice ? L.choice.reason : 'manual',
         free_radius_mm: mm(Math.min(s1[0].r, s1[6].r) - HALF()),
@@ -834,6 +850,10 @@ body.shot .panel, body.shot .views { display: none; }
     rd.onload = () => { $('jsonBox').value = rd.result; try { applyObject(JSON.parse(rd.result)); jsonMsg(`Loaded ${f.name}.`); } catch (e) { jsonMsg('Could not load: ' + e.message); } };
     rd.readAsText(f); $('fileIn').value = '';
   });
+  $('btnDefaults').addEventListener('click', () => {
+    try { localStorage.removeItem(STORE_KEY); localStorage.removeItem('panelFolded'); } catch (e) { /* storage unavailable */ }
+    location.reload();
+  });
   $('btnApplyJson').addEventListener('click', () => { try { applyObject(JSON.parse($('jsonBox').value)); jsonMsg('Applied.'); } catch (e) { jsonMsg('Could not apply: ' + e.message); } });
 
   // Fold the panel to the side so the render is unobstructed; remembered per browser (a convenience only).
@@ -845,6 +865,7 @@ body.shot .panel, body.shot .views { display: none; }
 
   resize();
   build();
+  if (storedParams) { try { applyObject({ format: JSON_FORMAT, params: storedParams }); } catch (e) { /* ignore a stale or foreign store */ } }
   if (q.get('dump') === '1') { document.body.textContent = ''; const pre = document.createElement('pre'); pre.id = 'dump'; pre.textContent = window.statueExport(); document.body.appendChild(pre); return; }
   render();
 })();
