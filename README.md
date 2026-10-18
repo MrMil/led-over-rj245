@@ -4,6 +4,11 @@ Two statues, each a V of 7 towers lit from inside with WS2812B strips behind CNC
 diffused faces, run as one show from a single controller. Controlled from a phone over the
 controller's own WiFi; no internet needed.
 
+**Layout tool:** [mrmil.github.io/led-over-rj245](https://mrmil.github.io/led-over-rj245/) — 3D
+view of the two statues from the centre, from above and from a drone, with the tower heights,
+spacings, LED and power-supply counts. Export the JSON from it into
+[`layout/`](layout/statue-layout.json).
+
 <!-- META-DOCS:BEGIN -->
 ## Documentation
 
