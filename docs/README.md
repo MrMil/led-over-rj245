@@ -18,7 +18,7 @@ source of truth for what happens. These docs are the source of truth for why.
 ## Design
 
 The system: **two statues** in an 8 m circle at Midburn (Negev desert), each a V of 7 towers
-(500–2000 mm tall, 40 × 40 cm, CNC-cut faces with a diffuser behind, a structural post in the
+(950–2000 mm tall, 40 × 40 cm, CNC-cut faces with a diffuser behind, a structural post in the
 middle). WS2812B 60/m strips inside, 4 per tower (one per face, on the post, facing out), run
 one show from one controller. Outdoors for the event: dust,
 40 °C+ days, near-freezing nights, generator power, heavy 2.4 GHz congestion, Leave No Trace.
@@ -31,12 +31,11 @@ shapes come from the cuts, not from the LEDs**; the LEDs light the faces from be
 look from all angles, so every face is lit. All 4 faces of a tower show the same pixels.
 The animation is a rolled 2D map: x = tower, y = height ([firmware/](firmware/README.md)).
 
-**Status: the two-statue layout is pending Midburn approval** (owner, 2026-10-10). The
-approved design has **four statues** of 7 towers. Art pieces above a certain size need
-approval from the Midburn authorities, and the change to two statues (3 weeks before the event,
-for less work) has been requested but not granted. This tree describes the two-statue
-variant because the owner asked for it. Do not treat it as final.
-**If it stays at four statues:** 28 towers with one channel each would need 28 outputs. One
+**Two statues** (owner, 2026-10-18: "we are doing 2 statues"). Reduced from the four-statue
+design Midburn originally approved, 3 weeks before the event, for less work.
+**Changed 2026-10-18:** from 2026-10-10 the two-statue layout was pending Midburn approval,
+with four statues still the approved design.
+**Had it stayed at four statues:** 28 towers with one channel each would need 28 outputs. One
 ESP32 in WLED tops out at 16 (8 RMT + 8 I2S), so towers would have to share channels, or the
 single-controller decision would have to be revisited. Earlier four-statue design: four
 statues star-wired from a controller at statue 0, two channels each over one CAT5e per statue
@@ -62,11 +61,11 @@ Most of the design is hardware, so "code" paths below are often diagrams
   [data_link/](data_link/README.md) for why the receiver needs it.
 - **Logic-level chips are SN74AHCT125N in Assmann A 14-LC-TT sockets; both ordered** (owner,
   2026-10-11), in the controller ([controller/local_outputs.md](controller/local_outputs.md))
-  and every tower base ([strips_and_power/tower_base.md](strips_and_power/tower_base.md)).
+  and every supply box ([strips_and_power/tower_base.md](strips_and_power/tower_base.md)).
   The N suffix is the through-hole DIP that fits the perfboard and socket; NSR is the SO-14
   surface-mount version. Generic BSS138 "bidirectional level converter" modules are not a
   substitute: their 10 kΩ pull-up gives rise times near 1 µs on a cable, too slow for WS2812
-  data, and they cannot isolate the four faces in a tower base.
+  data, and they cannot isolate the four faces of a tower.
 - **Human documentation is separate from this tree** (owner, 2026-10-09): `README.md` and
   `guide/` are for the field crew, who will build and run the installation without the owner
   present, reading on a phone on GitHub. See [field_docs/](field_docs/README.md).
@@ -96,15 +95,17 @@ otherwise does not exist.
   code — rejected only because at 8 m the LED data itself fits down the cable, deleting three
   ESP32s. **Revisit this first if the installation ever grows in distance.**
 **Constrains.** One output per tower means 14 outputs, beyond the ESP32's 8 RMT channels:
-WLED 16's RMT + I2S mix must carry it (bench test pending; fallback 12 channels by sharing
-two towers' channels). Frame rate is bounded by render throughput
+WLED 16's RMT + I2S mix was meant to carry it, but both drivers failed with 4 outputs on the
+owner's other project (2026-10-17); a replacement output driver and its bench test are in
+[firmware/output_driver.md](firmware/output_driver.md). Frame rate is bounded by render throughput
 ([firmware/](firmware/README.md)). The controller is a single point of
 failure — mitigated by a pre-flashed spare ESP32 in a socket ([controller/](controller/README.md)).
 
 ### Open questions
 
-0. **Two or four statues**: awaiting Midburn approval (owner, 2026-10-10).
-1. **14 outputs on one ESP32 in WLED 16**: bench test pending (owner, 2026-10-10).
+1. **14 outputs on one ESP32**: stock WLED likely fails (RMT flicker that follows the
+   channel, I2S colour shift; owner, 2026-10-17). Bench test and candidate drivers in
+   [firmware/output_driver.md](firmware/output_driver.md).
 2. ~~PSU size per statue~~ — decided 2026-10-10: 5 × S-100-5 per statue; strand-to-PSU
    grouping proposed in [strips_and_power/led_power_budget.md](strips_and_power/led_power_budget.md).
 3. ~~Tower power wiring~~ — decided 2026-10-10: see

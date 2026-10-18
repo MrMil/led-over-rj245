@@ -21,12 +21,14 @@ installation — and how the show is built and changed.
 - **14 outputs, one per tower: 8 on RMT + 6 on I2S** (owner/agent, 2026-10-10). WLED 16
   supports up to 8 RMT + 8 parallel I2S outputs on classic ESP32. All I2S buses must be the
   same LED type (all WS2812B), and I2S uses DMA memory proportional to the largest bus.
-  Source: `wled00/const.h` on WLED main, WLED issue #5266. **Not yet verified on hardware:
-  bench test pending.** Fallback: 12 outputs, with two towers sharing a channel each.
+  Source: `wled00/const.h` on WLED main, WLED issue #5266. **In doubt (2026-10-17):** the
+  owner saw both drivers fail with 4 outputs on another project (RMT flashes, I2S shifts
+  colours), and the 12-output fallback uses the same drivers. Alternatives and the bench test
+  are in [output_driver.md](output_driver.md).
   **Changed 2026-10-10:** previously 8 outputs, all RMT.
 - **Each output's LED count is one face** (agent, 2026-10-10). All 4 faces of a tower get the
   same data in parallel ([../strips_and_power/tower_layout.md](../strips_and_power/tower_layout.md)),
-  so WLED renders ~414 pixels per statue, ~830 total: around 80–100 fps of render capacity.
+  so WLED renders ~513 pixels per statue, ~1030 total: around 60–80 fps of render capacity.
 - **One continuous logical strip, outputs ordered S1-T1 … S1-T7, S2-T1 … S2-T7** (agent,
   2026-10-10). Effects that move along the strip sweep across each statue's V in order.
 - **AP mode "Always", fixed channel, password changed from default** (owner + agent). The
@@ -120,7 +122,7 @@ has exactly 8 RMT channels; `FASTLED_ESP32_I2S` gives headroom.
 ### Gotchas
 
 - **Throughput:** WLED renders ~65–85 k LEDs/s on ESP32
-  ([kno.wled.ge multi-strip](https://kno.wled.ge/features/multi-strip/)); ~830 rendered
+  ([kno.wled.ge multi-strip](https://kno.wled.ge/features/multi-strip/)); ~1030 rendered
   pixels is comfortable. Heavier custom effects cost more; check FPS on the Info page.
 - **About 4 phones max on the AP:** WLED calls `softAP` without `max_connection`, so the ESP32
   default of 4 clients applies (`wled00/wled.cpp`).
@@ -132,6 +134,10 @@ has exactly 8 RMT channels; `FASTLED_ESP32_I2S` gives headroom.
 
 ## Contents
 
+### Pages
+
+- [`output_driver.md`](output_driver.md) — sending to 14 outputs at once: evidence against stock WLED, candidate drivers, the bench test.
+
 ### Not yet documented
 
 - **WLED configuration backup** — `wled/cfg.json`, `wled/presets.json` (to be created) — the restorable state of the controller; the AP password must be blanked before commit.
@@ -142,5 +148,6 @@ has exactly 8 RMT channels; `FASTLED_ESP32_I2S` gives headroom.
 
 ## Related
 
+- [output_driver.md](output_driver.md) — why the 14-output configuration above is in doubt.
 - [../controller/gpio_assignment.md](../controller/gpio_assignment.md) — the pins behind the 14 outputs.
 - [../field_docs/README.md](../field_docs/README.md) — the operating guide written for this configuration.

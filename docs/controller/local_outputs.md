@@ -23,7 +23,7 @@ that tower's base, through the trench under the statue.
   current.
 - **100 Ω series resistor at each output** (agent, 2026-10-09; optional per the owner). It
   damps ringing on the cable and limits current if a pinched cable shorts DATA. The same
-  value is used at box 2's outputs and in the tower bases.
+  value is used at box 2's outputs and in the supply boxes.
 - **The 100 Ω stands upright in the output pin's row, with the output wire soldered to its
   top lead** (owner, 2026-10-11). The ESP32 board has no room to lay resistors flat (see
   [README.md](README.md)). Upright, it still sits at the driver, where series termination

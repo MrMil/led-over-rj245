@@ -37,11 +37,12 @@ that cable.
 2. Re-seat its data cable at both ends.
 3. Swap its data cable with another tower's at the box:
    - fault moves → box side (that output's buffer or receiver);
-   - fault stays → cable or tower base (its 74AHCT125).
+   - fault stays → cable or the tower's supply box (its 74AHCT125).
 
 ## One face of a tower dark, the others fine
 
-That face's strip, its connection to the tower-base 74AHCT125, or that gate of the chip.
+That face's strip, its JST-SM, or that gate of the 74AHCT125 in its supply box. On T1 or T7,
+the face's JST-SM at the base's WAGO split.
 
 ## A face dark from some point upwards
 
@@ -55,8 +56,8 @@ show playlist, or [restore the backup](build.md#restore-a-backup).
 
 ## Some towers dark, matching one supply
 
-A = T1 + T2 · B = T3 · C = T4 faces 1–2 · D = T4 faces 3–4 + T5 faces 1–2 · E = T5 faces 3–4
-+ T6 + T7. Check that supply's mains cord at the apex strip, then see below.
+A = T1 + T2 · B = T3 · C = T4 · D = T5 · E = T6 + T7. Check that supply's mains cord at the
+apex strip, then see below. Only T1 (or T7) dark: its XT60 run or data pair from A (E).
 
 ## A box is dead
 
@@ -68,10 +69,11 @@ The PSU shuts down on overload or over-temperature.
 
 ## Spares
 
-Bag: 2 CAT5e cables, 1 receiver module, 1 tower-base board, 1 ESP32 loaded with the show,
-2 × 74AHCT125, 1 A fuses.
+Bag: 2 CAT5e cables, 1 receiver module, 1 ESP32 loaded with the show, 2 × 74AHCT125, 1 A
+fuses, XT60 pairs, JST-SM pairs.
 
-- **Tower-base board / receiver:** photograph the wiring, move the wires across, check
-  against [tower-base.svg](img/tower-base.svg) / [box2-wiring.svg](img/box2-wiring.svg).
+- **74AHCT125:** pull it from its socket and seat the spare the same way round.
+- **Receiver:** photograph the wiring, move the wires across, check against
+  [box2-wiring.svg](img/box2-wiring.svg).
 - **ESP32:** lifts out of its socket. Seat the spare the same way round (USB connector in
   the same position). It already holds the show; if not, [restore](build.md#restore-a-backup).

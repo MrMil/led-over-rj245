@@ -32,18 +32,22 @@ Follow [wiring.md](wiring.md) and the diagrams there.
 
 **Box 2:** 7 MAX485 receivers, 7 pairs of 560 Ω bias resistors, 7 × 100 Ω.
 
-**Tower bases (14):** 74AHCT125 in a socket, 10 kΩ pull-down on its input, 4 × 100 Ω.
+**Supply boxes (A, B, D, E per statue; C's part sits in the apex box):** 74AHCT125 #1 in a
+socket with a 10 kΩ pull-down on its input and 4 × 100 Ω to the 4 strand JST-SMs. A and E
+also: 74AHCT125 #2 for the tip tower's data (one input with 10 kΩ, one 100 Ω on the output).
+
+**Neighbour bases (T1, T7 per statue):** no electronics: 2 WAGO 221-415 and 4 JST-SM.
 
 Check each module's chip marking reads MAX485 (not 483/487/488/489). The controller's
-74AHCT125s and all 100 Ω resistors are optional, depending on space. Build a spare receiver
-module and a spare tower-base board.
+74AHCT125s and all 100 Ω resistors are optional, depending on space. Keep a spare receiver
+module and spare 74AHCT125s.
 
 ## 3. Power wiring (10 supply boxes)
 
-Per [box-power.svg](img/box-power.svg) and [statue-power.svg](img/statue-power.svg): C14 to
-the PSU, PSU to the box's XT60 outputs, and in the apex box a separate thin pair to the
-perfboard. Make up the buried 5 V cables with XT60s at both ends and the tower-base splits
-to the strand XT60s. Ferrules on every stranded wire.
+Per [supply-box.svg](img/supply-box.svg) and [statue-power.svg](img/statue-power.svg): C14 to
+the PSU, PSU to the 4 strand JST-SMs and (A, E) the XT60 output, and in the apex box a
+separate thin pair to the perfboard. Make up the buried 5 V cables (3 × 2.5) with XT60s at
+both ends. Ferrules on every stranded wire.
 
 ## 4. Data cables
 
@@ -81,26 +85,26 @@ first 8 on its RMT driver and the rest on I2S; all must be type WS281x.
 
 | # | GPIO | Channel | LED count (one face) |
 |---|---|---|---|
-| 1 | 4 | S1-T1 | 39 |
-| 2 | 13 | S1-T2 | 60 |
-| 3 | 14 | S1-T3 | 84 |
+| 1 | 4 | S1-T1 | 48 |
+| 2 | 13 | S1-T2 | 66 |
+| 3 | 14 | S1-T3 | 87 |
 | 4 | 16 | S1-T4 | 111 |
-| 5 | 17 | S1-T5 | 60 |
-| 6 | 18 | S1-T6 | 39 |
-| 7 | 19 | S1-T7 | 21 |
-| 8 | 21 | S2-T1 | 39 |
-| 9 | 22 | S2-T2 | 60 |
-| 10 | 23 | S2-T3 | 84 |
+| 5 | 17 | S1-T5 | 87 |
+| 6 | 18 | S1-T6 | 66 |
+| 7 | 19 | S1-T7 | 48 |
+| 8 | 21 | S2-T1 | 48 |
+| 9 | 22 | S2-T2 | 66 |
+| 10 | 23 | S2-T3 | 87 |
 | 11 | 25 | S2-T4 | 111 |
-| 12 | 26 | S2-T5 | 60 |
-| 13 | 27 | S2-T6 | 39 |
-| 14 | 32 | S2-T7 | 21 |
+| 12 | 26 | S2-T5 | 87 |
+| 13 | 27 | S2-T6 | 66 |
+| 14 | 32 | S2-T7 | 48 |
 
 - LED count = **one face**: lit height (tower − 150 mm) × 60/m. All 4 faces get the same data.
   Correct the counts to the strips as fitted.
 - Colour order **GRB** (check: preset 1 must show T1 red).
 - **Current:** WLED sees one face per output, the real draw is 4×. Set **LED current per LED
-  (custom) to 144 mA** (4 × the WS2812B datasheet's 36 mA at full white), so WLED's estimate
+  (custom) to 118 mA** (4 × the measured 29.4 mA at full white), so WLED's estimate
   matches reality. Per-output limits: each tower's share of its box's LED
   budget; the firmware ceiling enforces the maximum.
 - **Defaults → apply preset at boot:** the show playlist (once it exists).

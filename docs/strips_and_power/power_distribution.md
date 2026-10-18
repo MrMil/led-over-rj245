@@ -2,67 +2,74 @@
 
 Path: [docs](../README.md) › [strips_and_power](README.md) › **power_distribution**
 Parent: [README.md](README.md)
-**Code:** `tools/wiring_diagrams.py` (`SUPPLIES`, `power()`, `statue_power()`), `guide/img/statue-power.svg`, `guide/img/box-power.svg`, `guide/wiring.md` (Power)
-**Covers:** mains from the apex outlet to five supplies per statue, and 5 V from each supply to its towers.
+**Code:** `tools/wiring_diagrams.py` (`SUPPLIES`, `supply_box()`, `neighbour_base()`, `statue_power()`), `guide/img/statue-power.svg`, `guide/img/supply-box.svg`, `guide/img/neighbour-base.svg`, `guide/wiring.md` (Power)
+**Covers:** mains from the apex to five supplies per statue, and 5 V from each supply to its towers.
 
 ## What it does
 
-Per statue, five S-100-5 supplies, each in its own box with a C14 inlet:
+Per statue, five S-100-5 supplies, each in a box with a C14 inlet:
 
-| Supply | Box | Sits at | Feeds |
-|---|---|---|---|
-| A | `100W` | T2 base | T1 + T2, all faces |
-| B | `100W` | T3 base | T3, all faces |
-| C | apex `100W-masterbox` | T4 (apex) | T4 faces 1–2, + the box's electronics |
-| D | `100W` | T4 (apex) | T4 faces 3–4, T5 faces 1–2 |
-| E | `100W` | T6 base | T5 faces 3–4, T6 + T7 all faces |
+| Supply | Box | Sits at | Own tower | Neighbour fed | Worst case |
+|---|---|---|---|---|---|
+| A | `100W` | T2 base | T2 (1250) | T1 (950) | 13.4 A |
+| B | `100W` | T3 base | T3 (1600) | — | 10.2 A |
+| C | apex `100W-masterbox` | T4 (apex) | T4 (2000) | — | 13.1 A |
+| D | `100W` | T5 base | T5 (1600) | — | 10.2 A |
+| E | `100W` | T6 base | T6 (1250) | T7 (950) | 13.4 A |
 
-Mains: an outlet and power strip at the apex; a C13 cord to each supply box. 5 V: one cable
-per destination tower (or tower half) from the supply to the tower base, split there to the
-strand XT60s.
+Mains: an outlet and power strip at the apex, and a C13 cord to each of A, B, D and E (C is
+in the apex box). Each box drives its own tower's 4 strands on 4 JST-SM. A and E also feed the
+tip tower next to them: power on an XT60 run (3 × 2.5 cable) with a buffered data pair
+alongside. The tip tower's base splits both passively to its 4 strands
+([tower_base.md](tower_base.md)).
 
 ## Decisions
 
-- **Five S-100-5 per statue** (owner, 2026-10-10). See
-  [led_power_budget.md](led_power_budget.md).
-- **Clean grouping: each tower whole or halved (faces 1–2 / 3–4), neighbours along the V
-  share a supply** (owner wanted clean splits, 2026-10-10; grouping by agent). Worked out
-  with 60 mA per LED, under which whole towers could not fit (T4 alone 26.6 A). With the
-  datasheet's 36 mA every supply stays under its ceiling at full white
-  ([led_power_budget.md](led_power_budget.md)); the grouping stands because it is already
-  wired that way.
-  **Rejected.** *Arbitrary strand-level splits* (slightly better balance, messier wiring).
-  *6 supplies:* same towers split (T4, T5), only slightly less dimming at full white.
-  *7 supplies:* no longer needed with datasheet currents.
+- **Five S-100-5 per statue, whole towers only, symmetric** (owner, 2026-10-18). At the
+  artist's current heights and the measured 29.4 mA per LED
+  ([led_power_budget.md](led_power_budget.md)), every supply stays under the 18 A ceiling at
+  full white (max 13.4 A). Only the two tip towers are fed from a neighbour's box. The owner
+  already has 10 supplies.
+  **Changed 2026-10-18 (twice):** first five per statue with T4 and T5 split between two
+  supplies (sized for 60 mA per LED); then four per statue with whole towers (at the earlier,
+  smaller heights). The new heights put four towers' worth (23.6 A) on one supply in the
+  four-supply grouping.
+  **Rejected.** *4 per statue:* only by splitting the 2000 tower between the two 1600 supplies
+  (16.8 A each): more XT60 runs (4 per statue) and a split tower. *7 per statue* (one per
+  tower): no 5 V between towers, but 14 supplies for no electrical need.
 - **Each supply sits by the towers it feeds** (agent, 2026-10-10). Mains is easy to carry far;
   5 V at several amps is not.
 - **Each supply in its own box with a C14 inlet** (agent proposal, 2026-10-10). This reuses the
-  enclosure repo's `100W` design (S-100-5 + C14), so no mains terminals are exposed in a tower
-  base. C shares the apex `100W-masterbox` with the ESP32 or receivers. **Enclosure change
-  pending:** XT60 outputs instead of JST-SM slots.
-- **One 230 V cord per supply, from a power strip at the apex** (agent, 2026-10-10). Any supply
-  can be unplugged on its own, and there are no mains joints in the field. Buried cords:
-  H07RN-F 3 × 1.5 mm² with a C13 plug.
-- **One 5 V cable per destination, split at the tower base** (owner, 2026-10-10: "each power
-  supply has 2 output ports — in the end it all combines"). That replaces a cable per strand.
+  enclosure repo's `100W` design (S-100-5, C14, perfboard, 4 JST-SM exits), so no mains
+  terminals are exposed in a tower base. C shares the apex `100W-masterbox` with the ESP32 or
+  receivers. **Enclosure change pending:** data inputs on A, B, D and E; XT60 and neighbour
+  data outputs on A and E.
+- **One JST-SM per strand, from the box straight to the strand** (owner, 2026-10-18). Every
+  strand is ≤ 2.5 A at full white except the 2000 mm tower's 3.3 A. A JST-SM contact is rated
+  3 A, and it also carries the strand's DATA, so no separate connector is needed. For the
+  2000 strands, either the top feed (if the strip voltage-drop test calls for it) halves the
+  bottom current, or the firmware holds the tower to 12 A (~8 % dimmer at full white only).
+- **XT60 only where a whole tower's current travels between towers** (owner, 2026-10-18): the
+  runs A → T1 and E → T7, 2 per statue, 8 XT60 pairs in total. A tower's combined current
+  (5.6 A on these runs) is over a JST-SM's 3 A.
 - **Buried 5 V runs use 3-core mains-type cable with XT60 at both ends** (owner, 2026-10-10).
   Brown +5 V, blue GND, green/yellow unused or joined to GND. 3 × 2.5 mm² (owner's choice,
-  "כבל פנדל פלסטי 3*2.5"), well above the ≤ 7.5 A per run at datasheet currents. Three cores although only two are
+  "כבל פנדל פלסטי 3*2.5"), well above the 5.6 A per run. Three cores although only two are
   used, because standard 3-core mains cable is sold in any hardware store and is far cheaper
   than 2-core cable of the same gauge (owner, 2026-10-11). **Rejected:** imported 2 × 12 AWG
   (Carol C2410A, E3062S): enough copper, but costlier, sold mostly on 305 m reels, and
-  indoor-rated. No extra labelling: an XT60 can't be
-  mistaken for mains (owner). H07RN-F (rubber) is the tougher jacket; PVC survives a week.
-  Inside boxes and bases: NYAF 2.5 mm², red +5 V, blue GND (owner's chosen wire; it has no
-  black).
-- **Two supplies feeding one tower keep their +V separate** (agent, 2026-10-10). T4 (C/D) and T5
-  (D/E): each supply's +V goes only to its own two faces, so supplies never back-feed each
-  other. GNDs may join.
-- **All supply −V tied together** (agent, 2026-10-10): a 1.5 mm² ground bond in the trench
-  (A–B–apex–E; D and E also meet at T5). The data cables' GND then sees one reference.
-- **T4's strands get a second feed at the top, up the post** (agent, 2026-10-10), faces 1–2
-  from C and 3–4 from D. Voltage-drop estimate in [led_power_budget.md](led_power_budget.md);
-  drop it if the strip measurement shows ≥ 4.5 V at the far end.
+  indoor-rated. No extra labelling: an XT60 can't be mistaken for mains (owner). H07RN-F
+  (rubber) is the tougher jacket; PVC survives a week. Inside boxes and bases: NYAF 2.5 mm²,
+  red +5 V, blue GND (owner's chosen wire; it has no black).
+- **One 230 V cord per supply, from a power strip at the apex** (agent, 2026-10-10). Any supply
+  can be unplugged on its own, and there are no mains joints in the field. Buried cords:
+  H07RN-F 3 × 1.5 mm² with a C13 plug.
+- **No separate ground bond** (agent, 2026-10-18). Each supply's 5 V output is isolated from
+  mains, and every supply box receives a data cable with its own GND from the apex box. That
+  ties all supplies to one reference, and only leakage-level current flows through it.
+  **Changed 2026-10-18:** previously a 1.5 mm² bond wire along each arm.
+- **T4's strands may get a second feed at the top, up the post** (agent, 2026-10-10), from
+  supply C. Decided by the strip voltage-drop test (`TODO.md`).
 - **Logic power only from supply C** (agent, 2026-10-09). The apex box perfboard gets its own
   pair from C's second terminals, so tower current never flows through perfboard copper.
 - **C14 fuse 1 A on the AC side** (owner, 2026-10-09). ~240 W of input for a 100 W PSU. The
@@ -71,11 +78,12 @@ strand XT60s.
 
 ## Gotchas
 
-- Five supplies per statue switching on together make a large inrush; check the outlet's
-  breaker, or switch on in stages. Inlet fuses that blow at power-up need to be time-delay (T).
-- Never parallel two supplies' +V outputs.
+- Inlet fuses that blow at power-up need to be time-delay (T).
+- Never parallel two supplies' +V outputs. The data inputs' 5V pins stay unconnected for this
+  reason.
 
 ## Related
 
 - [trenches.md](trenches.md) — what runs in each trench segment.
-- [led_power_budget.md](led_power_budget.md) — current per group and the limiter ceilings.
+- [tower_base.md](tower_base.md) — the splitter in each supply box and the passive neighbour bases.
+- [led_power_budget.md](led_power_budget.md) — current per tower and the limiter ceilings.

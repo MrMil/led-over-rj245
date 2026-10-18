@@ -15,9 +15,6 @@ These docs are written for LLM coding agents. Design changes are documented in t
 makes them; see [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md).
 <!-- META-DOCS:END -->
 
-**Layout pending approval:** this guide describes the two-statue version, which awaits
-Midburn's approval. The approved design has four statues.
-
 ## Guide
 
 | | |
@@ -25,7 +22,7 @@ Midburn's approval. The approved design has four statues.
 | [Setup](guide/setup.md) | Numbering, connections, order of work, teardown |
 | [Operating](guide/operating.md) | WiFi, test presets, preset numbering, settings not to touch |
 | [Troubleshooting](guide/troubleshooting.md) | Symptom → check, spares |
-| [Wiring](guide/wiring.md) | Diagrams and pin tables: apex boxes, tower bases, power |
+| [Wiring](guide/wiring.md) | Diagrams and pin tables: apex boxes, supply boxes, neighbour bases, power |
 | [Parts](guide/parts.md) | Bill of materials, spares |
 | [Build](guide/build.md) | Workshop assembly, flashing and configuring WLED, backup and restore |
 
@@ -37,10 +34,12 @@ Midburn's approval. The approved design has four statues.
   14 channels: one per tower.
 - Statue 1's towers are wired from the controller box. Statue 2's 7 channels cross to box 2
   as RS-485 on 3 buried CAT5e cables, 3 channels per cable.
-- Each tower has 4 strips, one per face, all showing the same pixels; a 74AHCT125 in the
-  tower base splits the tower's channel to the 4 faces.
-- Each statue has five 5 V supplies in their own boxes, fed from a mains outlet at its apex
-  and placed by the towers they feed. Only data and ground cross between the statues.
+- Each tower has 4 strips, one per face, all showing the same pixels, each on its own
+  JST-SM.
+- Each statue has five 5 V supply boxes, fed with mains from its apex: A at T2, B at T3, C
+  in the apex box, D at T5, E at T6. Each box splits its own tower's channel to the 4
+  strands; A and E also feed the tip towers (T1, T7) over XT60. Only data and ground cross
+  between the statues.
 - The controller runs its own WiFi access point at `http://4.3.2.1`. The password comes from
   the installation lead.
 - The CAT5e cables are not Ethernet: never connect them to network equipment or PoE.

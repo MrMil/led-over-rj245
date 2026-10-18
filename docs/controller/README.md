@@ -13,8 +13,8 @@ towers, and the logic power for all of it.
 ### Decisions
 
 - **Classic dual-core ESP32 (WROOM-32), no PSRAM** (owner). GPIO 16/17 are used, which are
-  the PSRAM bus on WROVER modules. 14 outputs need the RMT + I2S mix of WLED 16
-  ([../firmware/README.md](../firmware/README.md)).
+  the PSRAM bus on WROVER modules. 14 outputs need more than the 8 RMT channels;
+  how they are driven is open ([../firmware/output_driver.md](../firmware/output_driver.md)).
 - **Seven MAX485 transmitters, one per statue-2 tower** (owner, 2026-10-10). Statue 2's
   channels cross the trench as RS-485 ([../data_link/README.md](../data_link/README.md)).
   **Changed 2026-10-10:** previously six (two per remote statue, three remote statues).

@@ -7,56 +7,56 @@ Parent: [README.md](README.md)
 
 ## What it does
 
-WS2812B datasheet (Worldsemi): **12 mA per channel, so 36 mA per LED at full white**. Some
-datasheet revisions give 16 mA (48 mA per LED). Typical animated content is ~30 % of that,
-plus ~1 mA idle. Per statue at 60/m, 1656 LEDs:
+**Measured on the bought strip: 29.4 mA per LED at full white, 0.5 mA idle** (owner,
+2026-10-18). Method: a 5 m reel (300 LEDs) on a lab supply at 5.0 V, driven from MicroPython
+`neopixel` with `(255, 255, 255)` (no global brightness). All off: 0.14–0.15 A. First 60 LEDs
+white: 1.87–1.89 A. (1.88 − 0.145) / 60 + 0.145 / 300 = 29.4 mA. Typical animated content is
+~30 % of full white, plus idle. Per statue at 60/m, 2052 LEDs:
 
-| Tower | LEDs (4 faces) | Worst, 36 mA | Worst, 48 mA |
-|---|---|---|---|
-| 2000 | 444 | 16.0 A | 21.3 A |
-| 1550 | 336 | 12.1 A | 16.1 A |
-| 1150 (×2) | 240 each | 8.6 A | 11.5 A |
-| 800 (×2) | 156 each | 5.6 A | 7.5 A |
-| 500 | 84 | 3.0 A | 4.0 A |
-| **Statue** | **1656** | **59.6 A · 298 W** | **79.5 A · 397 W** |
+| Tower | LEDs per face | Strand (one face), full white | LEDs (4 faces) | Tower, full white | Tower, typical |
+|---|---|---|---|---|---|
+| 2000 | 111 | 3.3 A | 444 | 13.1 A | 4.1 A |
+| 1600 (×2) | 87 | 2.6 A | 348 each | 10.2 A | 3.2 A |
+| 1250 (×2) | 66 | 1.9 A | 264 each | 7.8 A | 2.5 A |
+| 950 (×2) | 48 | 1.4 A | 192 each | 5.6 A | 1.8 A |
+| **Statue** | | | **2052** | **60.3 A · 302 W** | **19.1 A · 95 W** |
 
-Typical content: ~20–26 A per statue. Whole installation from the wall (both statues, ~85 %
-PSU efficiency): ~700–935 W worst case, inside the 1.5 kW generator budget (owner, 2026-10-10).
+Typical = ~30 % of full white + 0.5 mA idle per LED (≈ 9.3 mA per LED). All off: ~1.0 A per
+statue. Whole installation from the wall (both statues, ~85 %
+PSU efficiency): ~575 W worst case, inside the 1.5 kW generator budget (owner, 2026-10-10).
 
 ## Decisions
 
-- **LED current from the datasheet, not a rule of thumb** (owner, 2026-10-10: "this is
-  ws2812b. check the data sheet").
-  **Changed 2026-10-10:** previously 60 mA per LED (20 mA per channel, from the original
-  design notes), which overstated every current here by 25–40 %.
-- **Five S-100-5 (100 W) per statue** (owner, 2026-10-10). Three per statue would already be
-  extra work, and five is marginally more. With datasheet currents, 500 W per statue covers
-  the worst case with margin.
+- **LED current measured, not estimated** (owner, 2026-10-18). The strips are unbranded
+  WS2812B and the label gives no current.
+  **Changed 2026-10-18:** previously 36–48 mA from a web-search summary of WS2812B datasheets
+  that was never checked against the primary document. Before that (2026-10-10), 60 mA from
+  the original design notes.
+- **Five S-100-5 (100 W) per statue** (owner, 2026-10-18). 500 W per statue against a 302 W
+  worst case.
 - **Every strand (one face's strip) has its own XT60 at its start** (owner, 2026-10-10).
 - **Supply grouping** (see [power_distribution.md](power_distribution.md)), worst case at
   full white, 15 cm base:
 
-  | Supply | Feeds | 36 mA | 48 mA |
-  |---|---|---|---|
-  | A | T1 + T2 | 14.3 A | 19.0 A |
-  | B | T3 | 12.1 A | 16.1 A |
-  | C | T4 faces 1–2 | 8.0 A | 10.7 A |
-  | D | T4 faces 3–4 + T5 faces 1–2 | 12.3 A | 16.4 A |
-  | E | T5 faces 3–4 + T6 + T7 | 13.0 A | 17.3 A |
+  | Supply | Feeds | Worst case |
+  |---|---|---|
+  | A | T1 + T2 (950 + 1250) | 13.4 A |
+  | B | T3 (1600) | 10.2 A |
+  | C | T4 (2000) | 13.1 A |
+  | D | T5 (1600) | 10.2 A |
+  | E | T6 + T7 (1250 + 950) | 13.4 A |
 
-  Firmware ceiling **18 A per supply** (90 % of rating). At 36 mA no supply reaches it, even
-  at full white. At 48 mA only supply A would, at full white, by ~5 %. The limiter then scales
-  the whole frame evenly. Each strand draws exactly a quarter of its tower, because all faces
-  show the same pixels, so each supply's load follows directly from the frame.
+  Firmware ceiling **18 A per supply** (90 % of rating). No supply reaches it, even at full
+  white. If one ever did, the limiter would scale the whole frame evenly.
 - **Voltage drop: the 2000 mm strands may need a second feed** (agent estimate, 2026-10-10).
-  Fed at the bottom only, at full white, a 1.85 m strand (4.0–5.3 A) drops ~0.45–1.2 V, given
-  strip copper of ~0.12–0.24 Ω/m round trip. The 1400 mm strands drop ~0.25–0.7 V; shorter
-  ones less. Measure the bought strip to decide (see `TODO.md`).
+  Fed at the bottom only, at full white, a 1.85 m strand (3.3 A) drops ~0.35–0.7 V, given
+  strip copper of ~0.12–0.24 Ω/m round trip. The 1600 mm towers' strands (1.45 m, 2.6 A) drop
+  ~0.2–0.45 V; shorter ones less. Measure the bought strip to decide (see `TODO.md`).
 - **Size PSUs at 80–90 % of rating** (agent, 2026-10-10). Generic S-series clones run
   continuously inside a closed box.
 - **WLED's current estimate is corrected 4×** (agent, 2026-10-10). Each output is configured
-  with one face's LEDs while four faces draw. Set WLED's custom LED current to 4 × 36 mA =
-  144 mA.
+  with one face's LEDs while four faces draw. Set WLED's custom LED current to 4 × 29.4 mA ≈
+  118 mA.
 - **The cap cannot be raised from the UI** (owner, 2026-10-10): firmware ceiling, see
   [../firmware/README.md](../firmware/README.md).
 - **Overall brightness is set in WLED, not decided by a mock-up** (owner, 2026-10-10). If

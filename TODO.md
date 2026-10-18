@@ -4,15 +4,12 @@
 
 ## Measure / confirm
 
-- [ ] **Midburn approval** for two statues (approved design: four). Four statues of 7 towers
-  means 28 channels, beyond one ESP32's 16 outputs.
-
 - [ ] **Layout:** tower spacing along each arm, and the distance between the two apexes.
-  Gives the lengths of the 5 V runs, tower data cables, ground bonds, and whether 10 m CAT5e
+  Gives the lengths of the 5 V runs, data cables, mains cords, and whether 10 m CAT5e
   reaches. See [trenches](docs/strips_and_power/trenches.md).
   3D sightline check and the spacing/height conflict: [statue geometry](docs/strips_and_power/statue_geometry.md).
-- [ ] **Tower order and heights T1–T7** with the artist (currently read off the model photo:
-  800, 1150, 1550, 2000, 1150, 800, 500).
+- [ ] **Tower heights and order** with the artist: current sizes 2 × 2000, 4 × 1600,
+  4 × 1250, 4 × 950 mm; order along the V assumed 950, 1250, 1600, 2000, 1600, 1250, 950.
 - [ ] **With the artist:** strips run bottom to top; 15 cm dark base; LED count per face as
   fitted; how the tower-base board connects to each strand's DIN.
 

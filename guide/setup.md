@@ -9,7 +9,7 @@ other**; T4 is the apex.
 
 | Tower | T1 | T2 | T3 | T4 | T5 | T6 | T7 |
 |---|---|---|---|---|---|---|---|
-| Height (mm) | 800 | 1150 | 1550 | 2000 | 1150 | 800 | 500 |
+| Height (mm) | 950 | 1250 | 1600 | 2000 | 1600 | 1250 | 950 |
 
 - **Statue 1** has the **controller box** (ESP32) in its base.
 - **Statue 2** has **box 2** (receivers only) in its base.
@@ -25,39 +25,40 @@ other**; T4 is the apex.
 | Controller jack 1 | Box 2 jack 1 | 10 m CAT5e |
 | Controller jack 2 | Box 2 jack 2 | 10 m CAT5e |
 | Controller jack 3 | Box 2 jack 3 | 10 m CAT5e |
-| Apex box, tower data outputs T1–T7 | Tower base T1–T7, data in | DATA + GND |
-| Apex power strip | Supply boxes A–E (C14) | C13 cords |
-| Supply boxes | Towers, per the power table below | 5 V, XT60 |
+| Apex box, tower data outputs | Supply boxes A (T1, T2), B (T3), D (T5), E (T6, T7); T4 stays inside the apex box | DATA + GND, JST-SM |
+| Apex power strip | Supply boxes A, B, D, E (C14) | C13 cords |
+| Each supply box, 4 × JST-SM out | Its own tower's 4 strands | JST-SM |
+| Box A, E: XT60 + data out | Tip towers T1 (A), T7 (E) | 3 × 2.5 + 22 AWG pair |
 
 **The CAT5e cables are not Ethernet.** Never connect them to network equipment. PoE puts
 48 V on the pairs and destroys the transceivers at both ends.
 
 ## Power
 
-Five supply boxes per statue, mains from the outlet and strip at the apex
+Five supply boxes per statue, mains from the strip at the apex
 ([statue-power.svg](img/statue-power.svg)):
 
-| Supply | Sits at | Feeds |
-|---|---|---|
-| A | T2 base | T1, T2 |
-| B | T3 base | T3 |
-| C | apex box | T4 faces 1–2 |
-| D | apex | T4 faces 3–4, T5 faces 1–2 |
-| E | T6 base | T5 faces 3–4, T6, T7 |
+| Supply | Sits at | Own tower | Also feeds |
+|---|---|---|---|
+| A | T2 base | T2 | T1 |
+| B | T3 base | T3 | — |
+| C | apex box | T4 | — |
+| D | T5 base | T5 | — |
+| E | T6 base | T6 | T7 |
 
-T4 and T5 each take two supplies: keep each supply's +5 V on its own two faces. All supply
-GNDs are tied together by the ground bond.
+T1 and T7 have no box: their base only splits the incoming power and data to the 4
+strands ([neighbour-base.svg](img/neighbour-base.svg)).
 
 ## Trenches
 
 | Segment | Contents |
 |---|---|
-| T4 → T3 | 230 V to B and to A · data T3, T2, T1 · ground bond |
-| T3 → T2 | 230 V to A · data T2, T1 · ground bond |
-| T2 → T1 | 5 V A → T1 · data T1 |
-| T4 → T5 | 230 V to E · 5 V D → T5 · data T5, T6, T7 · ground bond |
-| T5 → T6 | 230 V to E · 5 V E → T5 · data T6, T7 · ground bond |
-| T6 → T7 | 5 V E → T7 · data T7 |
+| T4 → T3 | 230 V to B and to A · data to B (T3) and to A (T2, T1) |
+| T3 → T2 | 230 V to A · data to A (T2, T1) |
+| T2 → T1 | 5 V A → T1 · data A → T1 |
+| T4 → T5 | 230 V to D and to E · data to D (T5) and to E (T6, T7) |
+| T5 → T6 | 230 V to E · data to E (T6, T7) |
+| T6 → T7 | 5 V E → T7 · data E → T7 |
 | Apex 1 → apex 2 | 3 × CAT5e |
 
 ## Order
@@ -76,5 +77,5 @@ GNDs are tied together by the ground bond.
 
 1. Switch off and unplug all mains.
 2. Disconnect the tower cables and the CAT5e cables at both ends.
-3. Dig out all buried cables: per statue 3 mains cords, 4 × 5 V, 7 data, 2 ground bonds;
-   plus the 3 CAT5e between the statues.
+3. Dig out all buried cables: per statue 4 mains cords, 2 × 5 V, and the data cables; plus
+   the 3 CAT5e between the statues.

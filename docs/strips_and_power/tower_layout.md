@@ -11,15 +11,22 @@ Each statue is a V of 7 towers, numbered T1–T7 from one tip to the other, T4 t
 
 | Tower | T1 | T2 | T3 | T4 | T5 | T6 | T7 |
 |---|---|---|---|---|---|---|---|
-| Height (mm) | 800 | 1150 | 1550 | 2000 | 1150 | 800 | 500 |
-| Lit height (−150 mm base) | 650 | 1000 | 1400 | 1850 | 1000 | 650 | 350 |
-| LEDs per face at 60/m | 39 | 60 | 84 | 111 | 60 | 39 | 21 |
+| Height (mm) | 950 | 1250 | 1600 | 2000 | 1600 | 1250 | 950 |
+| Lit height (−150 mm base) | 800 | 1100 | 1450 | 1850 | 1450 | 1100 | 800 |
+| LEDs per face at 60/m | 48 | 66 | 87 | 111 | 87 | 66 | 48 |
+
+Heights: the artist's current sizes (owner, 2026-10-18): 2 × 2000, 4 × 1600, 4 × 1250,
+4 × 950 mm. They have changed several times, so treat them as current, not final. The order
+along the V (shortest at the tips, 2000 at the apex) is assumed.
+**Changed 2026-10-18:** previously 800, 1150, 1550, 2000, 1150, 800, 500 mm, read off the
+owner's model photo.
 
 Towers are 40 × 40 cm with a structural post in the middle. Each face has one strip, mounted
 on the post facing out, about 15 cm behind a diffuser and the CNC-cut face. **Each tower is
 one channel; its 4 strips get the same data in parallel** through the tower-base splitter
-([tower_base.md](tower_base.md)). Strips run bottom to top. Per statue: 414 rendered pixels,
-1656 physical LEDs, 27.6 m of strip.
+([tower_base.md](tower_base.md)). Strips run bottom to top. Per statue: 513 rendered pixels,
+2052 physical LEDs, 34.2 m of strip. Both statues: 4104 LEDs, 68.4 m, at least 15 reels of
+5 m with every face cut whole from one reel (no joins).
 
 ## Decisions
 
@@ -27,7 +34,7 @@ one channel; its 4 strips get the same data in parallel** through the tower-base
 
 **Why.** All faces show the same animation (owner, 2026-10-10). One channel per tower means
 data never has to come back down from the top of a tower: no return wiring (owner, 2026-10-10,
-the reason for the two-statue layout). The ESP32 renders one face per tower, about 830 pixels
+the reason for the two-statue layout). The ESP32 renders one face per tower, about 1030 pixels
 for both statues, so frame rate is not a concern.
 **Rejected.** *One strand per arm of the V* (2026-10-09): needed data to snake up and down
 the towers. *Independent faces:* not wanted for the art.
@@ -52,7 +59,7 @@ corners. Evenness numbers are geometry estimates; check with the brightness mock
 
 ## Gotchas
 
-- Tower order and heights T1–T7 were read off the owner's model photo; confirm on site.
+- Heights have changed several times; the tower order along the V is assumed. Confirm on site.
 - LED counts assume full lit height at 60/m; correct them to the strips as fitted.
 - One dead LED darkens the rest of that face above it; the other faces are unaffected.
 

@@ -8,51 +8,65 @@
 <circle cx="600" cy="500" r="320" fill="none" stroke="#bbb" stroke-width="2" stroke-dasharray="8 8"/>
 <circle cx="600" cy="500" r="10" fill="#555"/>
 <text x="600" y="532" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="middle" font-weight="normal" fill="#555">viewing point</text>
-<polyline points="250,500 485,320" fill="none" stroke="#e65100" stroke-width="2" stroke-linejoin="round"/>
 <polyline points="250,500 430,380" fill="none" stroke="#e65100" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="430,380 485,320" fill="none" stroke="#c62828" stroke-width="4" stroke-linejoin="round"/>
 <polyline points="250,500 375,440" fill="none" stroke="#e65100" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="250,500 320,500" fill="none" stroke="#e65100" stroke-width="2" stroke-linejoin="round"/>
 <polyline points="250,500 375,560" fill="none" stroke="#e65100" stroke-width="2" stroke-linejoin="round"/>
 <polyline points="250,500 430,620" fill="none" stroke="#e65100" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="250,500 485,680" fill="none" stroke="#e65100" stroke-width="2" stroke-linejoin="round"/>
-<rect x="475.0" y="310.0" width="20.0" height="20.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="501.0" y="325" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T1</text>
-<rect x="418.25" y="368.25" width="23.5" height="23.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="447.75" y="385" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T2</text>
-<rect x="361.25" y="426.25" width="27.5" height="27.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="394.75" y="445" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T3</text>
+<polyline points="430,620 485,680" fill="none" stroke="#c62828" stroke-width="4" stroke-linejoin="round"/>
+<rect x="474.25" y="309.25" width="21.5" height="21.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="501.75" y="325" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T1</text>
+<rect x="417.75" y="367.75" width="24.5" height="24.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="448.25" y="385" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T2</text>
+<rect x="376.75" y="369" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
+<text x="387.75" y="385" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">A</text>
+<rect x="361.0" y="426.0" width="28.0" height="28.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="395.0" y="445" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T3</text>
+<rect x="320.0" y="429" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
+<text x="331.0" y="445" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">B</text>
 <rect x="304.0" y="484.0" width="32.0" height="32.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
 <text x="342.0" y="505" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T4</text>
-<rect x="363.25" y="548.25" width="23.5" height="23.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="392.75" y="565" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T5</text>
-<rect x="420.0" y="610.0" width="20.0" height="20.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="446.0" y="625" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T6</text>
-<rect x="476.5" y="671.5" width="17.0" height="17.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="499.5" y="685" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T7</text>
+<rect x="361.0" y="546.0" width="28.0" height="28.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="395.0" y="565" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T5</text>
+<rect x="320.0" y="549" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
+<text x="331.0" y="565" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">D</text>
+<rect x="417.75" y="607.75" width="24.5" height="24.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="448.25" y="625" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T6</text>
+<rect x="376.75" y="609" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
+<text x="387.75" y="625" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">E</text>
+<rect x="474.25" y="669.25" width="21.5" height="21.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="501.75" y="685" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T7</text>
 <rect x="216" y="478" width="68" height="44" rx="8" fill="#2e7d32" stroke="#333" stroke-width="2"/>
 <text x="250" y="505" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#fff">CTRL</text>
 <text x="320" y="270" font-family="Helvetica, Arial, sans-serif" font-size="17" text-anchor="middle" font-weight="bold" fill="#222">Statue 1</text>
-<polyline points="950,500 715,320" fill="none" stroke="#e65100" stroke-width="2" stroke-linejoin="round"/>
 <polyline points="950,500 770,380" fill="none" stroke="#e65100" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="770,380 715,320" fill="none" stroke="#c62828" stroke-width="4" stroke-linejoin="round"/>
 <polyline points="950,500 825,440" fill="none" stroke="#e65100" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="950,500 880,500" fill="none" stroke="#e65100" stroke-width="2" stroke-linejoin="round"/>
 <polyline points="950,500 825,560" fill="none" stroke="#e65100" stroke-width="2" stroke-linejoin="round"/>
 <polyline points="950,500 770,620" fill="none" stroke="#e65100" stroke-width="2" stroke-linejoin="round"/>
-<polyline points="950,500 715,680" fill="none" stroke="#e65100" stroke-width="2" stroke-linejoin="round"/>
-<rect x="705.0" y="310.0" width="20.0" height="20.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="699.0" y="325" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T1</text>
-<rect x="758.25" y="368.25" width="23.5" height="23.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="752.25" y="385" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T2</text>
-<rect x="811.25" y="426.25" width="27.5" height="27.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="805.25" y="445" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T3</text>
+<polyline points="770,620 715,680" fill="none" stroke="#c62828" stroke-width="4" stroke-linejoin="round"/>
+<rect x="704.25" y="309.25" width="21.5" height="21.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="698.25" y="325" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T1</text>
+<rect x="757.75" y="367.75" width="24.5" height="24.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="751.75" y="385" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T2</text>
+<rect x="801.25" y="369" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
+<text x="812.25" y="385" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">A</text>
+<rect x="811.0" y="426.0" width="28.0" height="28.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="805.0" y="445" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T3</text>
+<rect x="858.0" y="429" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
+<text x="869.0" y="445" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">B</text>
 <rect x="864.0" y="484.0" width="32.0" height="32.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
 <text x="858.0" y="505" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T4</text>
-<rect x="813.25" y="548.25" width="23.5" height="23.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="807.25" y="565" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T5</text>
-<rect x="760.0" y="610.0" width="20.0" height="20.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="754.0" y="625" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T6</text>
-<rect x="706.5" y="671.5" width="17.0" height="17.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="700.5" y="685" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T7</text>
+<rect x="811.0" y="546.0" width="28.0" height="28.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="805.0" y="565" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T5</text>
+<rect x="858.0" y="549" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
+<text x="869.0" y="565" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">D</text>
+<rect x="757.75" y="607.75" width="24.5" height="24.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="751.75" y="625" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T6</text>
+<rect x="801.25" y="609" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
+<text x="812.25" y="625" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">E</text>
+<rect x="704.25" y="669.25" width="21.5" height="21.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="698.25" y="685" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T7</text>
 <rect x="916" y="478" width="68" height="44" rx="8" fill="#1565c0" stroke="#333" stroke-width="2"/>
 <text x="950" y="505" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#fff">BOX 2</text>
 <text x="880" y="270" font-family="Helvetica, Arial, sans-serif" font-size="17" text-anchor="middle" font-weight="bold" fill="#222">Statue 2</text>
@@ -62,7 +76,7 @@
 <rect x="450" y="812" width="300" height="30" rx="8" fill="#fff" stroke="#6a1b9a" stroke-width="1.5"/>
 <text x="600" y="833" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="middle" font-weight="bold" fill="#6a1b9a">3 × CAT5e, jacks 1–3 → jacks 1–3</text>
 <rect x="60" y="870" width="1080" height="96" rx="8" fill="#fafafa" stroke="#bbb" stroke-width="1"/>
-<text x="80" y="896" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#222">CTRL = controller box (ESP32) in statue 1's base. BOX 2 = receiver box in statue 2's base.</text>
-<text x="80" y="915" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#222">Orange: per-tower data cable (DATA + GND) and 2-pin power feed from the box, in the trench under the statue.</text>
-<text x="80" y="934" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#222">Purple: 3 data cables between the boxes, buried with the mains. Placement and distances to be confirmed.</text>
+<text x="80" y="896" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#222">CTRL / BOX 2 = apex box (with supply C) in statue 1 / 2. Grey A, B, D, E = supply boxes at T2, T3, T5, T6.</text>
+<text x="80" y="915" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#222">Orange: data (DATA + GND) and 230 V from the apex box to supply boxes A, B, D, E. Red: power + data to T1, T7.</text>
+<text x="80" y="934" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#222">Purple: 3 data cables between the apex boxes. Placement and distances to be confirmed.</text>
 </svg>

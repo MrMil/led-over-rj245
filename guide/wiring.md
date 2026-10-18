@@ -7,9 +7,9 @@
 | [System overview](img/overview.svg) | Both statues, boxes, cables |
 | [Controller box](img/controller-wiring.svg) | Statue 1: ESP32, 2 × 74AHCT125, 7 transmitters, 3 jacks, 7 tower outputs |
 | [Box 2](img/box2-wiring.svg) | Statue 2: 3 jacks, 7 receivers, 7 tower outputs |
-| [Tower base](img/tower-base.svg) | All 14 towers: data in, 74AHCT125 split to the 4 faces |
-| [Statue power](img/statue-power.svg) | Mains from the apex to 5 supplies; 5 V to the towers |
-| [Supply box](img/box-power.svg) | All 10 supply boxes: C14, PSU, XT60 outputs |
+| [Statue power](img/statue-power.svg) | Mains from the apex to 5 supply boxes; which box feeds which tower |
+| [Supply box](img/supply-box.svg) | All 10 supply boxes: C14, PSU, own tower's splitter and 4 JST-SM, neighbour outputs |
+| [Neighbour base](img/neighbour-base.svg) | T1, T7: passive split of power and data to the 4 strands |
 
 `+5V` / `GND` flags are the perfboard rails. Crossing lines without a dot are not connected.
 RJ45 pigtail wires are drawn in T568B colours (striped = white/colour).
@@ -115,20 +115,28 @@ jacks; don't rely on colours.
 
 ---
 
-## Tower base (all 14 towers)
+## Supply box (A, B, D, E; C is inside the apex box)
 
-![Tower base wiring](img/tower-base.svg)
+![Supply box](img/supply-box.svg)
 
 | Connection | To |
 |---|---|
-| Data cable DATA | 74AHCT125 pins 2, 5, 9, 12 (all four inputs), and 10 kΩ to GND |
-| Data cable GND | GND |
-| 74AHCT125 pin 14 | tower +5V |
-| 74AHCT125 pins 7, 1, 4, 10, 13 | GND |
-| Pins 3, 6, 8, 11 | 100 Ω → face 1–4 strip DIN |
-| Strips 5V / GND | tower power feed |
+| Own tower data in (JST-SM) | DATA → 74AHCT125 #1 pins 2, 5, 9, 12, and 10 kΩ to GND; GND → GND; 5V pin not connected |
+| 74AHCT125 #1 pins 3, 6, 8, 11 | 100 Ω → DATA of JST-SM out 1–4 (one per face) |
+| JST-SM out 5V / GND | PSU +V / −V |
+| Tip-tower data in (A, E only) | DATA → 74AHCT125 #2 gate 1, 10 kΩ to GND |
+| 74AHCT125 #2 pin 3 | 100 Ω → tip-tower data out (22 AWG pair: DATA + GND) |
+| 74AHCT125 VCC (14) / GND (7), OE (1, 4, 10, 13) | +5V / GND, GND; unused inputs to GND |
+| XT60 out (A, E only) | PSU +V / −V, NYAF 2.5 mm² |
 
-All four faces get the same data. Strips run bottom to top.
+---
+
+## Neighbour base (T1, T7)
+
+![Neighbour base](img/neighbour-base.svg)
+
+- XT60 in → WAGO +5V and WAGO GND → 5V / GND of the 4 strand JST-SMs.
+- Data pair: DATA → the DATA pin of all 4 JST-SMs; GND → WAGO GND.
 
 ---
 
@@ -136,19 +144,14 @@ All four faces get the same data. Strips run bottom to top.
 
 ![Statue power](img/statue-power.svg)
 
-![Supply box](img/box-power.svg)
-
-- **Mains:** apex outlet → power strip → a C13 cord to each supply box's C14. Buried cords:
-  H07RN-F 3 × 1.5. In each box: L → PSU 1, N → 2, PE → 3 (FG).
-- **5 V out:** PSU 4/5 (−V) and 6/7 (+V) → XT60 outputs, one per destination, NYAF 2.5 mm²
-  inside (red +5 V, blue GND).
-- **Buried 5 V:** 3-core cable, brown +5 V, blue GND, green/yellow unused or GND, XT60 both
-  ends. 3 × 2.5.
-- **Tower bases:** the incoming feed splits to the strand XT60s. At T4 and T5 the two
-  supplies' +5 V stay separate (faces 1–2 / faces 3–4); GNDs may join.
-- **T4:** a second feed to the top of each strand, up the post (faces 1–2 from C, 3–4
-  from D).
-- **Ground bond:** 1.5 mm² linking all supplies' −V along the trenches.
+- **Mains:** apex outlet → power strip → a C13 cord to the C14 of boxes A, B, D, E (box C is the
+  apex box). Buried cords: H07RN-F 3 × 1.5. In each box: L → PSU 1, N → 2, PE → 3 (FG).
+- **Strands:** every strand plugs into a JST-SM (5V, DATA, GND), at its own supply box or at
+  a neighbour base.
+- **Buried 5 V (A → T1, E → T7):** 3 × 2.5 cable, brown +5 V, blue GND,
+  green/yellow unused or GND, XT60 at both ends.
+- **T4:** if the strip voltage-drop test calls for it, a second feed to the top of each
+  strand, up the post, from supply C.
 - **Supply C only:** PSU 5 (−V) / 7 (+V) → apex box perfboard rails, 0.5 mm².
 
 ---
