@@ -731,7 +731,7 @@ body.shot .panel, body.shot .views { display: none; }
   paramRow($('powerParams'), 'reel', 'Reel length', 1000, 10000, 100, 'mm', () => state.reel, v => state.reel = v, repower);
   $('btnPower').addEventListener('click', computePower);
   paramRow($('armParams'), 'arm', 'Arm angle from the radial line', 0, 80, 1, '°', () => state.arm, v => state.arm = v, rebuild);
-  paramRow($('viewerParams'), 'eye', 'Eye height (sitting on the ground ≈ 800–900, chair ≈ 1200, standing ≈ 1600)', 400, 2000, 10, 'mm', () => state.eye, v => state.eye = v, () => { applyView(); build(); });
+  paramRow($('viewerParams'), 'eye', 'Eye height', 400, 2000, 10, 'mm', () => state.eye, v => state.eye = v, () => { applyView(); build(); });
   paramRow($('viewerParams'), 'hfov', 'Horizontal field of view', 60, 140, 5, '°', () => state.hfov, v => state.hfov = v, applyView);
   $('mode').value = state.mode; $('armParams').hidden = state.mode !== 'straight';
   $('mode').addEventListener('change', () => { state.mode = $('mode').value; $('armParams').hidden = state.mode !== 'straight'; build(); });
