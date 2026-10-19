@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Statue Tower Sightlines</title>
 <style>
-/* Layout: a full-window 3D viewport; one control/readout panel floats top-left, view buttons top-right. */
+/* Layout: a full-window 3D viewport; one control/readout panel floats top-left, view buttons top-right, a camera pad bottom-right. */
 :root {
   --bg: #16130f;            /* viewport fallback behind the canvas */
   --panel: rgba(24, 20, 16, 0.9);
@@ -16,7 +16,7 @@
 }
 html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font-family: var(--font); }
 #view { position: fixed; inset: 0; }
-#view canvas { display: block; width: 100%; height: 100%; }
+#view canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 .panel {
   position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); left: 12px;
   width: min(380px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow: auto;
@@ -34,6 +34,7 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); f
 .param label { color: var(--fg); }
 .param .num { display: flex; align-items: center; gap: 4px; justify-content: flex-end; }
 .param input[type=number] { width: 66px; background: #241f19; color: var(--accent); border: 1px solid var(--line); border-radius: 6px; padding: 3px 5px; font: inherit; font-variant-numeric: tabular-nums; text-align: right; }
+.param input:disabled { opacity: 0.55; }
 .param .unit { color: var(--muted); font-size: 11px; min-width: 2ch; }
 .param input[type=range] { grid-column: 1 / -1; width: 100%; margin: 0 0 2px; accent-color: var(--accent); }
 .param select { grid-column: 1 / -1; background: #241f19; color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; font: inherit; }
@@ -64,19 +65,34 @@ textarea { width: 100%; box-sizing: border-box; margin-top: 6px; background: #24
 #shotOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.78); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px; box-sizing: border-box; z-index: 10; }
 #shotOverlay img { max-width: 100%; max-height: calc(100vh - 90px); border: 1px solid var(--line); border-radius: 6px; }
 #shotOverlay .bar { display: flex; gap: 10px; align-items: center; color: var(--fg); font-size: 13px; flex-wrap: wrap; justify-content: center; }
-body.shot .panel, body.shot .views { display: none; }
-@media (max-width: 600px) { .panel { font-size: 12px; } .views { top: auto; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); } }
+/* camera pad: works by touch on a phone; keyboard and right-drag do the same on a desktop */
+#pad { position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); display: grid; grid-template-columns: repeat(3, 44px); grid-auto-rows: 44px; gap: 4px; z-index: 2; }
+#pad[hidden] { display: none; }
+#pad button { padding: 0; font-size: 18px; line-height: 1; border-radius: 10px; background: rgba(43, 36, 29, 0.9); user-select: none; -webkit-user-select: none; touch-action: none; }
+#pad button[hidden] { visibility: hidden; display: block; }
+#hint { position: fixed; left: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); max-width: min(420px, calc(100vw - 180px)); font-size: 11px; color: var(--muted); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
+body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #btnUnfold { display: none; }
+@media (max-width: 600px) { .panel { font-size: 12px; } .views { top: auto; bottom: calc(160px + env(safe-area-inset-bottom, 0px)); } #hint { display: none; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
 <div id="view"></div>
 
 <div class="views" role="group" aria-label="Viewpoint">
-  <button id="btnCentre" aria-pressed="true">Centre view (eye)</button>
-  <button id="btnDrone" aria-pressed="false">Drone view</button>
+  <button id="btnCentre" aria-pressed="true" title="Press again to reset the camera">Centre view (eye)</button>
+  <button id="btnDrone" aria-pressed="false" title="Press again to reset the camera">Drone view</button>
   <button id="btnTop" aria-pressed="false">Top-down view</button>
   <button id="btnPng">Save PNG</button>
+  <button id="btnUndo" title="Undo (Ctrl/Cmd+Z)" disabled>↶ Undo</button>
+  <button id="btnRedo" title="Redo (Ctrl/Cmd+Shift+Z)" disabled>↷ Redo</button>
 </div>
+
+<div id="pad" role="group" aria-label="Camera">
+  <span></span><button data-move="fwd" aria-label="Forward">▲</button><button data-move="in" id="padIn" aria-label="Zoom in">+</button>
+  <button data-move="left" aria-label="Left">◀</button><button data-move="reset" aria-label="Reset the camera">⟲</button><button data-move="right" aria-label="Right">▶</button>
+  <span></span><button data-move="back" aria-label="Back">▼</button><button data-move="out" id="padOut" aria-label="Zoom out">−</button>
+</div>
+<div id="hint"></div>
 
 <div id="shotOverlay" hidden>
   <img id="shotImg" alt="Rendered frame">
@@ -93,16 +109,22 @@ body.shot .panel, body.shot .views { display: none; }
   <button id="btnLevel" class="small">Compute heights for a level top line</button>
   <div id="levelNote" class="note">Keeps T4 and sets the others so every top sits on one line from the eye at the centre, for the spacing, side, circle and eye height above.</div>
 
+  <h2>Statue 2</h2>
+  <div class="check"><input id="decoupled" type="checkbox"><label for="decoupled">Set statue 2 separately from statue 1</label></div>
+  <div class="note">Off: statue 2 mirrors statue 1 (rotated 180°). On: it starts as a copy and gets its own heights, spacings and positions.</div>
+  <div id="statue2Params" hidden></div>
+
   <h2>Spacing between towers (centre to centre)</h2>
   <div id="spacingParams"></div>
   <div id="result" class="result"></div>
-  <h2>Individual spacings <span id="manualBadge" class="badge" hidden>set by hand</span></h2>
-  <div class="note">Solved from the values above until you change one here. Min / max / optimum then ask before overwriting them.</div>
+  <h2>Individual spacings <span id="manualBadge" class="badge" hidden>set by hand</span><span id="freeBadge" class="badge" hidden>moved freely</span></h2>
+  <div class="note">Solved from the values above until you change one here. In the top-down view you can also drag any tower to wherever you like; the spacings below then just report the distances. Changing a solver setting afterwards asks before re-solving.</div>
   <div id="pairParams"></div>
-  <button id="btnPairsReset" class="small">Reset to the solved spacing</button>
+  <div id="pairParams2" hidden></div>
+  <button id="btnPairsReset" class="small">Reset to the solved layout</button>
   <div id="confirmBox" class="confirm" hidden>
-    <div>You set individual spacings by hand. Reset them to the solved spacing?</div>
-    <div class="bar"><button id="confirmReset">Reset them</button><button id="confirmKeep">Keep mine</button></div>
+    <div id="confirmText"></div>
+    <div class="bar"><button id="confirmYes">Reset and re-solve</button><button id="confirmNo">Keep mine</button></div>
   </div>
 
   <h2>Circle</h2>
@@ -119,6 +141,7 @@ body.shot .panel, body.shot .views { display: none; }
   <h2>Viewer</h2>
   <div id="viewerParams"></div>
   <div class="check"><input id="labels" type="checkbox"><label for="labels">Tower labels</label></div>
+  <div class="note">Eye view: drag to look around, right-drag (or arrow keys / WASD, or the pad) to walk. Drone: drag to orbit, right-drag or arrows to pan, wheel or ± to zoom. Press the active view button, or ⟲, to reset that camera.</div>
 
   <h2>LEDs and power supplies</h2>
   <div id="powerParams"></div>
@@ -132,7 +155,7 @@ body.shot .panel, body.shot .views { display: none; }
   <div class="bar"><button id="btnApplyJson" class="small">Apply pasted JSON</button><button id="btnCopyJson" class="small">Copy</button><span id="jsonMsg" class="note"></span></div>
   <div class="bar"><button id="btnDefaults" class="small">Restore project defaults</button><span class="note">Your last settings are kept in this browser and come back when you reopen the page.</span></div>
 
-  <h2>Readout, statue 1 (statue 2 is identical, rotated 180°)</h2>
+  <h2>Readout</h2>
   <div id="readout"></div>
 </div>
 
@@ -142,18 +165,23 @@ body.shot .panel, body.shot .views { display: none; }
 (function () {
   'use strict';
   const NAMES = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+  const PAIR_NAMES = ['T1–T2', 'T2–T3', 'T3–T4', 'T4–T5', 'T5–T6', 'T6–T7'];
   const BASE = 0.15;                  // dark base, m, no LEDs
   const DEG = 180 / Math.PI;
+  const $ = id => document.getElementById(id);
 
   // ---------- State: lengths in mm, as the owner and artist think. URL params override defaults. ----------
   const q = new URLSearchParams(location.search);
   const num = (k, d) => (q.has(k) && !isNaN(parseFloat(q.get(k)))) ? parseFloat(q.get(k)) : d;
+  const newStatue = () => ({ h: [950, 1250, 1600, 2000, 1600, 1250, 950], pairs: [0, 0, 0, 0, 0, 0], manual: false });
   const state = {
     side: num('side', 400),
-    h: [950, 1250, 1600, 2000, 1600, 1250, 950].map((v, i) => num('h' + (i + 1), v)),
+    st: [newStatue(), newStatue()],    // per-statue heights, pair spacings and the "set by hand" flag; st[1] used only when decoupled
+    decoupled: q.get('decoupled') === '1',
+    free: null,                        // { s1: [[x, z] × 7], s2: [[x, z] × 7] } in metres once towers were dragged freely
     smin: num('smin', 500), smax: num('smax', 1000), sopt: num('sopt', 750),     // owner, 2026-10-19
     diam: num('d', 8000),
-    clear: num('clear', 900),         // smallest radius the viewer must have free at the centre
+    clear: num('clear', 900),          // smallest radius the viewer must have free at the centre
     mode: q.get('mode') === 'straight' ? 'straight' : 'touch',
     arm: num('arm', 25),
     eye: num('eye', 1600),
@@ -164,19 +192,23 @@ body.shot .panel, body.shot .views { display: none; }
     mA: num('ma', 29.4),               // current per LED at full white, measured on the bought strip
     psuA: num('psua', 18),             // current ceiling per supply
     reel: num('reel', 5000),           // reel length, mm
-    pairs: [1, 2, 3, 4, 5, 6].map(i => num('p' + i, 0)),   // T1–T2 … T6–T7, mm; 0 = not yet solved
-    manual: q.get('manual') === '1',   // true once the user edits a pair by hand; the solver then leaves them alone
   };
-  if (state.pairs.some(v => !v)) state.manual = false;
+  state.st[0].h = state.st[0].h.map((v, i) => num('h' + (i + 1), v));
+  state.st[0].pairs = [1, 2, 3, 4, 5, 6].map(i => num('p' + i, 0));
+  state.st[0].manual = q.get('manual') === '1' && state.st[0].pairs.every(v => v > 0);
+  state.st[1] = JSON.parse(JSON.stringify(state.st[0]));
   let powerShown = false;
   let view = ['drone', 'top'].includes(q.get('view')) ? q.get('view') : 'centre';
   if (q.get('shot') === '1') document.body.classList.add('shot');
+  const cfg = s => (state.decoupled ? state.st[s] : state.st[0]);
+  const isCustom = () => !!state.free || state.st[0].manual || (state.decoupled && state.st[1].manual);
 
   // ---------- Geometry (metres inside) ----------
   const W = () => state.side / 1000;
   const HALF = () => W() * Math.SQRT1_2;           // half-diagonal: half the silhouette width seen from the centre
   const R = () => state.diam / 2000;               // the apex tower's far corner sits on this radius
   const hw = r => Math.atan(HALF() / r);           // angular half-width of a tower at distance r
+  const wrap = a => Math.atan2(Math.sin(a), Math.cos(a));
 
   // Arm from the apex (k = 0) towards the tip (k = 3): step k is a chord of chords[k] (m), each silhouette touching the last.
   function solveTouch(chords) {
@@ -228,44 +260,56 @@ body.shot .panel, body.shot .views { display: none; }
   }
 
   // Pairs are T1–T2 … T6–T7. The left arm runs T4→T3→T2→T1 (pairs 2, 1, 0), the right arm T4→T5→T6→T7 (pairs 3, 4, 5).
+  // Free positions override the solver entirely; statue 2 mirrors statue 1 unless decoupled.
   function layout() {
     let choice = null;
-    if (!state.manual) {
-      choice = chooseSpacing();
-      state.pairs = state.pairs.map(() => Math.round(choice.s * 1000));
-      if (typeof showPairs === 'function') showPairs();
-    }
-    const pm = state.pairs.map(v => v / 1000);
-    const left = solver()([pm[2], pm[1], pm[0]]), right = solver()([pm[3], pm[4], pm[5]]);
     const towers = [];
-    for (let s = 0; s < 2; s++) {
-      const off = s * Math.PI;
-      NAMES.forEach((n, i) => {
-        const k = Math.abs(i - 3), arm = i < 3 ? left : right, side = i < 3 ? -1 : 1;
-        const r = arm.r[k], th = side * arm.th[k] + off;
-        towers.push({ name: n, statue: s + 1, h: state.h[i] / 1000, r, th, x: r * Math.sin(th), z: -r * Math.cos(th) });
-      });
+    if (!state.free && [0, 1].some(s => !cfg(s).manual)) {
+      choice = chooseSpacing();
+      [0, 1].forEach(s => { const c = cfg(s); if (!c.manual) c.pairs = c.pairs.map(() => Math.round(choice.s * 1000)); });
     }
-    const fits = left.solved && right.solved && valid(left) && valid(right);
-    return { towers, left, right, choice, fits };
+    for (let s = 0; s < 2; s++) {
+      const c = cfg(s), off = s * Math.PI;
+      if (state.free) {
+        const P = (s === 0 || state.decoupled) ? state.free['s' + (s + 1)] : state.free.s1.map(([x, z]) => [-x, -z]);
+        NAMES.forEach((n, i) => { const [x, z] = P[i]; towers.push({ name: n, statue: s + 1, idx: s * 7 + i, h: c.h[i] / 1000, r: Math.hypot(x, z), th: Math.atan2(x, -z), x, z, solved: true }); });
+      } else {
+        const pm = c.pairs.map(v => v / 1000);
+        const left = solver()([pm[2], pm[1], pm[0]]), right = solver()([pm[3], pm[4], pm[5]]);
+        NAMES.forEach((n, i) => {
+          const k = Math.abs(i - 3), arm = i < 3 ? left : right, side = i < 3 ? -1 : 1;
+          const r = arm.r[k], th = side * arm.th[k] + off;
+          towers.push({ name: n, statue: s + 1, idx: s * 7 + i, h: c.h[i] / 1000, r, th, x: r * Math.sin(th), z: -r * Math.cos(th), solved: arm.solved });
+        });
+      }
+    }
+    const solved = towers.every(t => t.solved);
+    const farMax = Math.max(...towers.map(t => t.r + HALF()));
+    const clear = Math.min(...towers.map(t => t.r - HALF()));
+    const fits = solved && farMax <= R() + 1e-9 && clear >= state.clear / 1000 - 1e-9;
+    if (typeof showPairs === 'function') showPairs(towers);
+    return { towers, choice, solved, farMax, clear, fits };
   }
+  const statueTowers = (L, s) => L.towers.filter(t => t.statue === s + 1);
+  const relAz = (t, s) => wrap(t.th - s * Math.PI);
+  const rf = t => t.r - HALF() / 2;                // face, mid-depth
 
   // Heights (mm) that put every top on one line from the eye: (h − eye)/r equal to the apex tower's.
-  function levelHeights(L) {
-    const eye = state.eye / 1000, s1 = L.towers.slice(0, 7), rf = t => t.r - HALF() / 2;
-    const c = (state.h[3] / 1000 - eye) / rf(s1[3]);
-    return s1.map(t => Math.round((eye + c * rf(t)) * 100) * 10);
+  function levelHeights(L, s) {
+    const eye = state.eye / 1000, T = statueTowers(L, s);
+    const c = (cfg(s).h[3] / 1000 - eye) / rf(T[3]);
+    return T.map(t => Math.round((eye + c * rf(t)) * 100) * 10);
   }
 
   // Per-statue mural in the viewer's angular space (azimuth relative to the statue, elevation).
-  function muralSpec(L) {
-    const eye = state.eye / 1000, s1 = L.towers.slice(0, 7), rf = t => t.r - HALF() / 2;
-    const span = Math.max(L.left.th[3] + hw(L.left.r[3]), L.right.th[3] + hw(L.right.r[3]));
+  function muralSpec(L, s) {
+    const eye = state.eye / 1000, T = statueTowers(L, s);
+    const lo = Math.min(...T.map(t => relAz(t, s) - hw(t.r))), hi = Math.max(...T.map(t => relAz(t, s) + hw(t.r)));
     // the band every tower from T2 to T6 can show: lowest top among them, the apex tower's (highest) bottom
-    const elTop = Math.min(...[1, 2, 3, 4, 5].map(i => Math.atan((s1[i].h - eye) / rf(s1[i]))));
-    const elBot = Math.atan((BASE - eye) / rf(s1[3]));
+    const elTop = Math.min(...[1, 2, 3, 4, 5].map(i => Math.atan((T[i].h - eye) / rf(T[i]))));
+    const elBot = Math.atan((BASE - eye) / rf(T[3]));
     const cy = (elTop + elBot) / 2;
-    return { cx: 0, cy, rx: span * 0.90, ry: Math.max(0.02, (elTop - elBot) / 2 * 0.84), stroke: 2.0 / DEG };
+    return { cx: (lo + hi) / 2, cy, rx: Math.max(0.05, (hi - lo) / 2 * 0.90), ry: Math.max(0.02, (elTop - elBot) / 2 * 0.84), stroke: 2.0 / DEG };
   }
   // 0 wood, 1 outline, 2 eyes, 3 mouth
   function muralAt(spec, az, el) {
@@ -283,7 +327,7 @@ body.shot .panel, body.shot .views { display: none; }
   }
 
   // ---------- Three.js scene ----------
-  const viewEl = document.getElementById('view');
+  const viewEl = $('view');
   const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.outputEncoding = THREE.sRGBEncoding;
@@ -308,9 +352,10 @@ body.shot .panel, body.shot .views { display: none; }
   // "1 m" scale bar, flat on the floor, shown at the bottom-right of the top-down view
   const scaleBar = new THREE.Group();
   {
-    const bar = new THREE.Mesh(new THREE.PlaneGeometry(1, 0.08), new THREE.MeshBasicMaterial({ color: 0x3a2412 }));
+    const dark = new THREE.MeshBasicMaterial({ color: 0x3a2412 });
+    const bar = new THREE.Mesh(new THREE.PlaneGeometry(1, 0.08), dark);
     bar.rotation.x = -Math.PI / 2; bar.position.y = 0.006; scaleBar.add(bar);
-    [-0.5, 0.5].forEach(x => { const tick = new THREE.Mesh(new THREE.PlaneGeometry(0.06, 0.3), new THREE.MeshBasicMaterial({ color: 0x3a2412 })); tick.rotation.x = -Math.PI / 2; tick.position.set(x, 0.006, 0); scaleBar.add(tick); });
+    [-0.5, 0.5].forEach(x => { const tick = new THREE.Mesh(new THREE.PlaneGeometry(0.06, 0.3), dark); tick.rotation.x = -Math.PI / 2; tick.position.set(x, 0.006, 0); scaleBar.add(tick); });
     const c = document.createElement('canvas'); c.width = 256; c.height = 96;
     const g = c.getContext('2d'); g.fillStyle = '#3a2412'; g.font = 'bold 72px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('1 m', 128, 50);
     const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding;
@@ -365,8 +410,7 @@ body.shot .panel, body.shot .views { display: none; }
         let f = 0;
         if (lit && y >= BASE) {
           worldAt(u, v, p); p.sub(eye);
-          let az = Math.atan2(p.x, -p.z) - statueAz;
-          az = Math.atan2(Math.sin(az), Math.cos(az));
+          const az = wrap(Math.atan2(p.x, -p.z) - statueAz);
           f = muralAt(spec, az, Math.atan2(p.y, Math.hypot(p.x, p.z)));
         }
         const k = (j * cols + i) * 4;
@@ -406,12 +450,15 @@ body.shot .panel, body.shot .views { display: none; }
   const dimLabel = labelSprite('Ø 8 m'); dimLabel.scale.set(1.2, 0.45, 1); scene.add(dimLabel);
   let dimText = 'Ø 8 m';
 
-  const labels = [];
+  const labels = [], towerGroups = [];
   const disposeGroup = g => g.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) { const m = o.material; ['map', 'emissiveMap'].forEach(k => m[k] && m[k].dispose()); m.dispose(); } });
 
   let current = null, levelPending = null;
+  function placeGroup(g, x, z) { g.position.set(x, 0, z); g.rotation.y = Math.atan2(-x, -z) - Math.PI / 4; }   // one corner points at the centre
+  function placeLabel(lab, x, z) { lab.userData.pos.set(x, 0, z); lab.userData.out.set(x, 0, z).normalize(); }
+
   function build() {
-    disposeGroup(towersGroup); towersGroup.clear(); labels.length = 0;
+    disposeGroup(towersGroup); towersGroup.clear(); labels.length = 0; towerGroups.length = 0;
     if (ring) { scene.remove(ring); ring.geometry.dispose(); }
     ring = new THREE.Mesh(new THREE.RingGeometry(R() - 0.025, R() + 0.025, 160), ringMat);
     ring.rotation.x = -Math.PI / 2; ring.position.y = 0.004; scene.add(ring);
@@ -420,19 +467,20 @@ body.shot .panel, body.shot .views { display: none; }
     dimLabel.position.set(-(R() + 0.9) * 0.707, 0.35, (R() + 0.9) * 0.707);   // bottom-left of the circle, clear of both apex labels
 
     const L = layout(); current = L;
-    const spec = muralSpec(L);
+    const specs = [muralSpec(L, 0), muralSpec(L, 1)];
     const w = W();
     const edgeMat = new THREE.LineBasicMaterial({ color: 0x2a1a0e });
     const hullMat = new THREE.MeshBasicMaterial({ color: 0x1e120a, side: THREE.BackSide });
+    const pickMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
     const faces = [{ c: [0, 0, w / 2], ry: 0 }, { c: [w / 2, 0, 0], ry: Math.PI / 2 }, { c: [0, 0, -w / 2], ry: Math.PI }, { c: [-w / 2, 0, 0], ry: -Math.PI / 2 }];
     const Y = new THREE.Vector3(0, 1, 0);
-    L.towers.forEach((t, idx) => {
+    L.towers.forEach(t => {
       const g = new THREE.Group();
-      g.position.set(t.x, 0, t.z);
-      g.rotation.y = Math.atan2(-t.x, -t.z) - Math.PI / 4;   // one corner points at the centre
+      g.userData.idx = t.idx;
+      placeGroup(g, t.x, t.z);
       g.updateMatrixWorld(true);
       const toCentre = new THREE.Vector3(-t.x, 0, -t.z).normalize();
-      const statueAz = (t.statue - 1) * Math.PI;
+      const statueAz = (t.statue - 1) * Math.PI, spec = specs[t.statue - 1];
       const texCache = {};
       faces.forEach((f, fi) => {
         const normal = new THREE.Vector3(0, 0, 1).applyAxisAngle(Y, f.ry).applyAxisAngle(Y, g.rotation.y);
@@ -441,7 +489,7 @@ body.shot .panel, body.shot .views { display: none; }
         const centre = new THREE.Vector3(f.c[0], t.h / 2, f.c[2]);
         const worldAt = (u, v, out) => { out.copy(centre).addScaledVector(right, (u - 0.5) * w); out.y = v * t.h; return g.localToWorld(out); };
         const key = inner ? fi : (fi + 2) % 4;      // outer faces repeat the face opposite: all faces show the same pixels
-        if (!texCache[key]) texCache[key] = faceTextures(t.h, worldAt, statueAz, spec, idx * 7 + fi, inner);
+        if (!texCache[key]) texCache[key] = faceTextures(t.h, worldAt, statueAz, spec, t.idx * 7 + fi, inner);
         const tex = texCache[key];
         const mat = new THREE.MeshStandardMaterial({ map: tex.map, emissiveMap: tex.emissiveMap, emissive: 0xffffff, emissiveIntensity: 1.1, roughness: 0.9, metalness: 0 });
         const m = new THREE.Mesh(new THREE.PlaneGeometry(w, t.h), mat);
@@ -454,68 +502,71 @@ body.shot .panel, body.shot .views { display: none; }
       hull.position.y = t.h / 2; hull.scale.set(1.035, 1.008, 1.035); g.add(hull);
       const edges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w, t.h, w)), edgeMat);
       edges.position.y = t.h / 2; g.add(edges);
+      const pick = new THREE.Mesh(new THREE.BoxGeometry(w * 1.3, t.h, w * 1.3), pickMat);   // drag target in the top-down view
+      pick.position.y = t.h / 2; pick.userData.idx = t.idx; g.add(pick); g.userData.pick = pick;
       const lab = labelSprite(`${t.name} · ${Math.round(t.h * 1000)}`);
-      lab.userData.pos = new THREE.Vector3(t.x, 0, t.z);
-      lab.userData.out = new THREE.Vector3(t.x, 0, t.z).normalize();      // away from the circle centre
-      lab.userData.h = t.h;
+      lab.userData.pos = new THREE.Vector3(); lab.userData.out = new THREE.Vector3(); lab.userData.h = t.h; lab.userData.idx = t.idx;
+      placeLabel(lab, t.x, t.z);
       lab.visible = state.labels; towersGroup.add(lab); labels.push(lab);
-      towersGroup.add(g);
+      towersGroup.add(g); towerGroups.push(g);
     });
     updateReadout(L);
-    aimCentre();
     if (powerShown) computePower();
     if (typeof saveSettings === 'function') saveSettings();
+    if (typeof recordHistory === 'function') recordHistory();
   }
 
   // ---------- Readout ----------
   const mm = m => Math.round(m * 1000);
-  function updateReadout(L) {
-    const c = L.choice, eye = state.eye / 1000;
-    const s1 = L.towers.filter(t => t.statue === 1);
-    const rows = s1.map((t, i) => {
-      const rf = t.r - HALF() / 2;
-      const appH = (Math.atan((t.h - eye) / rf) - Math.atan((BASE - eye) / rf)) * DEG;
-      const top = Math.atan((t.h - eye) / rf) * DEG;
+  function statueTable(L, s) {
+    const eye = state.eye / 1000, T = statueTowers(L, s);
+    const rows = T.map((t, i) => {
+      const appH = (Math.atan((t.h - eye) / rf(t)) - Math.atan((BASE - eye) / rf(t))) * DEG;
+      const top = Math.atan((t.h - eye) / rf(t)) * DEG;
       let gap = '', cls = '';
       if (i < 6) {
-        const n = s1[i + 1], gv = ((n.th - t.th) - hw(t.r) - hw(n.r)) * DEG;
+        const n = T[i + 1], gv = (Math.abs(wrap(n.th - t.th)) - hw(t.r) - hw(n.r)) * DEG;
         gap = (gv >= 0 ? '+' : '') + gv.toFixed(1);
         cls = Math.abs(gv) < 0.3 ? 'ok' : (gv < 0 ? 'bad' : '');
       }
-      return `<tr><td>${t.name} · ${mm(t.h)}</td><td>${mm(t.r)}</td><td>${(t.th * DEG).toFixed(1)}</td><td class="${cls}">${gap}</td><td>${top.toFixed(1)}</td><td>${appH.toFixed(1)}</td></tr>`;
+      return `<tr><td>${t.name} · ${mm(t.h)}</td><td>${mm(t.r)}</td><td>${(relAz(t, s) * DEG).toFixed(1)}</td><td class="${cls}">${gap}</td><td>${top.toFixed(1)}</td><td>${appH.toFixed(1)}</td></tr>`;
     }).join('');
-    const clear = Math.min(s1[0].r, s1[6].r) - HALF();
-    const farMax = Math.max(...s1.map(t => t.r + HALF()));
-    const span = Math.max(L.left.th[3] + hw(L.left.r[3]), L.right.th[3] + hw(L.right.r[3])) * DEG;
-    const spacings = [0, 1, 2, 3, 4, 5].map(i => Math.hypot(s1[i].x - s1[i + 1].x, s1[i].z - s1[i + 1].z));
-    const lv = levelHeights(L);
-    const solved = L.left.solved && L.right.solved;
-    document.getElementById('readout').innerHTML = `
-      <table><thead><tr><th>Tower</th><th>r</th><th>az °</th><th>gap °</th><th>top °</th><th>lit °</th></tr></thead><tbody>${rows}</tbody></table>
-      <p class="note">r: tower centre to the circle centre, mm. az: azimuth from the apex. gap: angular gap to the next silhouette from the eye; negative = the nearer tower hides part of the next (green = touching). top: elevation of the tower top above the eye line. lit: angle the lit part subtends.</p>
-      <p class="note">Each statue spans ±${span.toFixed(0)}° of the view. Free radius at the centre (nearest corner of T1/T7): <b>${mm(clear)} mm</b>. Farthest corner: ${mm(farMax)} mm from the centre (${farMax <= R() + 0.0005 ? 'inside' : 'outside'} the Ø ${state.diam} circle). Spacing T1–T2 … T6–T7: ${spacings.map(mm).join(' / ')} mm.</p>
-      ${solved ? '' : '<p class="warn">No solution: an arm reaches the centre before its tip tower. That tip is clamped at 200 mm.</p>'}`;
-    const same = lv.every((v, i) => v === state.h[i]);
-    document.getElementById('levelNote').innerHTML = same
+    const span = Math.max(...T.map(t => Math.abs(relAz(t, s)) + hw(t.r))) * DEG;
+    const spacings = [0, 1, 2, 3, 4, 5].map(i => Math.hypot(T[i].x - T[i + 1].x, T[i].z - T[i + 1].z));
+    return `<table><thead><tr><th>Statue ${s + 1}</th><th>r</th><th>az °</th><th>gap °</th><th>top °</th><th>lit °</th></tr></thead><tbody>${rows}</tbody></table>
+      <p class="note">Spans ±${span.toFixed(0)}° of the view from its apex direction. Spacing T1–T2 … T6–T7: ${spacings.map(mm).join(' / ')} mm.</p>`;
+  }
+  function updateReadout(L) {
+    const c = L.choice;
+    const tables = statueTable(L, 0) + (state.decoupled ? statueTable(L, 1) : '<p class="note">Statue 2 mirrors statue 1.</p>');
+    $('readout').innerHTML = `${tables}
+      <p class="note">r: tower centre to the circle centre, mm. az: azimuth from the statue's apex direction. gap: angular gap to the next silhouette from the eye; negative = the nearer tower hides part of the next (green = touching). top: elevation of the tower top above the eye line. lit: angle the lit part subtends.</p>
+      <p class="note">Free radius at the centre (nearest corner of any tower): <b>${mm(L.clear)} mm</b>. Farthest corner: ${mm(L.farMax)} mm from the centre (${L.farMax <= R() + 0.0005 ? 'inside' : 'outside'} the Ø ${state.diam} circle).</p>
+      ${L.solved ? '' : '<p class="warn">No solution: an arm reaches the centre before its tip tower. That tip is clamped at 200 mm.</p>'}`;
+    // level-top heights, per statue when decoupled
+    const lv = [levelHeights(L, 0)].concat(state.decoupled ? [levelHeights(L, 1)] : []);
+    const same = lv.every((arr, s) => arr.every((v, i) => v === cfg(s).h[i]));
+    $('levelNote').innerHTML = same
       ? 'These heights put every top on one line from the eye at the centre.'
-      : `Level-top heights for the current spacing, side, circle and eye height (T4 kept): ${NAMES.map((n, i) => `${n} ${lv[i]}`).join(' · ')} mm.`;
+      : lv.map((arr, s) => `${state.decoupled ? `Statue ${s + 1}: ` : ''}${NAMES.map((n, i) => `${n} ${arr[i]}`).join(' · ')} mm`).join('<br>') + ' (T4 kept, for the current layout, side, circle and eye height).';
     levelPending = lv;
 
-    const res = document.getElementById('result');
-    document.getElementById('manualBadge').hidden = !state.manual;
-    if (state.manual) {
+    $('manualBadge').hidden = !(state.st[0].manual || (state.decoupled && state.st[1].manual)) || !!state.free;
+    $('freeBadge').hidden = !state.free;
+    const res = $('result');
+    if (state.free || !c) {
+      const how = state.free ? 'Towers moved freely' : 'Individual spacings set by hand';
       res.innerHTML = L.fits
-        ? `Individual spacings set by hand. They fit: inside the circle, with ${mm(clear)} mm free at the centre.`
-        : `<span class="warn">Individual spacings set by hand. They do not fit: ${farMax > R() + 0.0005 ? 'a tower crosses the circle; ' : ''}${clear < state.clear / 1000 - 1e-9 ? `only ${mm(clear)} mm free at the centre (wanted ${state.clear}); ` : ''}${solved ? '' : 'an arm reaches the centre.'}</span>`;
+        ? `${how}. They fit: inside the circle, with ${mm(L.clear)} mm free at the centre.`
+        : `<span class="warn">${how}. They do not fit: ${L.farMax > R() + 0.0005 ? 'a tower crosses the circle; ' : ''}${L.clear < state.clear / 1000 - 1e-9 ? `only ${mm(L.clear)} mm free at the centre (wanted ${state.clear}); ` : ''}${L.solved ? '' : 'an arm reaches the centre.'}</span>`;
       return;
     }
     const sUsed = `<b>${mm(c.s)} mm</b>`;
-    if (c.reason === 'optimum') res.innerHTML = `Spacing used: ${sUsed}, the optimum. Touching silhouettes fit inside the circle with ${mm(clear)} mm free at the centre.`;
+    if (c.reason === 'optimum') res.innerHTML = `Spacing used: ${sUsed}, the optimum. Touching silhouettes fit inside the circle with ${mm(L.clear)} mm free at the centre.`;
     else if (c.reason === 'capped') res.innerHTML = `Spacing used: ${sUsed}. The optimum (${state.sopt} mm) does not fit: with touching silhouettes inside the circle and ${state.clear} mm free at the centre, the largest spacing is ${mm(c.sMaxValid)} mm.`;
     else if (c.reason === 'below-min') res.innerHTML = `<span class="warn">Spacing used: ${sUsed}, the minimum, but even that does not fit: the largest spacing that keeps ${state.clear} mm free at the centre is ${mm(c.sMaxValid)} mm. Widen the circle, shrink the towers, lower the minimum spacing, or accept less room at the centre.</span>`;
     else res.innerHTML = `<span class="warn">No spacing works with these numbers: the towers do not fit between the circle and the free radius at the centre.</span>`;
   }
-
 
   // ---------- LEDs and power supplies ----------
   // Every face is one strip cut whole from one reel (no joins), so reels are bin-packed with whole strips.
@@ -571,16 +622,15 @@ body.shot .panel, body.shot .views { display: none; }
     };
     return rec(0, k);
   }
-  function powerModel() {
-    const lit = state.h.map(h => Math.max(0, h - state.unlit) / 1000);           // m per face
+  const fmtGroups = g => g.map(b => `${b.items.map(it => it.tag).join('+')} (${b.used.toFixed(1)} A)`).join(' · ');
+  function powerModel(heights) {
+    const lit = heights.map(h => Math.max(0, h - state.unlit) / 1000);            // m per face
     const leds = lit.map(l => Math.floor(l * state.lpm + 1e-9));
     const amps = leds.map(n => 4 * n * state.mA / 1000);
     const towers = NAMES.map((n, i) => ({ tag: n, len: amps[i] }));
-    const metresSide = lit.reduce((a, l) => a + 4 * l, 0);
-    const stripsSide = NAMES.flatMap((n, i) => [0, 1, 2, 3].map(f => ({ tag: `${n}`, len: lit[i] * 1000 })));
-    const reelsSide = packBins(stripsSide, state.reel);
-    const reelsBoth = packBins([...stripsSide, ...stripsSide], state.reel);
-    const fmtGroups = g => g.map(b => `${b.items.map(it => it.tag).join('+')} (${b.used.toFixed(1)} A)`).join(' · ');
+    const metres = lit.reduce((a, l) => a + 4 * l, 0);
+    const strips = NAMES.flatMap((n, i) => [0, 1, 2, 3].map(() => ({ tag: n, len: lit[i] * 1000 })));
+    const reels = packBins(strips, state.reel);
     const exact = minBins(towers, state.psuA);
     let groups = exact, note = '';
     if (exact) {
@@ -593,26 +643,31 @@ body.shot .panel, body.shot .views { display: none; }
       }
     }
     const tooBig = NAMES.filter((n, i) => amps[i] > state.psuA + 1e-9);
-    return { lit, leds, amps, metresSide, reelsSide, reelsBoth, exact, groups, note, tooBig, fmtGroups };
+    return { heights, lit, leds, amps, metres, strips, reels, exact, groups, note, tooBig };
   }
   function computePower() {
     powerShown = true;
-    const { lit, leds, amps, metresSide, reelsSide, reelsBoth, exact, groups, note, tooBig, fmtGroups } = powerModel();
-    const rows = NAMES.map((n, i) => `<tr><td>${n} · ${state.h[i]}</td><td>${Math.round(lit[i] * 1000)}</td><td>${leds[i]}</td><td>${4 * leds[i]}</td><td class="${amps[i] > state.psuA ? 'bad' : ''}">${amps[i].toFixed(1)}</td></tr>`).join('');
-    document.getElementById('powerOut').innerHTML = `
-      <table><thead><tr><th>Tower</th><th>lit mm</th><th>LEDs/face</th><th>LEDs</th><th>A full white</th></tr></thead><tbody>${rows}</tbody></table>
+    const sides = [powerModel(cfg(0).h)].concat(state.decoupled ? [powerModel(cfg(1).h)] : []);
+    const both = state.decoupled ? sides : [sides[0], sides[0]];
+    const pooled = packBins([...both[0].strips, ...both[1].strips], state.reel);
+    const sideHtml = (pw, s) => {
+      const rows = NAMES.map((n, i) => `<tr><td>${n} · ${pw.heights[i]}</td><td>${Math.round(pw.lit[i] * 1000)}</td><td>${pw.leds[i]}</td><td>${4 * pw.leds[i]}</td><td class="${pw.amps[i] > state.psuA ? 'bad' : ''}">${pw.amps[i].toFixed(1)}</td></tr>`).join('');
+      return `<table><thead><tr><th>${state.decoupled ? `Side ${s + 1}` : 'Tower'}</th><th>lit mm</th><th>LEDs/face</th><th>LEDs</th><th>A full white</th></tr></thead><tbody>${rows}</tbody></table>
       <div class="result" style="margin-top:8px">
-        <b>Per side (one statue, 7 towers):</b><br>
-        LED strip: <b>${metresSide.toFixed(1)} m</b> (${leds.reduce((a, n) => a + 4 * n, 0)} LEDs, ${amps.reduce((a, x) => a + x, 0).toFixed(1)} A at full white)<br>
-        Reels of ${(state.reel / 1000).toFixed(1)} m, every face strip cut whole from one reel: <b>${reelsSide.length}</b>
-        (${(reelsSide.length * state.reel / 1000 - metresSide).toFixed(1)} m left over)<br>
-        Power supplies at ≤ ${state.psuA} A each, no tower split: <b>${exact ? exact.length : 'impossible'}</b>${exact ? ` — ${fmtGroups(groups)}; ${note}` : ''}
+        <b>${state.decoupled ? `Side ${s + 1}` : 'Per side'} (7 towers):</b><br>
+        LED strip: <b>${pw.metres.toFixed(1)} m</b> (${pw.leds.reduce((a, n) => a + 4 * n, 0)} LEDs, ${pw.amps.reduce((a, x) => a + x, 0).toFixed(1)} A at full white)<br>
+        Reels of ${(state.reel / 1000).toFixed(1)} m, every face strip cut whole from one reel: <b>${pw.reels.length}</b>
+        (${(pw.reels.length * state.reel / 1000 - pw.metres).toFixed(1)} m left over)<br>
+        Power supplies at ≤ ${state.psuA} A each, no tower split: <b>${pw.exact ? pw.exact.length : 'impossible'}</b>${pw.exact ? ` — ${fmtGroups(pw.groups)}; ${pw.note}` : ''}
       </div>
+      ${pw.tooBig.length ? `<p class="warn">${pw.tooBig.join(', ')} alone draw${pw.tooBig.length > 1 ? '' : 's'} more than ${state.psuA} A: no single supply can carry the tower. Raise the ceiling, lower the per-LED current (the firmware current cap), or shorten the tower.</p>` : ''}`;
+    };
+    const sum = f => both.reduce((a, pw) => a + f(pw), 0);
+    $('powerOut').innerHTML = sides.map(sideHtml).join('') + `
       <div class="result" style="margin-top:6px">
-        <b>Both sides:</b> ${(2 * metresSide).toFixed(1)} m of strip, ${2 * reelsSide.length} reels
-        (${reelsBoth.length} if the cutting plan pools both sides' offcuts), ${exact ? 2 * exact.length : '—'} supplies.
+        <b>Both sides:</b> ${sum(pw => pw.metres).toFixed(1)} m of strip, ${sum(pw => pw.reels.length)} reels
+        (${pooled.length} if the cutting plan pools both sides' offcuts), ${both.every(pw => pw.exact) ? sum(pw => pw.exact.length) : '—'} supplies.
       </div>
-      ${tooBig.length ? `<p class="warn">${tooBig.join(', ')} alone draw${tooBig.length > 1 ? '' : 's'} more than ${state.psuA} A: no single supply can carry the tower. Raise the ceiling, lower the per-LED current (the firmware current cap), or shorten the tower.</p>` : ''}
       <p class="note">Full-white worst case. Lit length = height − unlit base. LEDs per face rounded down to whole LEDs at ${state.lpm}/m. A tower's 4 faces draw 4 × its LEDs × ${state.mA} mA.</p>`;
   }
 
@@ -620,21 +675,24 @@ body.shot .panel, body.shot .views { display: none; }
   const camCentre = new THREE.PerspectiveCamera(60, 1, 0.05, 200);
   const camDrone = new THREE.PerspectiveCamera(40, 1, 0.1, 300);
   const camTop = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 200);
-  camTop.position.set(0, 25, 0); camTop.up.set(0, 0, -1); camTop.lookAt(0, 0, 0);   // below the fog start, else the view greys out   // statue 1's apex at the top of the image
-  camDrone.position.set(5.2, 6.2, 7.6);
-  const controls = new THREE.OrbitControls(camDrone, renderer.domElement);
-  controls.target.set(0, 0.5, 0); controls.maxPolarAngle = Math.PI / 2 - 0.02; controls.update();
-  const look = new THREE.OrbitControls(camCentre, renderer.domElement);
+  camTop.position.set(0, 25, 0); camTop.up.set(0, 0, -1); camTop.lookAt(0, 0, 0);   // below the fog start, else the view greys out
+  const controls = new THREE.OrbitControls(camDrone, renderer.domElement);       // left: orbit, right: pan, wheel: zoom, two fingers: pan/zoom
+  controls.maxPolarAngle = Math.PI / 2 - 0.02;
+  if (controls.listenToKeyEvents) controls.listenToKeyEvents(window);            // arrow keys pan the drone
+  const look = new THREE.OrbitControls(camCentre, renderer.domElement);          // left: look around; the camera itself walks (below)
   look.enablePan = false; look.enableZoom = false; look.rotateSpeed = -0.4;
-
   let droneScale = 1;
+  const droneHome = () => { const k = Math.max(1, R() / 4); camDrone.position.set(5.2 * k, 6.2 * k, 7.6 * k); controls.target.set(0, 0.5, 0); controls.update(); };
+  droneHome();
+
   function applyView() {
     const aspect = viewEl.clientWidth / Math.max(1, viewEl.clientHeight);
     camCentre.fov = 2 * Math.atan(Math.tan(state.hfov / 2 / DEG) / aspect) * DEG;
     camCentre.aspect = aspect; camCentre.updateProjectionMatrix();
     camDrone.aspect = aspect; camDrone.updateProjectionMatrix();
-    camCentre.position.set(0, state.eye / 1000, 0);
-    const k = Math.max(1, R() / 4);                       // the drone backs off for a bigger circle
+    const dy = state.eye / 1000 - camCentre.position.y;            // eye height follows the slider; the walked position stays
+    if (Math.abs(dy) > 1e-9) { camCentre.position.y += dy; look.target.y += dy; look.update(); }
+    const k = Math.max(1, R() / 4);
     if (k !== droneScale) { camDrone.position.multiplyScalar(k / droneScale); droneScale = k; }
     const hh = R() + 1.2, hwid = hh * aspect;                // top-down: the whole circle plus a margin
     camTop.left = -hwid; camTop.right = hwid; camTop.top = hh; camTop.bottom = -hh; camTop.updateProjectionMatrix();
@@ -643,20 +701,121 @@ body.shot .panel, body.shot .views { display: none; }
     person.visible = view !== 'centre';
     controls.enabled = view === 'drone';
     look.enabled = view === 'centre';
-    ['Centre', 'Drone', 'Top'].forEach(n => document.getElementById('btn' + n).setAttribute('aria-pressed', view === n.toLowerCase()));
+    ['Centre', 'Drone', 'Top'].forEach(n => $('btn' + n).setAttribute('aria-pressed', view === n.toLowerCase()));
+    $('pad').hidden = view === 'top';
+    $('padIn').hidden = $('padOut').hidden = view !== 'drone';
+    $('hint').textContent = view === 'centre' ? 'Drag to look · right-drag, arrows / WASD or the pad to walk · press the view button again to reset'
+      : view === 'drone' ? 'Drag to orbit · right-drag or arrows to pan · wheel or ± to zoom · press the view button again to reset'
+      : 'Drag a tower to move it freely · the panel reports the new spacings';
+    renderer.domElement.style.cursor = view === 'top' ? 'grab' : '';
   }
-  function aimCentre() {
+  function resetCentre() {
     if (!current) return;
-    const target = new THREE.Vector3(0, (state.h[3] / 1000 + BASE) / 2 * 0.9 + state.eye / 1000 * 0.1, -current.left.r[0]);
-    const dir = target.clone().sub(camCentre.position).normalize();
+    camCentre.position.set(0, state.eye / 1000, 0);
+    const apex = statueTowers(current, 0)[3];
+    const target = new THREE.Vector3(apex.x * 0.98, (cfg(0).h[3] / 1000 + BASE) / 2 * 0.9 + state.eye / 1000 * 0.1, apex.z * 0.98);
+    const dir = target.sub(camCentre.position).normalize();
     look.target.copy(camCentre.position).addScaledVector(dir, 0.5);
     look.update();
   }
+  // Walking the eye camera: forward/right relative to where it looks, on the ground plane.
+  const fwd = new THREE.Vector3(), rgt = new THREE.Vector3();
+  function walk(dForward, dRight) {
+    camCentre.getWorldDirection(fwd); fwd.y = 0; if (fwd.lengthSq() < 1e-6) return; fwd.normalize();
+    rgt.set(-fwd.z, 0, fwd.x);
+    const d = fwd.multiplyScalar(dForward).addScaledVector(rgt, dRight);
+    camCentre.position.add(d); look.target.add(d); look.update();
+  }
+  function dronePan(dRight, dUp) {                       // screen-space pan, like a right-drag
+    const e = camDrone.matrix.elements;
+    const right = new THREE.Vector3(e[0], e[1], e[2]), up = new THREE.Vector3(e[4], e[5], e[6]);
+    const d = right.multiplyScalar(dRight).addScaledVector(up, dUp);
+    camDrone.position.add(d); controls.target.add(d); controls.update();
+  }
+  function droneZoom(f) { camDrone.position.sub(controls.target).multiplyScalar(f).add(controls.target); controls.update(); }
   function resize() { renderer.setSize(viewEl.clientWidth, viewEl.clientHeight, false); applyView(); }
   window.addEventListener('resize', resize);
 
+  // Right-drag walks the eye camera (3D-software habit); the drone's own right-drag pan comes from OrbitControls.
+  let rdrag = null;
+  renderer.domElement.addEventListener('contextmenu', ev => ev.preventDefault());
+  renderer.domElement.addEventListener('pointerdown', ev => {
+    if (view === 'centre' && ev.button === 2) { rdrag = { x: ev.clientX, y: ev.clientY }; renderer.domElement.setPointerCapture(ev.pointerId); }
+  });
+  renderer.domElement.addEventListener('pointermove', ev => {
+    if (rdrag) { walk((rdrag.y - ev.clientY) * 0.01, (ev.clientX - rdrag.x) * 0.01); rdrag = { x: ev.clientX, y: ev.clientY }; }
+  });
+  renderer.domElement.addEventListener('pointerup', () => { rdrag = null; });
+  // Keyboard: arrows / WASD walk the eye camera (the drone's arrows are handled by OrbitControls).
+  const keys = new Set();
+  window.addEventListener('keydown', ev => { if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return; keys.add(ev.key.toLowerCase()); if (view === 'centre' && ['arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(ev.key.toLowerCase())) ev.preventDefault(); });
+  window.addEventListener('keyup', ev => keys.delete(ev.key.toLowerCase()));
+  function keyWalk() {
+    if (view !== 'centre') return;
+    const step = 0.04;
+    if (keys.has('w') || keys.has('arrowup')) walk(step, 0);
+    if (keys.has('s') || keys.has('arrowdown')) walk(-step, 0);
+    if (keys.has('a') || keys.has('arrowleft')) walk(0, -step);
+    if (keys.has('d') || keys.has('arrowright')) walk(0, step);
+  }
+  // On-screen pad: hold to repeat; works by touch.
+  let padTimer = null;
+  const padStep = move => {
+    if (move === 'reset') { if (view === 'centre') resetCentre(); else if (view === 'drone') droneHome(); return; }
+    if (view === 'centre') { if (move === 'fwd') walk(0.08, 0); if (move === 'back') walk(-0.08, 0); if (move === 'left') walk(0, -0.08); if (move === 'right') walk(0, 0.08); }
+    else if (view === 'drone') {
+      const s = 0.08 * Math.max(1, R() / 4);
+      if (move === 'fwd') dronePan(0, s); if (move === 'back') dronePan(0, -s); if (move === 'left') dronePan(-s, 0); if (move === 'right') dronePan(s, 0);
+      if (move === 'in') droneZoom(0.97); if (move === 'out') droneZoom(1.03);
+    }
+  };
+  $('pad').querySelectorAll('button[data-move]').forEach(b => {
+    const stop = () => { clearInterval(padTimer); padTimer = null; };
+    b.addEventListener('pointerdown', ev => { ev.preventDefault(); b.setPointerCapture(ev.pointerId); padStep(b.dataset.move); if (b.dataset.move !== 'reset') padTimer = setInterval(() => padStep(b.dataset.move), 50); });
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(e => b.addEventListener(e, stop));
+  });
+
+  // Dragging towers in the top-down view moves them freely; the mural and readout refresh on release.
+  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+  let tdrag = null;
+  const toNdc = ev => { const r = renderer.domElement.getBoundingClientRect(); ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1); };
+  const groundAt = ev => { toNdc(ev); ray.setFromCamera(ndc, camTop); const p = new THREE.Vector3(); return ray.ray.intersectPlane(groundPlane, p) ? p : null; };
+  function initFree() {
+    if (state.free) return;
+    state.free = { s1: statueTowers(current, 0).map(t => [t.x, t.z]), s2: statueTowers(current, 1).map(t => [t.x, t.z]) };
+  }
+  function moveTower(idx, x, z) {
+    const s = idx < 7 ? 0 : 1, i = idx % 7;
+    const setVis = (ix, px, pz) => { const g = towerGroups[ix]; if (g) placeGroup(g, px, pz); const l = labels[ix]; if (l) placeLabel(l, px, pz); };
+    if (!state.decoupled) {                                   // coupled: statue 2 is statue 1 rotated by 180°
+      if (s === 1) { x = -x; z = -z; }
+      state.free.s1[i] = [x, z]; setVis(i, x, z); setVis(7 + i, -x, -z);
+    } else { state.free['s' + (s + 1)][i] = [x, z]; setVis(idx, x, z); }
+  }
+  renderer.domElement.addEventListener('pointerdown', ev => {
+    if (view !== 'top' || ev.button !== 0) return;
+    toNdc(ev); ray.setFromCamera(ndc, camTop);
+    const hit = ray.intersectObjects(towerGroups.map(g => g.userData.pick), false)[0];
+    if (!hit) return;
+    const g = hit.object.parent, p = groundAt(ev);
+    if (!p) return;
+    initFree();
+    tdrag = { idx: g.userData.idx, dx: g.position.x - p.x, dz: g.position.z - p.z, moved: false };
+    renderer.domElement.setPointerCapture(ev.pointerId);
+    renderer.domElement.style.cursor = 'grabbing';
+  });
+  renderer.domElement.addEventListener('pointermove', ev => {
+    if (!tdrag) return;
+    const p = groundAt(ev); if (!p) return;
+    tdrag.moved = true; moveTower(tdrag.idx, p.x + tdrag.dx, p.z + tdrag.dz);
+  });
+  const endDrag = () => { if (!tdrag) return; const moved = tdrag.moved; tdrag = null; renderer.domElement.style.cursor = 'grab'; if (moved) build(); };
+  renderer.domElement.addEventListener('pointerup', endDrag);
+  renderer.domElement.addEventListener('pointercancel', endDrag);
+
   const tmp = new THREE.Vector3();
   function render() {
+    keyWalk();
     const cam = view === 'centre' ? camCentre : view === 'drone' ? camDrone : camTop;
     if (view === 'drone') controls.update();
     const base = view === 'centre' ? 0.09 : 0.032;        // small in the drone view so labels never hide towers
@@ -682,7 +841,7 @@ body.shot .panel, body.shot .views { display: none; }
       <input type="range" id="${id}_r" min="${min}" max="${max}" step="${step}" aria-label="${label}">`;
     host.appendChild(row);
     const n = row.querySelector('input[type=number]'), r = row.querySelector('input[type=range]');
-    const show = () => { n.value = getter(); r.value = getter(); };
+    const show = (disabled) => { n.value = getter(); r.value = getter(); if (disabled !== undefined) { n.disabled = r.disabled = disabled; } };
     show();
     const commit = v => { if (isNaN(v)) return; setter(Math.min(max, Math.max(min, v))); show(); after(); };
     r.addEventListener('input', () => commit(parseFloat(r.value)));
@@ -690,39 +849,71 @@ body.shot .panel, body.shot .views { display: none; }
     inputs[key] = show;
   }
   function setParam(key, v) {
-    if (/^h\d$/.test(key)) state.h[parseInt(key.slice(1), 10) - 1] = v; else state[key] = v;
+    let m;
+    if ((m = /^h(\d)$/.exec(key))) state.st[0].h[+m[1] - 1] = v;
+    else if ((m = /^h2_(\d)$/.exec(key))) state.st[1].h[+m[1] - 1] = v;
+    else if ((m = /^p(\d)$/.exec(key))) state.st[0].pairs[+m[1] - 1] = v;
+    else if ((m = /^p2_(\d)$/.exec(key))) state.st[1].pairs[+m[1] - 1] = v;
+    else state[key] = v;
     if (inputs[key]) inputs[key]();
   }
-  const $ = id => document.getElementById(id);
   const rebuild = () => build();
-  paramRow($('towerParams'), 'side', 'Tower side length', 200, 1000, 10, 'mm', () => state.side, v => state.side = v, rebuild);
-  NAMES.forEach((n, i) => paramRow($('towerParams'), 'h' + (i + 1), `${n} height${i === 3 ? ' (apex)' : (i === 0 || i === 6) ? ' (tip)' : ''}`, 300, 3000, 10, 'mm', () => state.h[i], v => state.h[i] = v, rebuild));
-  // Changing min / max / optimum re-solves the pairs. If the user set pairs by hand, ask first; "keep mine"
-  // puts the three values back as they were. confirm() cannot be used: hosted viewers return false from it.
-  let pending = null;
-  const afterRange = () => {
-    if (!state.manual) { build(); return; }
-    if (!pending) { pending = { smin: pendingOld.smin, smax: pendingOld.smax, sopt: pendingOld.sopt }; $('confirmBox').hidden = false; }
+
+  // Generic in-page confirmation (confirm() returns false inside hosted viewers).
+  let askOpen = null;
+  function ask(text, onYes, onNo) { $('confirmText').textContent = text; askOpen = { onYes, onNo }; $('confirmBox').hidden = false; }
+  $('confirmYes').addEventListener('click', () => { const a = askOpen; askOpen = null; $('confirmBox').hidden = true; a && a.onYes(); });
+  $('confirmNo').addEventListener('click', () => { const a = askOpen; askOpen = null; $('confirmBox').hidden = true; a && a.onNo(); });
+
+  // Solver settings: anything the solved layout depends on. Changing one while spacings or positions were set by
+  // hand asks first; "keep mine" puts the setting back as it was.
+  const SOLVER_KEYS = ['smin', 'smax', 'sopt', 'diam', 'clear', 'side', 'arm', 'mode'];
+  let snap = null;
+  const solverSetter = (key, fn) => v => { if (!askOpen && isCustom() && !snap) snap = Object.fromEntries(SOLVER_KEYS.map(k => [k, state[k]])); fn(v); };
+  const solverAfter = () => {
+    if (!isCustom()) { snap = null; applyView(); build(); return; }
+    if (askOpen) return;
+    ask('Spacings or positions were set by hand. Re-solve the layout and reset them?',
+      () => { snap = null; state.free = null; state.st.forEach(c => c.manual = false); applyView(); build(); },
+      () => { if (snap) { Object.assign(state, snap); snap = null; SOLVER_KEYS.forEach(k => inputs[k] && inputs[k]()); $('mode').value = state.mode; $('armParams').hidden = state.mode !== 'straight'; } applyView(); build(); });
   };
-  let pendingOld = { smin: state.smin, smax: state.smax, sopt: state.sopt };
-  const rangeSetter = key => v => {
-    if (!pending) pendingOld = { smin: state.smin, smax: state.smax, sopt: state.sopt };
+  const rangeFix = key => v => {
     state[key] = v;
     if (key === 'smin') { if (state.smax < v) setParam('smax', v); if (state.sopt < v) setParam('sopt', v); }
     if (key === 'smax') { if (state.smin > v) setParam('smin', v); if (state.sopt > v) setParam('sopt', v); }
     if (key === 'sopt') { if (v < state.smin) setParam('smin', v); if (v > state.smax) setParam('smax', v); }
   };
-  paramRow($('spacingParams'), 'smin', 'Minimum', 300, 3000, 10, 'mm', () => state.smin, rangeSetter('smin'), afterRange);
-  paramRow($('spacingParams'), 'smax', 'Maximum', 300, 3000, 10, 'mm', () => state.smax, rangeSetter('smax'), afterRange);
-  paramRow($('spacingParams'), 'sopt', 'Optimum', 300, 3000, 10, 'mm', () => state.sopt, rangeSetter('sopt'), afterRange);
-  $('confirmReset').addEventListener('click', () => { pending = null; state.manual = false; $('confirmBox').hidden = true; build(); });
-  $('confirmKeep').addEventListener('click', () => { Object.assign(state, pending); pending = null; ['smin', 'smax', 'sopt'].forEach(k => inputs[k]()); $('confirmBox').hidden = true; build(); });
-  const PAIR_NAMES = ['T1–T2', 'T2–T3', 'T3–T4', 'T4–T5', 'T5–T6', 'T6–T7'];
-  PAIR_NAMES.forEach((n, i) => paramRow($('pairParams'), 'p' + (i + 1), n, 300, 3000, 10, 'mm', () => state.pairs[i], v => { state.pairs[i] = v; state.manual = true; }, rebuild));
-  showPairs = () => [1, 2, 3, 4, 5, 6].forEach(i => inputs['p' + i] && inputs['p' + i]());
-  $('btnPairsReset').addEventListener('click', () => { state.manual = false; build(); });
-  paramRow($('circleParams'), 'diam', 'Circle diameter (to the farthest corners)', 3000, 20000, 100, 'mm', () => state.diam, v => state.diam = v, () => { applyView(); build(); });
-  paramRow($('circleParams'), 'clear', 'Free radius the viewer keeps at the centre', 0, 3000, 50, 'mm', () => state.clear, v => state.clear = v, rebuild);
+
+  paramRow($('towerParams'), 'side', 'Tower side length', 200, 1000, 10, 'mm', () => state.side, solverSetter('side', v => state.side = v), solverAfter);
+  NAMES.forEach((n, i) => paramRow($('towerParams'), 'h' + (i + 1), `${n} height${i === 3 ? ' (apex)' : (i === 0 || i === 6) ? ' (tip)' : ''}`, 300, 3000, 10, 'mm', () => state.st[0].h[i], v => state.st[0].h[i] = v, rebuild));
+  NAMES.forEach((n, i) => paramRow($('statue2Params'), 'h2_' + (i + 1), `Statue 2 ${n} height`, 300, 3000, 10, 'mm', () => state.st[1].h[i], v => state.st[1].h[i] = v, rebuild));
+  ['smin', 'smax', 'sopt'].forEach((k, i) => paramRow($('spacingParams'), k, ['Minimum', 'Maximum', 'Optimum'][i], 300, 3000, 10, 'mm', () => state[k], solverSetter(k, rangeFix(k)), solverAfter));
+  PAIR_NAMES.forEach((n, i) => paramRow($('pairParams'), 'p' + (i + 1), n, 300, 3000, 10, 'mm', () => state.st[0].pairs[i], v => { state.st[0].pairs[i] = v; state.st[0].manual = true; }, rebuild));
+  PAIR_NAMES.forEach((n, i) => paramRow($('pairParams2'), 'p2_' + (i + 1), `Statue 2 ${n}`, 300, 3000, 10, 'mm', () => state.st[1].pairs[i], v => { state.st[1].pairs[i] = v; state.st[1].manual = true; }, rebuild));
+  showPairs = towers => {
+    // in free mode the pair boxes only report the actual distances and are disabled
+    if (state.free && towers) {
+      [0, 1].forEach(s => { const T = towers.filter(t => t.statue === s + 1); const c = state.st[s]; for (let i = 0; i < 6; i++) c.pairs[i] = Math.round(Math.hypot(T[i].x - T[i + 1].x, T[i].z - T[i + 1].z) * 1000); });
+    }
+    for (let i = 1; i <= 6; i++) { inputs['p' + i] && inputs['p' + i](!!state.free); inputs['p2_' + i] && inputs['p2_' + i](!!state.free); }
+  };
+  $('btnPairsReset').addEventListener('click', () => { state.free = null; state.st.forEach(c => c.manual = false); build(); });
+  $('decoupled').checked = state.decoupled;
+  const showDecoupled = () => { $('statue2Params').hidden = !state.decoupled; $('pairParams2').hidden = !state.decoupled; };
+  showDecoupled();
+  $('decoupled').addEventListener('change', () => {
+    if ($('decoupled').checked) {
+      state.st[1] = JSON.parse(JSON.stringify(state.st[0]));   // start as a copy
+      state.decoupled = true; showDecoupled(); [1, 2, 3, 4, 5, 6, 7].forEach(i => inputs['h2_' + i]()); build();
+    } else {
+      const differs = JSON.stringify(state.st[1]) !== JSON.stringify(state.st[0]) || (state.free && state.free.s2.some(([x, z], i) => Math.abs(x + state.free.s1[i][0]) > 1e-6 || Math.abs(z + state.free.s1[i][1]) > 1e-6));
+      const couple = () => { state.decoupled = false; showDecoupled(); build(); };
+      if (differs) ask('Statue 2 will go back to mirroring statue 1 and lose its own settings. Continue?', couple, () => { $('decoupled').checked = true; });
+      else couple();
+    }
+  });
+  paramRow($('circleParams'), 'diam', 'Circle diameter (to the farthest corners)', 3000, 20000, 100, 'mm', () => state.diam, solverSetter('diam', v => state.diam = v), solverAfter);
+  paramRow($('circleParams'), 'clear', 'Free radius the viewer keeps at the centre', 0, 3000, 50, 'mm', () => state.clear, solverSetter('clear', v => state.clear = v), solverAfter);
   const repower = () => { if (powerShown) computePower(); };
   paramRow($('powerParams'), 'unlit', 'Unlit base at the foot of each face', 0, 500, 10, 'mm', () => state.unlit, v => state.unlit = v, repower);
   paramRow($('powerParams'), 'lpm', 'LEDs per metre', 30, 144, 1, '/m', () => state.lpm, v => state.lpm = v, repower);
@@ -730,16 +921,21 @@ body.shot .panel, body.shot .views { display: none; }
   paramRow($('powerParams'), 'psuA', 'Max current per power supply', 5, 60, 0.5, 'A', () => state.psuA, v => state.psuA = v, repower);
   paramRow($('powerParams'), 'reel', 'Reel length', 1000, 10000, 100, 'mm', () => state.reel, v => state.reel = v, repower);
   $('btnPower').addEventListener('click', computePower);
-  paramRow($('armParams'), 'arm', 'Arm angle from the radial line', 0, 80, 1, '°', () => state.arm, v => state.arm = v, rebuild);
+  paramRow($('armParams'), 'arm', 'Arm angle from the radial line', 0, 80, 1, '°', () => state.arm, solverSetter('arm', v => state.arm = v), solverAfter);
   paramRow($('viewerParams'), 'eye', 'Eye height', 400, 2000, 10, 'mm', () => state.eye, v => state.eye = v, () => { applyView(); build(); });
   paramRow($('viewerParams'), 'hfov', 'Horizontal field of view', 60, 140, 5, '°', () => state.hfov, v => state.hfov = v, applyView);
   $('mode').value = state.mode; $('armParams').hidden = state.mode !== 'straight';
-  $('mode').addEventListener('change', () => { state.mode = $('mode').value; $('armParams').hidden = state.mode !== 'straight'; build(); });
+  $('mode').addEventListener('change', () => { solverSetter('mode', v => { state.mode = v; $('armParams').hidden = v !== 'straight'; })($('mode').value); solverAfter(); });
   $('labels').checked = state.labels;
   $('labels').addEventListener('change', () => { state.labels = $('labels').checked; labels.forEach(l => l.visible = state.labels); });
-  $('btnLevel').addEventListener('click', () => { if (!levelPending) return; levelPending.forEach((v, i) => setParam('h' + (i + 1), v)); build(); });
-  $('btnCentre').addEventListener('click', () => { view = 'centre'; applyView(); aimCentre(); });
-  $('btnDrone').addEventListener('click', () => { view = 'drone'; applyView(); });
+  $('btnLevel').addEventListener('click', () => {
+    if (!levelPending) return;
+    levelPending.forEach((arr, s) => arr.forEach((v, i) => setParam((s ? 'h2_' : 'h') + (i + 1), v)));
+    build();
+  });
+  // View buttons: switch, or reset the camera when the view is already active.
+  $('btnCentre').addEventListener('click', () => { if (view === 'centre') resetCentre(); view = 'centre'; applyView(); });
+  $('btnDrone').addEventListener('click', () => { if (view === 'drone') droneHome(); view = 'drone'; applyView(); });
   $('btnTop').addEventListener('click', () => { view = 'top'; applyView(); });
   // Save PNG: a download where the host allows it; the frame is also shown full-size so it can be saved
   // by right-click or long-press where downloads are blocked (hosted viewers).
@@ -748,26 +944,30 @@ body.shot .panel, body.shot .views { display: none; }
     $('shotImg').src = url; $('shotOverlay').hidden = false;
     try {
       const a = document.createElement('a');
-      a.download = `statue-${view}-${state.pairs.join('-')}mm.png`;
+      a.download = `statue-${view}.png`;
       a.href = url; a.click();
     } catch (e) { /* downloads blocked: the overlay remains */ }
   });
+
   // ---------- JSON export / load: the handoff file for the led-over-rj245 repository ----------
   const JSON_FORMAT = 'led-over-rj245/statue-layout';
+  const statueParams = c => ({ heights_mm: [...c.h], spacing_pairs_mm: [...c.pairs], manual: c.manual });
   function paramsObject() {
     return {
-      side_mm: state.side, heights_mm: [...state.h],
-      spacing_mm: { min: state.smin, max: state.smax, optimum: state.sopt, pairs: [...state.pairs], pair_names: PAIR_NAMES, manual: state.manual },
+      side_mm: state.side, heights_mm: [...state.st[0].h],
+      spacing_mm: { min: state.smin, max: state.smax, optimum: state.sopt, pairs: [...state.st[0].pairs], pair_names: PAIR_NAMES, manual: state.st[0].manual },
+      statue2: state.decoupled ? statueParams(state.st[1]) : null,                 // null: statue 2 mirrors statue 1
+      free_positions_mm: state.free ? { statue1: state.free.s1.map(([x, z]) => [mm(x), mm(-z)]), statue2: state.free.s2.map(([x, z]) => [mm(x), mm(-z)]) } : null,
       circle_diameter_mm: state.diam, free_radius_mm: state.clear,
       arm: { method: state.mode, angle_deg: state.arm },
       viewer: { eye_mm: state.eye, fov_deg: state.hfov },
       leds: { unlit_base_mm: state.unlit, per_m: state.lpm, mA_per_led: state.mA, psu_max_A: state.psuA, reel_mm: state.reel },
     };
   }
-  // Last settings live in this browser only. URL parameters win (headless renders and shared links stay
-  // deterministic), and nothing is saved in shot or dump mode.
+  // Last settings live in this browser only. URL state parameters win (headless renders and shared links stay
+  // deterministic) and are never saved; view flags alone still restore the store.
   const STORE_KEY = 'statueSettings';
-  const urlHasParams = [...q.keys()].some(k => !['view', 'shot', 'dump', 'labels'].includes(k));   // view flags alone still restore the store
+  const urlHasParams = [...q.keys()].some(k => !['view', 'shot', 'dump', 'labels'].includes(k));
   let storedParams = null;
   try { if (!urlHasParams) storedParams = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); } catch (e) { storedParams = null; }
   function saveSettings() {
@@ -775,39 +975,41 @@ body.shot .panel, body.shot .views { display: none; }
     try { localStorage.setItem(STORE_KEY, JSON.stringify(paramsObject())); } catch (e) { /* storage unavailable */ }
   }
   function exportObject() {
-    const L = current, pw = powerModel(), r1 = v => Math.round(v * 10) / 10;
-    const statues = [1, 2].map(sn => ({
-      statue: sn,
-      apex_azimuth_deg: (sn - 1) * 180,
-      towers: L.towers.filter(t => t.statue === sn).map((t, i, arr) => ({
-        name: t.name, height_mm: Math.round(t.h * 1000), lit_mm: Math.round(pw.lit[i] * 1000), leds_per_face: pw.leds[i],
-        r_mm: mm(t.r), azimuth_deg: r1(t.th * DEG), x_mm: mm(t.x), y_mm: mm(-t.z),
-        corner_towards_centre: true, box_yaw_deg: r1(((t.th * DEG) + 45) % 360),
-        spacing_to_next_mm: i < 6 ? mm(Math.hypot(arr[i + 1].x - t.x, arr[i + 1].z - t.z)) : null,
-        full_white_A: r1(pw.amps[i]),
-      })),
-    }));
-    const s1 = L.towers.slice(0, 7);
+    const L = current, r1 = v => Math.round(v * 10) / 10;
+    const pws = [powerModel(cfg(0).h), powerModel(cfg(1).h)];
+    const statues = [0, 1].map(s => {
+      const T = statueTowers(L, s), pw = pws[s];
+      return {
+        statue: s + 1, mirrors_statue_1: !state.decoupled && s === 1, apex_azimuth_deg: s * 180,
+        towers: T.map((t, i) => ({
+          name: t.name, height_mm: Math.round(t.h * 1000), lit_mm: Math.round(pw.lit[i] * 1000), leds_per_face: pw.leds[i],
+          r_mm: mm(t.r), azimuth_deg: r1(wrap(t.th) * DEG), x_mm: mm(t.x), y_mm: mm(-t.z),
+          corner_towards_centre: true, box_yaw_deg: r1(((wrap(t.th) * DEG) + 45 + 360) % 360),
+          spacing_to_next_mm: i < 6 ? mm(Math.hypot(T[i + 1].x - t.x, T[i + 1].z - t.z)) : null,
+          full_white_A: r1(pw.amps[i]),
+        })),
+        half_span_deg: r1(Math.max(...T.map(t => Math.abs(relAz(t, s)) + hw(t.r))) * DEG),
+        level_top_heights_mm: levelHeights(L, s),
+      };
+    });
+    const side = pw => ({
+      strip_m: r1(pw.metres), leds: pw.leds.reduce((a, n) => a + 4 * n, 0), full_white_A: r1(pw.amps.reduce((a, x) => a + x, 0)),
+      reels: pw.reels.length, supplies: pw.exact ? pw.exact.length : null,
+      supply_groups: pw.exact ? pw.groups.map(g => ({ towers: g.items.map(it => it.tag), A: r1(g.used) })) : null,
+      note: pw.note, towers_over_limit: pw.tooBig,
+    });
+    const pooled = packBins([...pws[0].strips, ...pws[1].strips], state.reel);
     return {
-      format: JSON_FORMAT, version: 1, generated: new Date().toISOString(),
+      format: JSON_FORMAT, version: 2, generated: new Date().toISOString(),
       units: 'mm, degrees, A; plan x east, y north with statue 1 apex on +y; azimuth clockwise from +y',
       params: paramsObject(),
       layout: {
-        fits: L.fits, spacing_used_mm: L.choice ? mm(L.choice.s) : null, spacing_reason: L.choice ? L.choice.reason : 'manual',
-        free_radius_mm: mm(Math.min(s1[0].r, s1[6].r) - HALF()),
-        farthest_corner_mm: mm(Math.max(...s1.map(t => t.r + HALF()))),
-        statue_half_span_deg: r1(Math.max(L.left.th[3] + hw(L.left.r[3]), L.right.th[3] + hw(L.right.r[3])) * DEG),
-        level_top_heights_mm: levelHeights(L),
-        statues,
+        fits: L.fits, spacing_used_mm: L.choice ? mm(L.choice.s) : null, spacing_reason: L.choice ? L.choice.reason : (state.free ? 'free' : 'manual'),
+        free_radius_mm: mm(L.clear), farthest_corner_mm: mm(L.farMax), statues,
       },
       leds_power: {
-        per_side: {
-          strip_m: r1(pw.metresSide), leds: pw.leds.reduce((a, n) => a + 4 * n, 0), full_white_A: r1(pw.amps.reduce((a, x) => a + x, 0)),
-          reels: pw.reelsSide.length, supplies: pw.exact ? pw.exact.length : null,
-          supply_groups: pw.exact ? pw.groups.map(g => ({ towers: g.items.map(it => it.tag), A: r1(g.used) })) : null,
-          note: pw.note, towers_over_limit: pw.tooBig,
-        },
-        both_sides: { strip_m: r1(2 * pw.metresSide), reels: 2 * pw.reelsSide.length, reels_if_pooled: pw.reelsBoth.length, supplies: pw.exact ? 2 * pw.exact.length : null },
+        per_side: side(pws[0]), side_2: state.decoupled ? side(pws[1]) : null,
+        both_sides: { strip_m: r1(pws[0].metres + pws[1].metres), reels: pws[0].reels.length + pws[1].reels.length, reels_if_pooled: pooled.length, supplies: (pws[0].exact && pws[1].exact) ? pws[0].exact.length + pws[1].exact.length : null },
       },
     };
   }
@@ -820,13 +1022,22 @@ body.shot .panel, body.shot .views { display: none; }
     if (Array.isArray(P.heights_mm)) P.heights_mm.slice(0, 7).forEach((v, i) => setIf('h' + (i + 1), v));
     const S = P.spacing_mm || {};
     setIf('smin', S.min); setIf('smax', S.max); setIf('sopt', S.optimum);
-    if (Array.isArray(S.pairs) && S.pairs.length === 6 && S.manual) { state.pairs = S.pairs.map(Number); state.manual = true; } else state.manual = false;
+    if (Array.isArray(S.pairs) && S.pairs.length === 6 && S.manual) { state.st[0].pairs = S.pairs.map(Number); state.st[0].manual = true; } else state.st[0].manual = false;
+    if (P.statue2 && Array.isArray(P.statue2.heights_mm)) {
+      state.decoupled = true; state.st[1] = { h: P.statue2.heights_mm.slice(0, 7).map(Number), pairs: (P.statue2.spacing_pairs_mm || [0, 0, 0, 0, 0, 0]).map(Number), manual: !!P.statue2.manual };
+      if (state.st[1].pairs.length !== 6 || state.st[1].pairs.some(v => !(v > 0))) state.st[1].manual = false;
+    } else { state.decoupled = false; state.st[1] = JSON.parse(JSON.stringify(state.st[0])); }
+    const F = P.free_positions_mm;
+    state.free = (F && Array.isArray(F.statue1) && F.statue1.length === 7 && Array.isArray(F.statue2) && F.statue2.length === 7)
+      ? { s1: F.statue1.map(([x, y]) => [x / 1000, -y / 1000]), s2: F.statue2.map(([x, y]) => [x / 1000, -y / 1000]) } : null;
     setIf('diam', P.circle_diameter_mm); setIf('clear', P.free_radius_mm);
     if (P.arm) { if (P.arm.method === 'touch' || P.arm.method === 'straight') { state.mode = P.arm.method; $('mode').value = state.mode; $('armParams').hidden = state.mode !== 'straight'; } setIf('arm', P.arm.angle_deg); }
     if (P.viewer) { setIf('eye', P.viewer.eye_mm); setIf('hfov', P.viewer.fov_deg); }
     if (P.leds) { setIf('unlit', P.leds.unlit_base_mm); setIf('lpm', P.leds.per_m); setIf('mA', P.leds.mA_per_led); setIf('psuA', P.leds.psu_max_A); setIf('reel', P.leds.reel_mm); }
-    pending = null; $('confirmBox').hidden = true;
-    applyView(); build(); if (state.manual) showPairs();
+    $('decoupled').checked = state.decoupled; showDecoupled();
+    [1, 2, 3, 4, 5, 6, 7].forEach(i => inputs['h2_' + i]()); [1, 2, 3, 4, 5, 6].forEach(i => { inputs['p' + i](); inputs['p2_' + i](); });
+    askOpen = null; snap = null; $('confirmBox').hidden = true;
+    applyView(); build();
   }
   const jsonMsg = t => { $('jsonMsg').textContent = t; };
   $('btnExport').addEventListener('click', () => {
@@ -856,6 +1067,39 @@ body.shot .panel, body.shot .views { display: none; }
   });
   $('btnApplyJson').addEventListener('click', () => { try { applyObject(JSON.parse($('jsonBox').value)); jsonMsg('Applied.'); } catch (e) { jsonMsg('Could not apply: ' + e.message); } });
 
+  // ---------- Undo / redo: a stack of parameter snapshots, one per change that rebuilt the layout ----------
+  // Quick successive edits of the same control (a slider drag) collapse into one step.
+  const undoStack = [], redoStack = [];
+  let lastSnap = null, lastKeys = '', lastTime = 0, applyingHistory = false;
+  const diffKeys = (a, b) => Object.keys(a).filter(k => JSON.stringify(a[k]) !== JSON.stringify(b[k])).join(',');
+  function recordHistory() {
+    const now = paramsObject(), txt = JSON.stringify(now);
+    if (lastSnap === null) { lastSnap = now; return; }
+    if (JSON.stringify(lastSnap) === txt) return;
+    if (!applyingHistory) {
+      const keys = diffKeys(lastSnap, now), t = Date.now();
+      if (!(keys === lastKeys && t - lastTime < 800)) { undoStack.push(lastSnap); if (undoStack.length > 200) undoStack.shift(); }
+      lastKeys = keys; lastTime = t; redoStack.length = 0;
+    }
+    lastSnap = now;
+    $('btnUndo').disabled = undoStack.length === 0; $('btnRedo').disabled = redoStack.length === 0;
+  }
+  function restoreSnapshot(p) {
+    applyingHistory = true;
+    try { applyObject({ format: JSON_FORMAT, params: p }); } finally { applyingHistory = false; }
+    lastSnap = paramsObject(); lastKeys = ''; lastTime = 0;
+    $('btnUndo').disabled = undoStack.length === 0; $('btnRedo').disabled = redoStack.length === 0;
+  }
+  function undo() { if (!undoStack.length) return; redoStack.push(paramsObject()); restoreSnapshot(undoStack.pop()); }
+  function redo() { if (!redoStack.length) return; undoStack.push(paramsObject()); restoreSnapshot(redoStack.pop()); }
+  $('btnUndo').addEventListener('click', undo);
+  $('btnRedo').addEventListener('click', redo);
+  window.addEventListener('keydown', ev => {
+    if (!(ev.metaKey || ev.ctrlKey) || ev.key.toLowerCase() !== 'z') return;
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) && document.activeElement.type !== 'range') return;
+    ev.preventDefault(); if (ev.shiftKey) redo(); else undo();
+  });
+
   // Fold the panel to the side so the render is unobstructed; remembered per browser (a convenience only).
   const setFolded = f => { $('panel').classList.toggle('folded', f); $('btnUnfold').hidden = !f; try { localStorage.setItem('panelFolded', f ? '1' : '0'); } catch (e) { /* storage unavailable */ } };
   $('btnFold').addEventListener('click', () => setFolded(true));
@@ -865,7 +1109,8 @@ body.shot .panel, body.shot .views { display: none; }
 
   resize();
   build();
-  if (storedParams) { try { applyObject({ format: JSON_FORMAT, params: storedParams }); } catch (e) { /* ignore a stale or foreign store */ } }
+  resetCentre();
+  if (storedParams) { try { applyObject({ format: JSON_FORMAT, params: storedParams }); resetCentre(); } catch (e) { /* ignore a stale or foreign store */ } }
   if (q.get('dump') === '1') { document.body.textContent = ''; const pre = document.createElement('pre'); pre.id = 'dump'; pre.textContent = window.statueExport(); document.body.appendChild(pre); return; }
   render();
 })();

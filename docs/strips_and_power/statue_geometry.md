@@ -42,10 +42,37 @@ or optimum then asks before resetting the pairs, because hand-set values are del
 mine" also puts the three range values back. The page's own confirmation box is used because
 `confirm()` returns false inside hosted viewers.
 
+### Statue 2 on its own, free positions, undo
+
+- **Statue 2 mirrors statue 1 until "Set statue 2 separately" is ticked** (owner, 2026-10-19, for
+  the artist: move everything together first, then decouple). Ticking it copies statue 1's
+  heights, pair spacings and positions into statue 2, which then has its own controls, its own
+  mural projection, its own level-top heights and its own LED/supply side. Unticking asks first
+  when statue 2 differs, because it loses those settings.
+- **Towers can be dragged freely in the top-down view** (owner, 2026-10-19). The first drag
+  snapshots the solved positions; from then on the solver is bypassed, the pair boxes only report
+  distances, and the readout checks the circle and the free radius as before. Towers keep one
+  corner to the centre wherever they stand, because the mural is still read from there. Dragging
+  a tower while coupled moves its mirror on statue 2. Any solver setting (spacing range, circle,
+  free radius, side, arm method or angle) asks before re-solving, exactly as for hand-set pairs;
+  "keep mine" puts the setting back.
+- **Undo and redo keep a stack of parameter snapshots**, one per change that rebuilt the layout
+  (owner, 2026-10-19). A slider drag collapses into one step (same control within 0.8 s). Undo
+  restores through the same loader as the JSON file, so it is as complete as the export. The stack
+  is per page load; the browser store keeps only the latest state.
+- **Cameras** (owner, 2026-10-19: as in 3D software, with a pad so it works on a phone). Eye view:
+  left-drag looks, right-drag or arrows/WASD walks; the eye height slider keeps the walked
+  position. Drone: left-drag orbits, right-drag or arrows pans, wheel zooms. The on-screen pad
+  does the same by touch. Pressing the active view's button, or ⟲, resets that camera.
+
 ### The JSON handoff file
 
-**Export / Load** writes and reads `led-over-rj245/statue-layout` version 1 (owner, 2026-10-19:
-the file comes back into this repository for the field blueprints and the LED order). It holds
+**Export / Load** writes `led-over-rj245/statue-layout` version 2 and reads versions 1 and 2
+(owner, 2026-10-19: the artist has saved version 1 files, so they must keep loading; a version 1
+file simply has no `statue2` and no `free_positions_mm`, which read as "mirrors" and "solved").
+Version 2 adds `params.statue2` (null while mirrored), `params.free_positions_mm` (plan x/y per
+tower, null while solved), per-statue `level_top_heights_mm` and `leds_power.side_2`. The file
+comes back into this repository for the field blueprints and the LED order. It holds
 every input under `params` (so a load restores the page exactly), the solved layout under
 `layout` (per tower: height, lit length, LEDs per face, `r_mm`, `azimuth_deg`, plan `x_mm`/`y_mm`
 with statue 1's apex on +y and azimuth clockwise from it, box yaw, spacing to the next tower,

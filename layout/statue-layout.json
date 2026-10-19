@@ -1,7 +1,7 @@
 {
   "format": "led-over-rj245/statue-layout",
-  "version": 1,
-  "generated": "2026-10-18T22:46:24.724Z",
+  "version": 2,
+  "generated": "2026-10-19T06:33:17.606Z",
   "units": "mm, degrees, A; plan x east, y north with statue 1 apex on +y; azimuth clockwise from +y",
   "params": {
     "side_mm": 400,
@@ -36,6 +36,8 @@
       ],
       "manual": false
     },
+    "statue2": null,
+    "free_positions_mm": null,
     "circle_diameter_mm": 8000,
     "free_radius_mm": 900,
     "arm": {
@@ -60,19 +62,10 @@
     "spacing_reason": "optimum",
     "free_radius_mm": 1955,
     "farthest_corner_mm": 4000,
-    "statue_half_span_deg": 40.6,
-    "level_top_heights_mm": [
-      1830,
-      1890,
-      1940,
-      2000,
-      1940,
-      1890,
-      1830
-    ],
     "statues": [
       {
         "statue": 1,
+        "mirrors_statue_1": false,
         "apex_azimuth_deg": 0,
         "towers": [
           {
@@ -173,10 +166,21 @@
             "spacing_to_next_mm": null,
             "full_white_A": 5.6
           }
+        ],
+        "half_span_deg": 40.6,
+        "level_top_heights_mm": [
+          1830,
+          1890,
+          1940,
+          2000,
+          1940,
+          1890,
+          1830
         ]
       },
       {
         "statue": 2,
+        "mirrors_statue_1": true,
         "apex_azimuth_deg": 180,
         "towers": [
           {
@@ -241,7 +245,7 @@
             "lit_mm": 1450,
             "leds_per_face": 87,
             "r_mm": 3224,
-            "azimuth_deg": 189.4,
+            "azimuth_deg": -170.6,
             "x_mm": -525,
             "y_mm": -3181,
             "corner_towards_centre": true,
@@ -255,7 +259,7 @@
             "lit_mm": 1100,
             "leds_per_face": 66,
             "r_mm": 2731,
-            "azimuth_deg": 200.3,
+            "azimuth_deg": -159.7,
             "x_mm": -947,
             "y_mm": -2561,
             "corner_towards_centre": true,
@@ -269,7 +273,7 @@
             "lit_mm": 800,
             "leds_per_face": 48,
             "r_mm": 2237,
-            "azimuth_deg": 213.4,
+            "azimuth_deg": -146.6,
             "x_mm": -1232,
             "y_mm": -1868,
             "corner_towards_centre": true,
@@ -277,6 +281,16 @@
             "spacing_to_next_mm": null,
             "full_white_A": 5.6
           }
+        ],
+        "half_span_deg": 40.6,
+        "level_top_heights_mm": [
+          1830,
+          1890,
+          1940,
+          2000,
+          1940,
+          1890,
+          1830
         ]
       }
     ]
@@ -320,6 +334,7 @@
       "note": "4 supplies only work with non-neighbouring towers sharing a supply; neighbours only: 5 — T1 (5.6 A) · T2+T3 (18.0 A) · T4 (13.1 A) · T5 (10.2 A) · T6+T7 (13.4 A)",
       "towers_over_limit": []
     },
+    "side_2": null,
     "both_sides": {
       "strip_m": 68.4,
       "reels": 16,
