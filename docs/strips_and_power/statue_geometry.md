@@ -49,7 +49,10 @@ mine" also puts the three range values back. The page's own confirmation box is 
   heights, pair spacings and positions into statue 2, which then has its own controls, its own
   mural projection, its own level-top heights and its own LED/supply side. Unticking asks first
   when statue 2 differs, because it loses those settings.
-- **Towers can be dragged freely in the top-down view** (owner, 2026-10-19). The first drag
+- **Towers can be dragged freely in the top-down view, and in the eye and drone views with the
+  "Drag towers" toggle on** (owner, 2026-10-19; the toggle sits with the view buttons). The toggle
+  takes the left button and the single finger away from the camera, so right-drag, the pad and
+  the keys still move the camera while towers are being placed. The first drag
   snapshots the solved positions; from then on the solver is bypassed, the pair boxes only report
   distances, and the readout checks the circle and the free radius as before. Towers keep one
   corner to the centre wherever they stand, because the mural is still read from there. Dragging

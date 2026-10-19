@@ -38,7 +38,7 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); f
 .param .unit { color: var(--muted); font-size: 11px; min-width: 2ch; }
 .param input[type=range] { grid-column: 1 / -1; width: 100%; margin: 0 0 2px; accent-color: var(--accent); }
 .param select { grid-column: 1 / -1; background: #241f19; color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; font: inherit; }
-.views { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: 12px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.views { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: 12px; max-width: 62vw; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 button {
   background: #2b241d; color: var(--fg); border: 1px solid var(--line); border-radius: 8px;
   padding: 7px 11px; font: inherit; font-size: 13px; cursor: pointer;
@@ -82,6 +82,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   <button id="btnCentre" aria-pressed="true" title="Press again to reset the camera">Centre view (eye)</button>
   <button id="btnDrone" aria-pressed="false" title="Press again to reset the camera">Drone view</button>
   <button id="btnTop" aria-pressed="false">Top-down view</button>
+  <button id="btnDrag" aria-pressed="false" title="Move towers by dragging them in any view">✥ Drag towers</button>
   <button id="btnPng">Save PNG</button>
   <button id="btnUndo" title="Undo (Ctrl/Cmd+Z)" disabled>↶ Undo</button>
   <button id="btnRedo" title="Redo (Ctrl/Cmd+Shift+Z)" disabled>↷ Redo</button>
@@ -199,6 +200,9 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   state.st[1] = JSON.parse(JSON.stringify(state.st[0]));
   let powerShown = false;
   let view = ['drone', 'top'].includes(q.get('view')) ? q.get('view') : 'centre';
+  let dragMode = false;                // "Drag towers": left-drag moves towers in the eye and drone views too (always on in the top view)
+  const canDrag = () => view === 'top' || dragMode;
+  const activeCam = () => view === 'centre' ? camCentre : view === 'drone' ? camDrone : camTop;
   if (q.get('shot') === '1') document.body.classList.add('shot');
   const cfg = s => (state.decoupled ? state.st[s] : state.st[0]);
   const isCustom = () => !!state.free || state.st[0].manual || (state.decoupled && state.st[1].manual);
@@ -702,12 +706,16 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     controls.enabled = view === 'drone';
     look.enabled = view === 'centre';
     ['Centre', 'Drone', 'Top'].forEach(n => $('btn' + n).setAttribute('aria-pressed', view === n.toLowerCase()));
+    const leftFree = !dragMode;      // left button and one finger go to the camera unless towers are being dragged
+    controls.mouseButtons.LEFT = leftFree ? THREE.MOUSE.ROTATE : -1; controls.touches.ONE = leftFree ? THREE.TOUCH.ROTATE : -1;
+    look.mouseButtons.LEFT = leftFree ? THREE.MOUSE.ROTATE : -1; look.touches.ONE = leftFree ? THREE.TOUCH.ROTATE : -1;
+    $('btnDrag').setAttribute('aria-pressed', dragMode);
     $('pad').hidden = view === 'top';
     $('padIn').hidden = $('padOut').hidden = view !== 'drone';
-    $('hint').textContent = view === 'centre' ? 'Drag to look · right-drag, arrows / WASD or the pad to walk · press the view button again to reset'
-      : view === 'drone' ? 'Drag to orbit · right-drag or arrows to pan · wheel or ± to zoom · press the view button again to reset'
+    $('hint').textContent = view === 'centre' ? (dragMode ? 'Drag a tower to move it · right-drag, arrows / WASD or the pad to walk' : 'Drag to look · right-drag, arrows / WASD or the pad to walk · press the view button again to reset')
+      : view === 'drone' ? (dragMode ? 'Drag a tower to move it · right-drag or arrows to pan · wheel or ± to zoom' : 'Drag to orbit · right-drag or arrows to pan · wheel or ± to zoom · press the view button again to reset')
       : 'Drag a tower to move it freely · the panel reports the new spacings';
-    renderer.domElement.style.cursor = view === 'top' ? 'grab' : '';
+    renderer.domElement.style.cursor = canDrag() ? 'grab' : '';
   }
   function resetCentre() {
     if (!current) return;
@@ -779,7 +787,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   let tdrag = null;
   const toNdc = ev => { const r = renderer.domElement.getBoundingClientRect(); ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1); };
-  const groundAt = ev => { toNdc(ev); ray.setFromCamera(ndc, camTop); const p = new THREE.Vector3(); return ray.ray.intersectPlane(groundPlane, p) ? p : null; };
+  const groundAt = ev => { toNdc(ev); ray.setFromCamera(ndc, activeCam()); const p = new THREE.Vector3(); return ray.ray.intersectPlane(groundPlane, p) ? p : null; };
   function initFree() {
     if (state.free) return;
     state.free = { s1: statueTowers(current, 0).map(t => [t.x, t.z]), s2: statueTowers(current, 1).map(t => [t.x, t.z]) };
@@ -793,8 +801,8 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     } else { state.free['s' + (s + 1)][i] = [x, z]; setVis(idx, x, z); }
   }
   renderer.domElement.addEventListener('pointerdown', ev => {
-    if (view !== 'top' || ev.button !== 0) return;
-    toNdc(ev); ray.setFromCamera(ndc, camTop);
+    if (!canDrag() || ev.button !== 0) return;
+    toNdc(ev); ray.setFromCamera(ndc, activeCam());
     const hit = ray.intersectObjects(towerGroups.map(g => g.userData.pick), false)[0];
     if (!hit) return;
     const g = hit.object.parent, p = groundAt(ev);
@@ -809,7 +817,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     const p = groundAt(ev); if (!p) return;
     tdrag.moved = true; moveTower(tdrag.idx, p.x + tdrag.dx, p.z + tdrag.dz);
   });
-  const endDrag = () => { if (!tdrag) return; const moved = tdrag.moved; tdrag = null; renderer.domElement.style.cursor = 'grab'; if (moved) build(); };
+  const endDrag = () => { if (!tdrag) return; const moved = tdrag.moved; tdrag = null; renderer.domElement.style.cursor = canDrag() ? 'grab' : ''; if (moved) build(); };
   renderer.domElement.addEventListener('pointerup', endDrag);
   renderer.domElement.addEventListener('pointercancel', endDrag);
 
@@ -937,6 +945,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   $('btnCentre').addEventListener('click', () => { if (view === 'centre') resetCentre(); view = 'centre'; applyView(); });
   $('btnDrone').addEventListener('click', () => { if (view === 'drone') droneHome(); view = 'drone'; applyView(); });
   $('btnTop').addEventListener('click', () => { view = 'top'; applyView(); });
+  $('btnDrag').addEventListener('click', () => { dragMode = !dragMode; applyView(); });
   // Save PNG: a download where the host allows it; the frame is also shown full-size so it can be saved
   // by right-click or long-press where downloads are blocked (hosted viewers).
   $('btnPng').addEventListener('click', () => {
