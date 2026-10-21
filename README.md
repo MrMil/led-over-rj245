@@ -9,6 +9,10 @@ view of the two statues from the centre, from above and from a drone, with the t
 spacings, LED and power-supply counts. Export the JSON from it into
 [`layout/`](layout/statue-layout.json).
 
+**Projection maker:** [mrmil.github.io/led-over-rj245/tools/projection_maker.html](https://mrmil.github.io/led-over-rj245/tools/projection_maker.html) —
+upload a picture per viewpoint, see it cut into the faces over the LEDs, export the DXF files for
+the laser cutter.
+
 <!-- META-DOCS:BEGIN -->
 ## Documentation
 
