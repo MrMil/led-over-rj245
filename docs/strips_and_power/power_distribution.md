@@ -11,11 +11,11 @@ Per statue, five S-100-5 supplies, each in a box with a C14 inlet:
 
 | Supply | Box | Sits at | Own tower | Neighbour fed | Worst case |
 |---|---|---|---|---|---|
-| A | `100W` | T2 base | T2 (1250) | T1 (950) | 13.4 A |
-| B | `100W` | T3 base | T3 (1600) | — | 10.2 A |
+| A | `100W` | T2 base | T2 (1400) | T1 (1100) | 15.5 A |
+| B | `100W` | T3 base | T3 (1700) | — | 10.9 A |
 | C | apex `100W-masterbox` | T4 (apex) | T4 (2000) | — | 13.1 A |
-| D | `100W` | T5 base | T5 (1600) | — | 10.2 A |
-| E | `100W` | T6 base | T6 (1250) | T7 (950) | 13.4 A |
+| D | `100W` | T5 base | T5 (1700) | — | 10.9 A |
+| E | `100W` | T6 base | T6 (1400) | T7 (1100) | 15.5 A |
 
 Mains: an outlet and power strip at the apex, and a C13 cord to each of A, B, D and E (C is
 in the apex box). Each box drives its own tower's 4 strands on 4 JST-SM. A and E also feed the
@@ -26,16 +26,16 @@ alongside. The tip tower's base splits both passively to its 4 strands
 ## Decisions
 
 - **Five S-100-5 per statue, whole towers only, symmetric** (owner, 2026-10-18). At the
-  artist's current heights and the measured 29.4 mA per LED
+  artist's final heights (2026-10-21) and the measured 29.4 mA per LED
   ([led_power_budget.md](led_power_budget.md)), every supply stays under the 18 A ceiling at
-  full white (max 13.4 A). Only the two tip towers are fed from a neighbour's box. The owner
+  full white (max 15.5 A, on A and E). Only the two tip towers are fed from a neighbour's box. The owner
   already has 10 supplies.
   **Changed 2026-10-18 (twice):** first five per statue with T4 and T5 split between two
   supplies (sized for 60 mA per LED); then four per statue with whole towers (at the earlier,
   smaller heights). The new heights put four towers' worth (23.6 A) on one supply in the
   four-supply grouping.
-  **Rejected.** *4 per statue:* only by splitting the 2000 tower between the two 1600 supplies
-  (16.8 A each): more XT60 runs (4 per statue) and a split tower. *7 per statue* (one per
+  **Rejected.** *4 per statue:* only by splitting the 2000 tower between the two 1700 supplies
+  (17.5 A each): more XT60 runs (4 per statue) and a split tower. *7 per statue* (one per
   tower): no 5 V between towers, but 14 supplies for no electrical need.
 - **Each supply sits by the towers it feeds** (agent, 2026-10-10). Mains is easy to carry far;
   5 V at several amps is not.

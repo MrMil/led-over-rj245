@@ -11,15 +11,15 @@ Parent: [README.md](README.md)
 2026-10-18). Method: a 5 m reel (300 LEDs) on a lab supply at 5.0 V, driven from MicroPython
 `neopixel` with `(255, 255, 255)` (no global brightness). All off: 0.14–0.15 A. First 60 LEDs
 white: 1.87–1.89 A. (1.88 − 0.145) / 60 + 0.145 / 300 = 29.4 mA. Typical animated content is
-~30 % of full white, plus idle. Per statue at 60/m, 2052 LEDs:
+~30 % of full white, plus idle. Per statue at 60/m, 2244 LEDs (final heights, 2026-10-21):
 
 | Tower | LEDs per face | Strand (one face), full white | LEDs (4 faces) | Tower, full white | Tower, typical |
 |---|---|---|---|---|---|
 | 2000 | 111 | 3.3 A | 444 | 13.1 A | 4.1 A |
-| 1600 (×2) | 87 | 2.6 A | 348 each | 10.2 A | 3.2 A |
-| 1250 (×2) | 66 | 1.9 A | 264 each | 7.8 A | 2.5 A |
-| 950 (×2) | 48 | 1.4 A | 192 each | 5.6 A | 1.8 A |
-| **Statue** | | | **2052** | **60.3 A · 302 W** | **19.1 A · 95 W** |
+| 1700 (×2) | 93 | 2.7 A | 372 each | 10.9 A | 3.5 A |
+| 1400 (×2) | 75 | 2.2 A | 300 each | 8.8 A | 2.8 A |
+| 1100 (×2) | 57 | 1.7 A | 228 each | 6.7 A | 2.1 A |
+| **Statue** | | | **2244** | **66.0 A · 330 W** | **20.9 A · 104 W** |
 
 Typical = ~30 % of full white + 0.5 mA idle per LED (≈ 9.3 mA per LED). All off: ~1.0 A per
 statue. Whole installation from the wall (both statues, ~85 %
@@ -40,18 +40,18 @@ PSU efficiency): ~575 W worst case, inside the 1.5 kW generator budget (owner, 2
 
   | Supply | Feeds | Worst case |
   |---|---|---|
-  | A | T1 + T2 (950 + 1250) | 13.4 A |
-  | B | T3 (1600) | 10.2 A |
+  | A | T1 + T2 (1100 + 1400) | 15.5 A |
+  | B | T3 (1700) | 10.9 A |
   | C | T4 (2000) | 13.1 A |
-  | D | T5 (1600) | 10.2 A |
-  | E | T6 + T7 (1250 + 950) | 13.4 A |
+  | D | T5 (1700) | 10.9 A |
+  | E | T6 + T7 (1400 + 1100) | 15.5 A |
 
   Firmware ceiling **18 A per supply** (90 % of rating). No supply reaches it, even at full
   white. If one ever did, the limiter would scale the whole frame evenly.
 - **Voltage drop: the 2000 mm strands may need a second feed** (agent estimate, 2026-10-10).
   Fed at the bottom only, at full white, a 1.85 m strand (3.3 A) drops ~0.35–0.7 V, given
-  strip copper of ~0.12–0.24 Ω/m round trip. The 1600 mm towers' strands (1.45 m, 2.6 A) drop
-  ~0.2–0.45 V; shorter ones less. Measure the bought strip to decide (see `TODO.md`).
+  strip copper of ~0.12–0.24 Ω/m round trip. The 1700 mm towers' strands (1.55 m, 2.7 A) drop
+  ~0.25–0.5 V; shorter ones less. Measure the bought strip to decide (see `TODO.md`).
 - **Size PSUs at 80–90 % of rating** (agent, 2026-10-10). Generic S-series clones run
   continuously inside a closed box.
 - **WLED's current estimate is corrected 4×** (agent, 2026-10-10). Each output is configured

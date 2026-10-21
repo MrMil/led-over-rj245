@@ -78,7 +78,7 @@ rejected as too much work; it stays the last resort.
   WLED's ~12–16 ms render for 1026 pixels adds on top (~45 ms, ~22 fps). It brings back the
   skew that one-channel-per-tower removed.
 - **One statue per channel** — RMT channels 0 and 1 stayed clean with 4 running, so 2 at
-  once is plausible but untested. 513 LEDs ≈ 15.4 ms per statue. Needs each statue's 7 towers
+  once is plausible but untested. 561 LEDs ≈ 16.8 ms per statue. Needs each statue's 7 towers
   sent in turn on one RMT channel, switching GPIO between towers (not stock WLED).
 
 ## Bench test
@@ -91,7 +91,7 @@ whether the next is needed.
 | 0 | MicroPython, one output after another | 14 × 60 LEDs | Rig is sound. If this flickers, fix power/data before anything else |
 | 1 | Stock WLED 16.0.1 | 14 × 60 LEDs (8 RMT + 6 I2S) | Confirms the evidence on this board and pins; which outputs fail and how |
 | 2 | Test sketch, I2SClocklessLedDriver + AP + web traffic | 14 × 60 LEDs | Whether parallel I2S is clean under WiFi |
-| 3 | Stock WLED, 2 outputs (RMT 0 + 1) | 2 × 513 configured | Whether two RMT channels at once are clean (needed only if 2 fails) |
+| 3 | Stock WLED, 2 outputs (RMT 0 + 1) | 2 × 561 configured | Whether two RMT channels at once are clean (needed only if 2 fails) |
 
 - **Every output 60 LEDs, all at once** (agent, 2026-10-17). It keeps all 14 channels busy
   for the whole frame, which is harsher than the real lengths (21–111, short ones finish

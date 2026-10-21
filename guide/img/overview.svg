@@ -14,28 +14,28 @@
 <polyline points="250,500 375,560" fill="none" stroke="#e65100" stroke-width="2" stroke-linejoin="round"/>
 <polyline points="250,500 430,620" fill="none" stroke="#e65100" stroke-width="2" stroke-linejoin="round"/>
 <polyline points="430,620 485,680" fill="none" stroke="#c62828" stroke-width="4" stroke-linejoin="round"/>
-<rect x="474.25" y="309.25" width="21.5" height="21.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="501.75" y="325" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T1</text>
-<rect x="417.75" y="367.75" width="24.5" height="24.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="448.25" y="385" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T2</text>
-<rect x="376.75" y="369" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
-<text x="387.75" y="385" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">A</text>
-<rect x="361.0" y="426.0" width="28.0" height="28.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="395.0" y="445" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T3</text>
-<rect x="320.0" y="429" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
-<text x="331.0" y="445" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">B</text>
+<rect x="473.5" y="308.5" width="23.0" height="23.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="502.5" y="325" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T1</text>
+<rect x="417.0" y="367.0" width="26.0" height="26.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="449.0" y="385" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T2</text>
+<rect x="376.0" y="369" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
+<text x="387.0" y="385" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">A</text>
+<rect x="360.5" y="425.5" width="29.0" height="29.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="395.5" y="445" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T3</text>
+<rect x="319.5" y="429" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
+<text x="330.5" y="445" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">B</text>
 <rect x="304.0" y="484.0" width="32.0" height="32.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
 <text x="342.0" y="505" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T4</text>
-<rect x="361.0" y="546.0" width="28.0" height="28.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="395.0" y="565" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T5</text>
-<rect x="320.0" y="549" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
-<text x="331.0" y="565" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">D</text>
-<rect x="417.75" y="607.75" width="24.5" height="24.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="448.25" y="625" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T6</text>
-<rect x="376.75" y="609" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
-<text x="387.75" y="625" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">E</text>
-<rect x="474.25" y="669.25" width="21.5" height="21.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="501.75" y="685" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T7</text>
+<rect x="360.5" y="545.5" width="29.0" height="29.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="395.5" y="565" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T5</text>
+<rect x="319.5" y="549" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
+<text x="330.5" y="565" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">D</text>
+<rect x="417.0" y="607.0" width="26.0" height="26.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="449.0" y="625" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T6</text>
+<rect x="376.0" y="609" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
+<text x="387.0" y="625" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">E</text>
+<rect x="473.5" y="668.5" width="23.0" height="23.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="502.5" y="685" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="bold" fill="#222">T7</text>
 <rect x="216" y="478" width="68" height="44" rx="8" fill="#2e7d32" stroke="#333" stroke-width="2"/>
 <text x="250" y="505" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#fff">CTRL</text>
 <text x="320" y="270" font-family="Helvetica, Arial, sans-serif" font-size="17" text-anchor="middle" font-weight="bold" fill="#222">Statue 1</text>
@@ -45,28 +45,28 @@
 <polyline points="950,500 825,560" fill="none" stroke="#e65100" stroke-width="2" stroke-linejoin="round"/>
 <polyline points="950,500 770,620" fill="none" stroke="#e65100" stroke-width="2" stroke-linejoin="round"/>
 <polyline points="770,620 715,680" fill="none" stroke="#c62828" stroke-width="4" stroke-linejoin="round"/>
-<rect x="704.25" y="309.25" width="21.5" height="21.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="698.25" y="325" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T1</text>
-<rect x="757.75" y="367.75" width="24.5" height="24.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="751.75" y="385" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T2</text>
-<rect x="801.25" y="369" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
-<text x="812.25" y="385" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">A</text>
-<rect x="811.0" y="426.0" width="28.0" height="28.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="805.0" y="445" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T3</text>
-<rect x="858.0" y="429" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
-<text x="869.0" y="445" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">B</text>
+<rect x="703.5" y="308.5" width="23.0" height="23.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="697.5" y="325" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T1</text>
+<rect x="757.0" y="367.0" width="26.0" height="26.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="751.0" y="385" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T2</text>
+<rect x="802.0" y="369" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
+<text x="813.0" y="385" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">A</text>
+<rect x="810.5" y="425.5" width="29.0" height="29.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="804.5" y="445" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T3</text>
+<rect x="858.5" y="429" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
+<text x="869.5" y="445" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">B</text>
 <rect x="864.0" y="484.0" width="32.0" height="32.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
 <text x="858.0" y="505" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T4</text>
-<rect x="811.0" y="546.0" width="28.0" height="28.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="805.0" y="565" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T5</text>
-<rect x="858.0" y="549" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
-<text x="869.0" y="565" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">D</text>
-<rect x="757.75" y="607.75" width="24.5" height="24.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="751.75" y="625" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T6</text>
-<rect x="801.25" y="609" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
-<text x="812.25" y="625" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">E</text>
-<rect x="704.25" y="669.25" width="21.5" height="21.5" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="698.25" y="685" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T7</text>
+<rect x="810.5" y="545.5" width="29.0" height="29.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="804.5" y="565" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T5</text>
+<rect x="858.5" y="549" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
+<text x="869.5" y="565" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">D</text>
+<rect x="757.0" y="607.0" width="26.0" height="26.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="751.0" y="625" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T6</text>
+<rect x="802.0" y="609" width="22" height="22" rx="3" fill="#eceff1" stroke="#455a64" stroke-width="2"/>
+<text x="813.0" y="625" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#455a64">E</text>
+<rect x="703.5" y="668.5" width="23.0" height="23.0" rx="3" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
+<text x="697.5" y="685" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">T7</text>
 <rect x="916" y="478" width="68" height="44" rx="8" fill="#1565c0" stroke="#333" stroke-width="2"/>
 <text x="950" y="505" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="bold" fill="#fff">BOX 2</text>
 <text x="880" y="270" font-family="Helvetica, Arial, sans-serif" font-size="17" text-anchor="middle" font-weight="bold" fill="#222">Statue 2</text>

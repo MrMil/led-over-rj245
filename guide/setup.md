@@ -9,12 +9,16 @@ other**; T4 is the apex.
 
 | Tower | T1 | T2 | T3 | T4 | T5 | T6 | T7 |
 |---|---|---|---|---|---|---|---|
-| Height (mm) | 950 | 1250 | 1600 | 2000 | 1600 | 1250 | 950 |
+| Height (mm) | 1100 | 1400 | 1700 | 2000 | 1700 | 1400 | 1100 |
 
 - **Statue 1** has the **controller box** (ESP32) in its base.
 - **Statue 2** has **box 2** (receivers only) in its base.
 - Effects run statue 1 T1 → T7, then statue 2 T1 → T7. Tower numbering must match the
   physical order.
+
+Where each tower stands, in mm from the centre of the circle, is in
+[`layout/statue-layout.json`](../layout/statue-layout.json) (open it in the
+[layout tool](https://mrmil.github.io/led-over-rj245/) for a top-down plan with a 1 m grid).
 
 ![System overview](img/overview.svg)
 
@@ -22,9 +26,9 @@ other**; T4 is the apex.
 
 | From | To | Cable |
 |---|---|---|
-| Controller jack 1 | Box 2 jack 1 | 10 m CAT5e |
-| Controller jack 2 | Box 2 jack 2 | 10 m CAT5e |
-| Controller jack 3 | Box 2 jack 3 | 10 m CAT5e |
+| Controller jack 1 | Box 2 jack 1 | 20 m CAT5e (apexes are 17.4 m apart) |
+| Controller jack 2 | Box 2 jack 2 | 20 m CAT5e |
+| Controller jack 3 | Box 2 jack 3 | 20 m CAT5e |
 | Apex box, tower data outputs | Supply boxes A (T1, T2), B (T3), D (T5), E (T6, T7); T4 stays inside the apex box | DATA + GND, JST-SM |
 | Apex power strip | Supply boxes A, B, D, E (C14) | C13 cords |
 | Each supply box, 4 × JST-SM out | Its own tower's 4 strands | JST-SM |

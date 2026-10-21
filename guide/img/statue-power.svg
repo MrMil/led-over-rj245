@@ -6,15 +6,15 @@
 <text x="40" y="82" font-family="Helvetica, Arial, sans-serif" font-size="16" text-anchor="start" font-weight="normal" fill="#444">Mains from the apex to 5 supply boxes; each box drives its own tower, A and E also the tip towers.</text>
 <text x="40" y="104" font-family="Helvetica, Arial, sans-serif" font-size="16" text-anchor="start" font-weight="normal" fill="#444">Thick lines run in the trench; thin lines stay inside a base.</text>
 <rect x="90" y="540" width="120" height="90" rx="8" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="150" y="570" font-family="Helvetica, Arial, sans-serif" font-size="15" text-anchor="middle" font-weight="bold" fill="#222">T1 · 950</text>
+<text x="150" y="570" font-family="Helvetica, Arial, sans-serif" font-size="15" text-anchor="middle" font-weight="bold" fill="#222">T1 · 1100</text>
 <text x="150" y="592" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="normal" fill="#555">4 × JST-SM</text>
 <text x="150" y="612" font-family="Helvetica, Arial, sans-serif" font-size="11" text-anchor="middle" font-weight="normal" fill="#777">passive base</text>
 <rect x="300" y="540" width="120" height="90" rx="8" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="360" y="570" font-family="Helvetica, Arial, sans-serif" font-size="15" text-anchor="middle" font-weight="bold" fill="#222">T2 · 1250</text>
+<text x="360" y="570" font-family="Helvetica, Arial, sans-serif" font-size="15" text-anchor="middle" font-weight="bold" fill="#222">T2 · 1400</text>
 <text x="360" y="592" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="normal" fill="#555">4 × JST-SM</text>
 <text x="360" y="612" font-family="Helvetica, Arial, sans-serif" font-size="11" text-anchor="middle" font-weight="normal" fill="#777">own box</text>
 <rect x="510" y="540" width="120" height="90" rx="8" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="570" y="570" font-family="Helvetica, Arial, sans-serif" font-size="15" text-anchor="middle" font-weight="bold" fill="#222">T3 · 1600</text>
+<text x="570" y="570" font-family="Helvetica, Arial, sans-serif" font-size="15" text-anchor="middle" font-weight="bold" fill="#222">T3 · 1700</text>
 <text x="570" y="592" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="normal" fill="#555">4 × JST-SM</text>
 <text x="570" y="612" font-family="Helvetica, Arial, sans-serif" font-size="11" text-anchor="middle" font-weight="normal" fill="#777">own box</text>
 <rect x="740" y="540" width="120" height="90" rx="8" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
@@ -22,15 +22,15 @@
 <text x="800" y="592" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="normal" fill="#555">4 × JST-SM</text>
 <text x="800" y="612" font-family="Helvetica, Arial, sans-serif" font-size="11" text-anchor="middle" font-weight="normal" fill="#777">own box</text>
 <rect x="970" y="540" width="120" height="90" rx="8" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="1030" y="570" font-family="Helvetica, Arial, sans-serif" font-size="15" text-anchor="middle" font-weight="bold" fill="#222">T5 · 1600</text>
+<text x="1030" y="570" font-family="Helvetica, Arial, sans-serif" font-size="15" text-anchor="middle" font-weight="bold" fill="#222">T5 · 1700</text>
 <text x="1030" y="592" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="normal" fill="#555">4 × JST-SM</text>
 <text x="1030" y="612" font-family="Helvetica, Arial, sans-serif" font-size="11" text-anchor="middle" font-weight="normal" fill="#777">own box</text>
 <rect x="1180" y="540" width="120" height="90" rx="8" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="1240" y="570" font-family="Helvetica, Arial, sans-serif" font-size="15" text-anchor="middle" font-weight="bold" fill="#222">T6 · 1250</text>
+<text x="1240" y="570" font-family="Helvetica, Arial, sans-serif" font-size="15" text-anchor="middle" font-weight="bold" fill="#222">T6 · 1400</text>
 <text x="1240" y="592" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="normal" fill="#555">4 × JST-SM</text>
 <text x="1240" y="612" font-family="Helvetica, Arial, sans-serif" font-size="11" text-anchor="middle" font-weight="normal" fill="#777">own box</text>
 <rect x="1390" y="540" width="120" height="90" rx="8" fill="#ffe0b2" stroke="#e65100" stroke-width="2"/>
-<text x="1450" y="570" font-family="Helvetica, Arial, sans-serif" font-size="15" text-anchor="middle" font-weight="bold" fill="#222">T7 · 950</text>
+<text x="1450" y="570" font-family="Helvetica, Arial, sans-serif" font-size="15" text-anchor="middle" font-weight="bold" fill="#222">T7 · 1100</text>
 <text x="1450" y="592" font-family="Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" font-weight="normal" fill="#555">4 × JST-SM</text>
 <text x="1450" y="612" font-family="Helvetica, Arial, sans-serif" font-size="11" text-anchor="middle" font-weight="normal" fill="#777">passive base</text>
 <rect x="285" y="320" width="150" height="80" rx="8" fill="#eceff1" stroke="#455a64" stroke-width="2"/>

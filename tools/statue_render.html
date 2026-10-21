@@ -103,7 +103,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
 <button id="btnUnfold" hidden aria-label="Show the settings panel">Settings ▸</button>
 <div class="panel" id="panel">
   <h1>Statue tower sightlines <button id="btnFold" class="small" title="Fold the panel to the side" aria-label="Hide the settings panel">◂ Hide</button></h1>
-  <div class="note">Two statues of 7 towers, corner to the centre of the circle. Towers are placed so that, seen from the centre, neighbouring silhouettes exactly touch; the cut pattern is a smiley projected from that eye point. Lengths in mm.</div>
+  <div class="note">Two statues of 7 towers, corner to the centre of the circle. The defaults are the artist's final layout (21 Oct 2026): towers placed by hand. "Reset to the solved layout" places them so that, seen from the centre, neighbouring silhouettes exactly touch. The cut pattern is a smiley projected from the eye point. Lengths in mm.</div>
 
   <h2>Towers</h2>
   <div id="towerParams"></div>
@@ -174,18 +174,22 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   // ---------- State: lengths in mm, as the owner and artist think. URL params override defaults. ----------
   const q = new URLSearchParams(location.search);
   const num = (k, d) => (q.has(k) && !isNaN(parseFloat(q.get(k)))) ? parseFloat(q.get(k)) : d;
-  const newStatue = () => ({ h: [950, 1250, 1600, 2000, 1600, 1250, 950], pairs: [0, 0, 0, 0, 0, 0], manual: false });
+  // Project defaults: the artist's final layout of 2026-10-21 (layout/statue-layout.json in the repository).
+  const DEFAULT_H = [1100, 1400, 1700, 2000, 1700, 1400, 1100];
+  const DEFAULT_PAIRS = [1120, 1590, 2200, 1340, 1760, 1102], DEFAULT_MANUAL = true;
+  const DEFAULT_FREE = { s1: [[-1.207, -3.96], [-0.882, -5.031], [-0.496, -6.574], [0.0, -8.717], [0.526, -7.485], [0.908, -5.767], [1.275, -4.727]], s2: [[1.176, 3.806], [0.882, 5.031], [0.496, 6.574], [0.0, 8.717], [-0.526, 7.485], [-0.908, 5.767], [-1.244, 4.604]] };   // metres, [x, z] with z = −north
+  const newStatue = () => ({ h: [...DEFAULT_H], pairs: [...DEFAULT_PAIRS], manual: DEFAULT_MANUAL });
   const state = {
     side: num('side', 400),
     st: [newStatue(), newStatue()],    // per-statue heights, pair spacings and the "set by hand" flag; st[1] used only when decoupled
     decoupled: q.get('decoupled') === '1',
-    free: null,                        // { s1: [[x, z] × 7], s2: [[x, z] × 7] } in metres once towers were dragged freely
-    smin: num('smin', 500), smax: num('smax', 1000), sopt: num('sopt', 750),     // owner, 2026-10-19
-    diam: num('d', 8000),
-    clear: num('clear', 900),          // smallest radius the viewer must have free at the centre
+    free: q.get('solved') === '1' ? null : { s1: DEFAULT_FREE.s1.map(p => [...p]), s2: DEFAULT_FREE.s2.map(p => [...p]) },   // the artist placed the towers by hand; ?solved=1 starts from the solver instead
+    smin: num('smin', 1000), smax: num('smax', 3000), sopt: num('sopt', 3000),     // owner, 2026-10-21
+    diam: num('d', 18000),
+    clear: num('clear', 2350),          // smallest radius the viewer must have free at the centre
     mode: q.get('mode') === 'straight' ? 'straight' : 'touch',
     arm: num('arm', 25),
-    eye: num('eye', 1600),
+    eye: num('eye', 1200),               // owner, 2026-10-21: the audience sits
     hfov: num('fov', 100),
     labels: q.get('labels') !== '0',
     unlit: num('unlit', 150),          // dark base at the foot of every face, mm, no LEDs
@@ -195,8 +199,9 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     reel: num('reel', 5000),           // reel length, mm
   };
   state.st[0].h = state.st[0].h.map((v, i) => num('h' + (i + 1), v));
-  state.st[0].pairs = [1, 2, 3, 4, 5, 6].map(i => num('p' + i, 0));
-  state.st[0].manual = q.get('manual') === '1' && state.st[0].pairs.every(v => v > 0);
+  if ([1, 2, 3, 4, 5, 6].some(i => q.has('p' + i))) { state.st[0].pairs = [1, 2, 3, 4, 5, 6].map(i => num('p' + i, 0)); state.st[0].manual = q.get('manual') === '1' && state.st[0].pairs.every(v => v > 0); state.free = null; }
+  if ([1, 2, 3, 4, 5, 6, 7].some(i => q.has('h' + i)) || q.has('solved')) { /* heights from the URL keep the artist's positions unless ?solved=1 */ }
+  if (q.get('solved') === '1') { state.st[0].manual = false; }
   state.st[1] = JSON.parse(JSON.stringify(state.st[0]));
   let powerShown = false;
   let view = ['drone', 'top'].includes(q.get('view')) ? q.get('view') : 'centre';

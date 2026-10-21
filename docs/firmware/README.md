@@ -28,7 +28,7 @@ installation — and how the show is built and changed.
   **Changed 2026-10-10:** previously 8 outputs, all RMT.
 - **Each output's LED count is one face** (agent, 2026-10-10). All 4 faces of a tower get the
   same data in parallel ([../strips_and_power/tower_layout.md](../strips_and_power/tower_layout.md)),
-  so WLED renders ~513 pixels per statue, ~1030 total: around 60–80 fps of render capacity.
+  so WLED renders 561 pixels per statue, 1122 total: around 60–80 fps of render capacity.
 - **One continuous logical strip, outputs ordered S1-T1 … S1-T7, S2-T1 … S2-T7** (agent,
   2026-10-10). Effects that move along the strip sweep across each statue's V in order.
 - **AP mode "Always", fixed channel, password changed from default** (owner + agent). The
@@ -122,7 +122,7 @@ has exactly 8 RMT channels; `FASTLED_ESP32_I2S` gives headroom.
 ### Gotchas
 
 - **Throughput:** WLED renders ~65–85 k LEDs/s on ESP32
-  ([kno.wled.ge multi-strip](https://kno.wled.ge/features/multi-strip/)); ~1030 rendered
+  ([kno.wled.ge multi-strip](https://kno.wled.ge/features/multi-strip/)); 1122 rendered
   pixels is comfortable. Heavier custom effects cost more; check FPS on the Info page.
 - **About 4 phones max on the AP:** WLED calls `softAP` without `max_connection`, so the ESP32
   default of 4 clients applies (`wled00/wled.cpp`).

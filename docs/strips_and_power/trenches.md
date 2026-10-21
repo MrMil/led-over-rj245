@@ -20,14 +20,16 @@ Per statue, one trench along each arm of the V: T1 – T2 – T3 – T4 (apex) �
 
 The two arms are mirror images.
 
-Between the statues: apex of statue 1 → apex of statue 2, 3 × CAT5e (10 m). Mains reaches
+Between the statues: apex of statue 1 → apex of statue 2, 3 × CAT5e, 17.4 m apart in the
+final layout ([statue_geometry.md](statue_geometry.md)); the 10 m cables do not reach,
+see [../data_link/cabling.md](../data_link/cabling.md). Mains reaches
 each apex from the camp's supply, ~20 m away, in its own trench (owner).
 
 ## Decisions
 
 - **Mains arrives at each statue's apex through a trench the owner digs from the camp supply,
   ~20 m away** (owner, 2026-10-10). The apex power strip is the start of the statue's power
-  distribution. Generator budget 1.5 kW; the installation's worst case is ~0.6 kW from
+  distribution. Generator budget 1.5 kW; the installation's worst case is ~0.7 kW from
   the wall ([led_power_budget.md](led_power_budget.md)).
 - **Trenches only along the arms and between the apexes** (agent, 2026-10-10). Every cable
   follows the V. The box sits at the apex, so data cables fan out along the arms with the
@@ -37,8 +39,11 @@ each apex from the camp's supply, ~20 m away, in its own trench (owner).
 
 ## Gotchas
 
-- Segment lengths depend on tower spacing along each arm (not yet known); cable lengths
-  follow from it.
+- Segment lengths, centre to centre, from the final layout (`layout/statue-layout.json`,
+  2026-10-21; statue 2 mirrors statue 1): T4→T3 2200, T3→T2 1590, T2→T1 1120, T4→T5 1340,
+  T5→T6 1760, T6→T7 1102 mm. The arms are not symmetric. Cable runs along an arm add up:
+  apex → A (T2) 3.8 m, apex → B (T3) 2.2 m, apex → D (T5) 1.3 m, apex → E (T6) 3.1 m, plus
+  slack into each base. The 5 V runs A → T1 and E → T7 are 1.1 m.
 
 ## Related
 

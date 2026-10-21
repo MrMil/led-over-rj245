@@ -18,7 +18,7 @@ OUT = Path(__file__).resolve().parent.parent / "guide" / "img"
 
 # Two statues, each a V of 7 towers T1..T7 numbered from one tip of the V to
 # the other; T4 is the apex. Heights in mm: the artist's current sizes (2026-10-18).
-TOWER_H = {"T1": 950, "T2": 1250, "T3": 1600, "T4": 2000, "T5": 1600, "T6": 1250, "T7": 950}
+TOWER_H = {"T1": 1100, "T2": 1400, "T3": 1700, "T4": 2000, "T5": 1700, "T6": 1400, "T7": 1100}  # artist, final, 2026-10-21
 TOWERS = list(TOWER_H)
 
 # One channel per tower. Statue 1 is local to the controller box; statue 2's

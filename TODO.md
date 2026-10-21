@@ -4,12 +4,11 @@
 
 ## Measure / confirm
 
-- [ ] **Layout:** tower spacing along each arm, and the distance between the two apexes.
-  Gives the lengths of the 5 V runs, data cables, mains cords, and whether 10 m CAT5e
-  reaches. See [trenches](docs/strips_and_power/trenches.md).
-  3D sightline check and the spacing/height conflict: [statue geometry](docs/strips_and_power/statue_geometry.md).
-- [ ] **Tower heights and order** with the artist: current sizes 2 × 2000, 4 × 1600,
-  4 × 1250, 4 × 950 mm; order along the V assumed 950, 1250, 1600, 2000, 1600, 1250, 950.
+- [x] **Layout and heights** — final from the artist, 2026-10-21: `layout/statue-layout.json`
+  (heights 1100/1400/1700/2000, positions, segment lengths in
+  [trenches](docs/strips_and_power/trenches.md)).
+- [ ] **CAT5e length:** the apexes are 17.4 m apart, so the 10 m cables do not reach. Buy or
+  make 3 × 20 m (plus spare), or decide otherwise ([cabling](docs/data_link/cabling.md)).
 - [ ] **With the artist:** strips run bottom to top; 15 cm dark base; LED count per face as
   fitted; how the tower-base board connects to each strand's DIN.
 

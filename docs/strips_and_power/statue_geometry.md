@@ -107,7 +107,19 @@ it). `index.html` at the repo root only redirects to `tools/statue_render.html`,
 stops Jekyll from processing the site, since nothing here is a Jekyll site and it would only add
 build time and surprises. The same file is also published as a private claude.ai artifact.
 
-## Findings (agent, 2026-10-19; for the owner and artist to confirm)
+## Final layout (artist, 2026-10-21)
+
+`layout/statue-layout.json` is the artist's export of 2026-10-21 and the project default in
+the tool (owner: the build must be finished within a week, so these are the sizes). Heights
+1100 / 1400 / 1700 / 2000 mm; towers placed by hand (free positions, so the solver is bypassed
+until "Reset to the solved layout" or `?solved=1`); circle Ø 18 m, apexes 17.4 m apart
+(8.7 m from the centre), tips 4.1 m from the centre, 2.35 m kept free; eye 1200 mm (a seated
+audience); spacing range 1000–3000 mm with hand-set pairs 1120 / 1590 / 2200 / 1340 / 1760 /
+1102 mm. Statue 2 mirrors statue 1. Consequences recorded elsewhere: LED counts and currents
+([led_power_budget.md](led_power_budget.md)), trench segments ([trenches.md](trenches.md)),
+the CAT5e length ([../data_link/cabling.md](../data_link/cabling.md)).
+
+## Earlier findings (agent, 2026-10-19, on the 8 m circle that preceded the final layout)
 
 - **Touching silhouettes, Ø 8 m and 1.5 m spacing cannot all hold.** Three steps of 1.5 m from a
   4 m radius cross the centre. With exact touching the arm must point almost at the viewer, so the

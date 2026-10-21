@@ -85,20 +85,20 @@ first 8 on its RMT driver and the rest on I2S; all must be type WS281x.
 
 | # | GPIO | Channel | LED count (one face) |
 |---|---|---|---|
-| 1 | 4 | S1-T1 | 48 |
-| 2 | 13 | S1-T2 | 66 |
-| 3 | 14 | S1-T3 | 87 |
+| 1 | 4 | S1-T1 | 57 |
+| 2 | 13 | S1-T2 | 75 |
+| 3 | 14 | S1-T3 | 93 |
 | 4 | 16 | S1-T4 | 111 |
-| 5 | 17 | S1-T5 | 87 |
-| 6 | 18 | S1-T6 | 66 |
-| 7 | 19 | S1-T7 | 48 |
-| 8 | 21 | S2-T1 | 48 |
-| 9 | 22 | S2-T2 | 66 |
-| 10 | 23 | S2-T3 | 87 |
+| 5 | 17 | S1-T5 | 93 |
+| 6 | 18 | S1-T6 | 75 |
+| 7 | 19 | S1-T7 | 57 |
+| 8 | 21 | S2-T1 | 57 |
+| 9 | 22 | S2-T2 | 75 |
+| 10 | 23 | S2-T3 | 93 |
 | 11 | 25 | S2-T4 | 111 |
-| 12 | 26 | S2-T5 | 87 |
-| 13 | 27 | S2-T6 | 66 |
-| 14 | 32 | S2-T7 | 48 |
+| 12 | 26 | S2-T5 | 93 |
+| 13 | 27 | S2-T6 | 75 |
+| 14 | 32 | S2-T7 | 57 |
 
 - LED count = **one face**: lit height (tower − 150 mm) × 60/m. All 4 faces get the same data.
   Correct the counts to the strips as fitted.
@@ -120,8 +120,8 @@ first 8 on its RMT driver and the rest on I2S; all must be type WS281x.
 
 ## 7. Bench test
 
-Both boxes, the three 10 m cables, a tower-base board with test strips on each tower output
-in turn. Presets 1 and 2, then the show for an hour. With a scope: RO on one receiver at the end of a 10 m cable should
+Both boxes, the three 20 m cables, a tower-base board with test strips on each tower output
+in turn. Presets 1 and 2, then the show for an hour. With a scope: RO on one receiver at the end of a 20 m cable should
 show clean 350/700 ns pulses with no ringing.
 
 ## 8. Back up

@@ -50,7 +50,8 @@ in PETG or ASA (not PLA):
 ## LED strips
 
 WS2812B, 5 V, 60/m (bought). Supplied and mounted by the statue artist: 4 strips per tower,
-one per face, 150 mm dark base.
+one per face, 150 mm dark base. 74.8 m in all: 16 reels of 5 m, 8 per statue, every face cut
+whole from one reel.
 
 ## Consumables
 

@@ -40,8 +40,11 @@ straight-through. Three cables run between the controller box and box 2.
 - **No cable above ground** (owner, 2026-10-09). The police safety check before the event
   fails an installation with exposed cables, which would mean tearing it down. Each box is
   hidden inside its statue's base, and the cables come up out of the ground inside the base.
-- **All cables 10 m** (owner, 2026-10-09). Identical lengths make every spare fit every run.
-  Whether 10 m reaches depends on the distance between the two statues' bases (open).
+- **All cables the same length** (owner, 2026-10-09). Identical lengths make every spare fit
+  every run. **Changed 2026-10-21 (agent):** the length was 10 m, with reach open. The final
+  layout puts the apexes 17.4 m apart (`layout/statue-layout.json`), so 10 m cannot reach;
+  the guide now says 20 m (the straight trench between the apexes plus slack into both bases).
+  The owner has not yet confirmed the purchase; the 10 m cables may exist already.
 - **Cable lengths fit the runs; no large spools** (owner, 2026-10-09). Spare length is stored
   inside a statue base, which already holds the box and the tower wiring.
 - **Mains shares the data trenches** (owner, 2026-10-09). Each trench is dug once; RS-485
