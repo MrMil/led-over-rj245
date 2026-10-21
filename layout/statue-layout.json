@@ -1,7 +1,7 @@
 {
   "format": "led-over-rj245/statue-layout",
   "version": 2,
-  "generated": "2026-10-21T15:19:02.706Z",
+  "generated": "2026-10-21T18:00:10.295Z",
   "units": "mm, degrees, A; plan x east, y north with statue 1 apex on +y; azimuth clockwise from +y",
   "params": {
     "side_mm": 400,
@@ -19,12 +19,12 @@
       "max": 3000,
       "optimum": 3000,
       "pairs": [
-        1120,
-        1590,
+        1119,
+        1591,
         2200,
         1340,
         1760,
-        1102
+        1103
       ],
       "pair_names": [
         "T1–T2",
@@ -101,6 +101,7 @@
     },
     "circle_diameter_mm": 18000,
     "free_radius_mm": 2350,
+    "bench_diameter_mm": 3000,
     "arm": {
       "method": "touch",
       "angle_deg": 25
@@ -123,6 +124,7 @@
     "spacing_reason": "free",
     "free_radius_mm": 3857,
     "farthest_corner_mm": 9000,
+    "bench_clearance_mm": 2357,
     "statues": [
       {
         "statue": 1,
@@ -134,13 +136,15 @@
             "height_mm": 1100,
             "lit_mm": 950,
             "leds_per_face": 57,
-            "r_mm": 4139,
+            "r_mm": 4140,
             "azimuth_deg": -17,
             "x_mm": -1207,
             "y_mm": 3960,
+            "d_eye_mm": 2740,
+            "azimuth_from_eye_deg": -26.1,
             "corner_towards_centre": true,
             "box_yaw_deg": 28,
-            "spacing_to_next_mm": 1120,
+            "spacing_to_next_mm": 1119,
             "full_white_A": 6.7
           },
           {
@@ -152,9 +156,11 @@
             "azimuth_deg": -9.9,
             "x_mm": -882,
             "y_mm": 5031,
+            "d_eye_mm": 3639,
+            "azimuth_from_eye_deg": -14,
             "corner_towards_centre": true,
             "box_yaw_deg": 35.1,
-            "spacing_to_next_mm": 1590,
+            "spacing_to_next_mm": 1591,
             "full_white_A": 8.8
           },
           {
@@ -162,10 +168,12 @@
             "height_mm": 1700,
             "lit_mm": 1550,
             "leds_per_face": 93,
-            "r_mm": 6592,
+            "r_mm": 6593,
             "azimuth_deg": -4.3,
             "x_mm": -496,
             "y_mm": 6574,
+            "d_eye_mm": 5098,
+            "azimuth_from_eye_deg": -5.6,
             "corner_towards_centre": true,
             "box_yaw_deg": 40.7,
             "spacing_to_next_mm": 2200,
@@ -180,6 +188,8 @@
             "azimuth_deg": 0,
             "x_mm": 0,
             "y_mm": 8717,
+            "d_eye_mm": 7217,
+            "azimuth_from_eye_deg": 0,
             "corner_towards_centre": true,
             "box_yaw_deg": 45,
             "spacing_to_next_mm": 1340,
@@ -194,6 +204,8 @@
             "azimuth_deg": 4,
             "x_mm": 526,
             "y_mm": 7485,
+            "d_eye_mm": 6008,
+            "azimuth_from_eye_deg": 5,
             "corner_towards_centre": true,
             "box_yaw_deg": 49,
             "spacing_to_next_mm": 1760,
@@ -205,12 +217,14 @@
             "lit_mm": 1250,
             "leds_per_face": 75,
             "r_mm": 5838,
-            "azimuth_deg": 9,
+            "azimuth_deg": 8.9,
             "x_mm": 908,
             "y_mm": 5767,
+            "d_eye_mm": 4363,
+            "azimuth_from_eye_deg": 12,
             "corner_towards_centre": true,
-            "box_yaw_deg": 54,
-            "spacing_to_next_mm": 1102,
+            "box_yaw_deg": 53.9,
+            "spacing_to_next_mm": 1103,
             "full_white_A": 8.8
           },
           {
@@ -222,21 +236,28 @@
             "azimuth_deg": 15.1,
             "x_mm": 1275,
             "y_mm": 4727,
+            "d_eye_mm": 3470,
+            "azimuth_from_eye_deg": 21.6,
             "corner_towards_centre": true,
             "box_yaw_deg": 60.1,
             "spacing_to_next_mm": null,
             "full_white_A": 6.7
           }
         ],
-        "half_span_deg": 20.9,
+        "eye_point": {
+          "x_mm": 0,
+          "y_mm": 1500,
+          "eye_mm": 1200
+        },
+        "half_span_deg": 32,
         "level_top_heights_mm": [
-          1570,
-          1660,
-          1800,
+          1490,
+          1600,
+          1760,
           2000,
-          1890,
-          1730,
-          1640
+          1860,
+          1680,
+          1580
         ]
       },
       {
@@ -249,13 +270,15 @@
             "height_mm": 1100,
             "lit_mm": 950,
             "leds_per_face": 57,
-            "r_mm": 4139,
+            "r_mm": 4140,
             "azimuth_deg": 163,
             "x_mm": 1207,
             "y_mm": -3960,
+            "d_eye_mm": 2740,
+            "azimuth_from_eye_deg": -26.1,
             "corner_towards_centre": true,
             "box_yaw_deg": 208,
-            "spacing_to_next_mm": 1120,
+            "spacing_to_next_mm": 1119,
             "full_white_A": 6.7
           },
           {
@@ -267,9 +290,11 @@
             "azimuth_deg": 170.1,
             "x_mm": 882,
             "y_mm": -5031,
+            "d_eye_mm": 3639,
+            "azimuth_from_eye_deg": -14,
             "corner_towards_centre": true,
             "box_yaw_deg": 215.1,
-            "spacing_to_next_mm": 1590,
+            "spacing_to_next_mm": 1591,
             "full_white_A": 8.8
           },
           {
@@ -277,10 +302,12 @@
             "height_mm": 1700,
             "lit_mm": 1550,
             "leds_per_face": 93,
-            "r_mm": 6592,
+            "r_mm": 6593,
             "azimuth_deg": 175.7,
             "x_mm": 496,
             "y_mm": -6574,
+            "d_eye_mm": 5098,
+            "azimuth_from_eye_deg": -5.6,
             "corner_towards_centre": true,
             "box_yaw_deg": 220.7,
             "spacing_to_next_mm": 2200,
@@ -295,6 +322,8 @@
             "azimuth_deg": -180,
             "x_mm": 0,
             "y_mm": -8717,
+            "d_eye_mm": 7217,
+            "azimuth_from_eye_deg": 0,
             "corner_towards_centre": true,
             "box_yaw_deg": 225,
             "spacing_to_next_mm": 1340,
@@ -309,6 +338,8 @@
             "azimuth_deg": -176,
             "x_mm": -526,
             "y_mm": -7485,
+            "d_eye_mm": 6008,
+            "azimuth_from_eye_deg": 5,
             "corner_towards_centre": true,
             "box_yaw_deg": 229,
             "spacing_to_next_mm": 1760,
@@ -320,12 +351,14 @@
             "lit_mm": 1250,
             "leds_per_face": 75,
             "r_mm": 5838,
-            "azimuth_deg": -171,
+            "azimuth_deg": -171.1,
             "x_mm": -908,
             "y_mm": -5767,
+            "d_eye_mm": 4363,
+            "azimuth_from_eye_deg": 12,
             "corner_towards_centre": true,
-            "box_yaw_deg": 234,
-            "spacing_to_next_mm": 1102,
+            "box_yaw_deg": 233.9,
+            "spacing_to_next_mm": 1103,
             "full_white_A": 8.8
           },
           {
@@ -337,21 +370,28 @@
             "azimuth_deg": -164.9,
             "x_mm": -1275,
             "y_mm": -4727,
+            "d_eye_mm": 3470,
+            "azimuth_from_eye_deg": 21.6,
             "corner_towards_centre": true,
             "box_yaw_deg": 240.1,
             "spacing_to_next_mm": null,
             "full_white_A": 6.7
           }
         ],
-        "half_span_deg": 20.9,
+        "eye_point": {
+          "x_mm": 0,
+          "y_mm": -1500,
+          "eye_mm": 1200
+        },
+        "half_span_deg": 32,
         "level_top_heights_mm": [
-          1570,
-          1660,
-          1800,
+          1490,
+          1600,
+          1760,
           2000,
-          1890,
-          1730,
-          1640
+          1860,
+          1680,
+          1580
         ]
       }
     ]

@@ -28,7 +28,7 @@ the smiley from the eye point onto the faces that look at the centre, renders th
 (horizontal field of view 100°, eye 1.6 m), a drone view with a 1.75 m figure at the centre and a
 top-down plan (orthographic, 1 m grid, a "1 m" bar at the bottom right), and prints per tower:
 distance, azimuth, angular gap to the neighbour, top elevation and the angle its lit part
-subtends. Headless Chrome produced `renders/*.png` from URL parameters (`view=centre|drone|top`,
+subtends. Headless Chrome produced `renders/*.png` from URL parameters (`view=centre|drone|top`, `pov=2` for the statue 2 eye, `bench`,
 `side`, `h1`–`h7`, `smin`, `smax`, `sopt`, `p1`–`p6` with `manual=1`, `d`, `clear`, `eye`,
 `fov`, `shot=1`), and `?dump=1` prints the export JSON instead of the page.
 
@@ -111,13 +111,31 @@ build time and surprises. The same file is also published as a private claude.ai
 
 `layout/statue-layout.json` is the artist's export of 2026-10-21 and the project default in
 the tool (owner: the build must be finished within a week, so these are the sizes). Heights
-1100 / 1400 / 1700 / 2000 mm; towers placed by hand (free positions, so the solver is bypassed
+1100 / 1400 / 1700 / 2000 mm; a bench at the centre (below); towers placed by hand (free positions, so the solver is bypassed
 until "Reset to the solved layout" or `?solved=1`); circle Ø 18 m, apexes 17.4 m apart
 (8.7 m from the centre), tips 4.1 m from the centre, 2.35 m kept free; eye 1200 mm (a seated
 audience); spacing range 1000–3000 mm with hand-set pairs 1120 / 1590 / 2200 / 1340 / 1760 /
 1102 mm. Statue 2 mirrors statue 1. Consequences recorded elsewhere: LED counts and currents
 ([led_power_budget.md](led_power_budget.md)), trench segments ([trenches.md](trenches.md)),
 the CAT5e length ([../data_link/cabling.md](../data_link/cabling.md)).
+
+### The bench at the centre (owner, 2026-10-21)
+
+A circular bench stands at the centre; the audience sits on its edge facing out, which is why
+the eye height is 1200 mm. The artist placed the towers before mentioning it. **Its diameter
+is not known yet**: the tool's default of 3000 mm is a placeholder (agent, 2026-10-21) that the
+owner must replace. Consequences in the tool:
+- **One eye point per statue, on the bench edge, on the apex axis** (owner): the eye view has a
+  button per statue, the figure stands at each eye point (the bench itself is not drawn), and
+  the mural, the level-top heights, the gaps and the readout angles are all taken from that
+  point, not from the centre. The solver also places towers so that silhouettes touch from the
+  eye point: it works in the eye's frame and checks the circle and the free radius from the
+  centre.
+- **Bench clearance is checked**: the nearest tower corner must lie beyond the bench edge; the
+  result box and the readout say by how much, or by how much a tower stands inside the bench.
+  `fits` in the export includes it, and `layout.bench_clearance_mm` records it.
+- Files without `bench_diameter_mm` (versions 1 and 2 before this change) load with the eye at
+  the centre, as they were made.
 
 ## Earlier findings (agent, 2026-10-19, on the 8 m circle that preceded the final layout)
 

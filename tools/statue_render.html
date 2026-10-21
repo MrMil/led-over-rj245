@@ -79,7 +79,8 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
 <div id="view"></div>
 
 <div class="views" role="group" aria-label="Viewpoint">
-  <button id="btnCentre" aria-pressed="true" title="Press again to reset the camera">Centre view (eye)</button>
+  <button id="btnCentre" aria-pressed="true" title="Eye on the bench edge, facing statue 1. Press again to reset the camera">Eye · statue 1</button>
+  <button id="btnCentre2" aria-pressed="false" title="Eye on the bench edge, facing statue 2. Press again to reset the camera">Eye · statue 2</button>
   <button id="btnDrone" aria-pressed="false" title="Press again to reset the camera">Drone view</button>
   <button id="btnTop" aria-pressed="false">Top-down view</button>
   <button id="btnDrag" aria-pressed="false" title="Move towers by dragging them in any view">✥ Drag towers</button>
@@ -187,6 +188,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     smin: num('smin', 1000), smax: num('smax', 3000), sopt: num('sopt', 3000),     // owner, 2026-10-21
     diam: num('d', 18000),
     clear: num('clear', 2350),          // smallest radius the viewer must have free at the centre
+    bench: num('bench', 3000),         // circular bench at the centre, mm; the audience sits on its edge facing out. PLACEHOLDER: the artist has not given the size
     mode: q.get('mode') === 'straight' ? 'straight' : 'touch',
     arm: num('arm', 25),
     eye: num('eye', 1200),               // owner, 2026-10-21: the audience sits
@@ -205,6 +207,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   state.st[1] = JSON.parse(JSON.stringify(state.st[0]));
   let powerShown = false;
   let view = ['drone', 'top'].includes(q.get('view')) ? q.get('view') : 'centre';
+  let povStatue = q.get('pov') === '2' ? 1 : 0;   // which statue the eye view faces
   let dragMode = false;                // "Drag towers": left-drag moves towers in the eye and drone views too (always on in the top view)
   const canDrag = () => view === 'top' || dragMode;
   const activeCam = () => view === 'centre' ? camCentre : view === 'drone' ? camDrone : camTop;
@@ -218,10 +221,16 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   const R = () => state.diam / 2000;               // the apex tower's far corner sits on this radius
   const hw = r => Math.atan(HALF() / r);           // angular half-width of a tower at distance r
   const wrap = a => Math.atan2(Math.sin(a), Math.cos(a));
+  // The audience sits on the bench edge facing its statue: one eye point per statue, on the apex axis.
+  const benchR = () => state.bench / 2000;
+  const povOf = s => { const a = s * Math.PI; return { x: benchR() * Math.sin(a), y: state.eye / 1000, z: -benchR() * Math.cos(a) }; };
+  const dPov = (t, s) => { const p = povOf(s); return Math.hypot(t.x - p.x, t.z - p.z); };
+  const azPov = (t, s) => { const p = povOf(s); return wrap(Math.atan2(t.x - p.x, -(t.z - p.z)) - s * Math.PI); };
+  const rfP = (t, s) => dPov(t, s) - HALF() / 2;   // face, mid-depth, from the eye
 
   // Arm from the apex (k = 0) towards the tip (k = 3): step k is a chord of chords[k] (m), each silhouette touching the last.
   function solveTouch(chords) {
-    const r = [R() - HALF()], th = [0];
+    const r = [R() - HALF() - benchR()], th = [0];
     let solved = true;
     for (let k = 0; k < 3; k++) {
       const rk = r[k], s = chords[k];
@@ -235,7 +244,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     return { r, th, solved };
   }
   function solveStraight(chords) {
-    const r = [R() - HALF()], th = [0];
+    const r = [R() - HALF() - benchR()], th = [0];
     const phi = state.arm / DEG;
     let solved = true, along = 0;
     for (let k = 1; k <= 3; k++) {
@@ -249,8 +258,9 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   }
   const solver = () => state.mode === 'touch' ? solveTouch : solveStraight;
   const uniform = s => solver()([s, s, s]);
-  const valid = arm => arm.solved && (arm.r[3] - HALF()) >= state.clear / 1000 - 1e-9
-    && Math.max(...arm.r) + HALF() <= R() + 1e-9;
+  // arm (r, th) is in the eye's frame; validity is judged from the circle's centre
+  const armCentreR = arm => arm.r.map((r, k) => Math.hypot(r * Math.sin(arm.th[k]), benchR() + r * Math.cos(arm.th[k])));
+  const valid = arm => { const rc = armCentreR(arm); return arm.solved && Math.min(...rc) - HALF() >= Math.max(state.clear / 1000, benchR()) - 1e-9 && Math.max(...rc) + HALF() <= R() + 1e-9; };
 
   // Spacing choice: the optimum if it works, else the largest working spacing below it (every step eats
   // radius, so validity only shrinks as spacing grows), clamped to [min, max].
@@ -287,17 +297,20 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
         const left = solver()([pm[2], pm[1], pm[0]]), right = solver()([pm[3], pm[4], pm[5]]);
         NAMES.forEach((n, i) => {
           const k = Math.abs(i - 3), arm = i < 3 ? left : right, side = i < 3 ? -1 : 1;
-          const r = arm.r[k], th = side * arm.th[k] + off;
-          towers.push({ name: n, statue: s + 1, idx: s * 7 + i, h: c.h[i] / 1000, r, th, x: r * Math.sin(th), z: -r * Math.cos(th), solved: arm.solved });
+          // eye frame → statue-1 frame (eye sits benchR before the centre) → world (statue 2 rotated 180°)
+          const ex = arm.r[k] * Math.sin(side * arm.th[k]), ez = -benchR() - arm.r[k] * Math.cos(side * arm.th[k]);
+          const x = s ? -ex : ex, z = s ? -ez : ez;
+          towers.push({ name: n, statue: s + 1, idx: s * 7 + i, h: c.h[i] / 1000, r: Math.hypot(x, z), th: Math.atan2(x, -z), x, z, solved: arm.solved });
         });
       }
     }
     const solved = towers.every(t => t.solved);
     const farMax = Math.max(...towers.map(t => t.r + HALF()));
     const clear = Math.min(...towers.map(t => t.r - HALF()));
-    const fits = solved && farMax <= R() + 1e-9 && clear >= state.clear / 1000 - 1e-9;
+    const benchGap = clear - benchR();                       // nearest tower corner beyond the bench edge (negative: overlap)
+    const fits = solved && farMax <= R() + 1e-9 && clear >= state.clear / 1000 - 1e-9 && benchGap >= -1e-9;
     if (typeof showPairs === 'function') showPairs(towers);
-    return { towers, choice, solved, farMax, clear, fits };
+    return { towers, choice, solved, farMax, clear, benchGap, fits };
   }
   const statueTowers = (L, s) => L.towers.filter(t => t.statue === s + 1);
   const relAz = (t, s) => wrap(t.th - s * Math.PI);
@@ -306,17 +319,17 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   // Heights (mm) that put every top on one line from the eye: (h − eye)/r equal to the apex tower's.
   function levelHeights(L, s) {
     const eye = state.eye / 1000, T = statueTowers(L, s);
-    const c = (cfg(s).h[3] / 1000 - eye) / rf(T[3]);
-    return T.map(t => Math.round((eye + c * rf(t)) * 100) * 10);
+    const c = (cfg(s).h[3] / 1000 - eye) / rfP(T[3], s);
+    return T.map(t => Math.round((eye + c * rfP(t, s)) * 100) * 10);
   }
 
   // Per-statue mural in the viewer's angular space (azimuth relative to the statue, elevation).
   function muralSpec(L, s) {
     const eye = state.eye / 1000, T = statueTowers(L, s);
-    const lo = Math.min(...T.map(t => relAz(t, s) - hw(t.r))), hi = Math.max(...T.map(t => relAz(t, s) + hw(t.r)));
+    const lo = Math.min(...T.map(t => azPov(t, s) - hw(dPov(t, s)))), hi = Math.max(...T.map(t => azPov(t, s) + hw(dPov(t, s))));
     // the band every tower from T2 to T6 can show: lowest top among them, the apex tower's (highest) bottom
-    const elTop = Math.min(...[1, 2, 3, 4, 5].map(i => Math.atan((T[i].h - eye) / rf(T[i]))));
-    const elBot = Math.atan((BASE - eye) / rf(T[3]));
+    const elTop = Math.min(...[1, 2, 3, 4, 5].map(i => Math.atan((T[i].h - eye) / rfP(T[i], s))));
+    const elBot = Math.atan((BASE - eye) / rfP(T[3], s));
     const cy = (elTop + elBot) / 2;
     return { cx: (lo + hi) / 2, cy, rx: Math.max(0.05, (hi - lo) / 2 * 0.90), ry: Math.max(0.02, (elTop - elBot) / 2 * 0.84), stroke: 2.0 / DEG };
   }
@@ -377,9 +390,9 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   const mark = new THREE.Mesh(new THREE.RingGeometry(0.0, 0.08, 32), ringMat);
   mark.rotation.x = -Math.PI / 2; mark.position.y = 0.004; scene.add(mark);
 
-  // Human figure for scale, 1.75 m, at the centre. Hidden in the centre view (the camera is its eye).
-  const person = new THREE.Group();
-  {
+  // Human figures for scale, 1.75 m, one at each eye point on the bench edge. The one whose eye the camera uses is hidden.
+  const persons = [0, 1].map(() => {
+    const person = new THREE.Group();
     const cloth = new THREE.MeshStandardMaterial({ color: 0x2f5fb8, roughness: 0.9 });
     const skin = new THREE.MeshStandardMaterial({ color: 0xe3b48f, roughness: 0.8 });
     const add = (geo, mat, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; person.add(m); };
@@ -389,8 +402,9 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     add(new THREE.CylinderGeometry(0.045, 0.04, 0.62, 10), skin, -0.23, 1.1, 0);
     add(new THREE.CylinderGeometry(0.045, 0.04, 0.62, 10), skin, 0.23, 1.1, 0);
     add(new THREE.SphereGeometry(0.11, 18, 14), skin, 0, 1.62, 0);
-  }
-  scene.add(person);
+    scene.add(person);
+    return person;
+  });
   const towersGroup = new THREE.Group(); scene.add(towersGroup);
 
   // ---------- Textures ----------
@@ -398,14 +412,14 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   function hash(x, y, s) { const v = Math.sin(x * 12.9898 + y * 78.233 + s * 37.719) * 43758.5453; return v - Math.floor(v); }
   const FEATURE_RGB = { 1: [255, 177, 59], 2: [79, 216, 255], 3: [255, 95, 168] };
 
-  function faceTextures(h, worldAt, statueAz, spec, seed, lit) {
+  function faceTextures(h, worldAt, statueAz, spec, seed, lit, eyePos) {
     const w = W();
     const cols = Math.max(8, Math.round(w * PX_PER_M)), rows = Math.max(8, Math.round(h * PX_PER_M));
     const c1 = document.createElement('canvas'), c2 = document.createElement('canvas');
     c1.width = c2.width = cols; c1.height = c2.height = rows;
     const g1 = c1.getContext('2d'), g2 = c2.getContext('2d');
     const d1 = g1.createImageData(cols, rows), d2 = g2.createImageData(cols, rows);
-    const eye = new THREE.Vector3(0, state.eye / 1000, 0);
+    const eye = eyePos.clone();
     const p = new THREE.Vector3();
     const tint = 0.9 + 0.2 * hash(seed, 1, 2);
     for (let j = 0; j < rows; j++) {
@@ -477,6 +491,8 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
 
     const L = layout(); current = L;
     const specs = [muralSpec(L, 0), muralSpec(L, 1)];
+    const eyes = [0, 1].map(s => { const p = povOf(s); return new THREE.Vector3(p.x, p.y, p.z); });
+    persons.forEach((g, s) => { const p = povOf(s); g.position.set(p.x, 0, p.z); g.rotation.y = s * Math.PI; });
     const w = W();
     const edgeMat = new THREE.LineBasicMaterial({ color: 0x2a1a0e });
     const hullMat = new THREE.MeshBasicMaterial({ color: 0x1e120a, side: THREE.BackSide });
@@ -498,7 +514,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
         const centre = new THREE.Vector3(f.c[0], t.h / 2, f.c[2]);
         const worldAt = (u, v, out) => { out.copy(centre).addScaledVector(right, (u - 0.5) * w); out.y = v * t.h; return g.localToWorld(out); };
         const key = inner ? fi : (fi + 2) % 4;      // outer faces repeat the face opposite: all faces show the same pixels
-        if (!texCache[key]) texCache[key] = faceTextures(t.h, worldAt, statueAz, spec, t.idx * 7 + fi, inner);
+        if (!texCache[key]) texCache[key] = faceTextures(t.h, worldAt, statueAz, spec, t.idx * 7 + fi, inner, eyes[t.statue - 1]);
         const tex = texCache[key];
         const mat = new THREE.MeshStandardMaterial({ map: tex.map, emissiveMap: tex.emissiveMap, emissive: 0xffffff, emissiveIntensity: 1.1, roughness: 0.9, metalness: 0 });
         const m = new THREE.Mesh(new THREE.PlaneGeometry(w, t.h), mat);
@@ -530,33 +546,34 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   function statueTable(L, s) {
     const eye = state.eye / 1000, T = statueTowers(L, s);
     const rows = T.map((t, i) => {
-      const appH = (Math.atan((t.h - eye) / rf(t)) - Math.atan((BASE - eye) / rf(t))) * DEG;
-      const top = Math.atan((t.h - eye) / rf(t)) * DEG;
+      const appH = (Math.atan((t.h - eye) / rfP(t, s)) - Math.atan((BASE - eye) / rfP(t, s))) * DEG;
+      const top = Math.atan((t.h - eye) / rfP(t, s)) * DEG;
       let gap = '', cls = '';
       if (i < 6) {
-        const n = T[i + 1], gv = (Math.abs(wrap(n.th - t.th)) - hw(t.r) - hw(n.r)) * DEG;
+        const n = T[i + 1], gv = (Math.abs(wrap(azPov(n, s) - azPov(t, s))) - hw(dPov(t, s)) - hw(dPov(n, s))) * DEG;
         gap = (gv >= 0 ? '+' : '') + gv.toFixed(1);
         cls = Math.abs(gv) < 0.3 ? 'ok' : (gv < 0 ? 'bad' : '');
       }
-      return `<tr><td>${t.name} · ${mm(t.h)}</td><td>${mm(t.r)}</td><td>${(relAz(t, s) * DEG).toFixed(1)}</td><td class="${cls}">${gap}</td><td>${top.toFixed(1)}</td><td>${appH.toFixed(1)}</td></tr>`;
+      return `<tr><td>${t.name} · ${mm(t.h)}</td><td>${mm(t.r)}</td><td>${mm(dPov(t, s))}</td><td>${(azPov(t, s) * DEG).toFixed(1)}</td><td class="${cls}">${gap}</td><td>${top.toFixed(1)}</td><td>${appH.toFixed(1)}</td></tr>`;
     }).join('');
-    const span = Math.max(...T.map(t => Math.abs(relAz(t, s)) + hw(t.r))) * DEG;
+    const span = Math.max(...T.map(t => Math.abs(azPov(t, s)) + hw(dPov(t, s)))) * DEG;
     const spacings = [0, 1, 2, 3, 4, 5].map(i => Math.hypot(T[i].x - T[i + 1].x, T[i].z - T[i + 1].z));
-    return `<table><thead><tr><th>Statue ${s + 1}</th><th>r</th><th>az °</th><th>gap °</th><th>top °</th><th>lit °</th></tr></thead><tbody>${rows}</tbody></table>
-      <p class="note">Spans ±${span.toFixed(0)}° of the view from its apex direction. Spacing T1–T2 … T6–T7: ${spacings.map(mm).join(' / ')} mm.</p>`;
+    return `<table><thead><tr><th>Statue ${s + 1}</th><th>r</th><th>d</th><th>az °</th><th>gap °</th><th>top °</th><th>lit °</th></tr></thead><tbody>${rows}</tbody></table>
+      <p class="note">Spans ±${span.toFixed(0)}° of the view from its eye point. Spacing T1–T2 … T6–T7: ${spacings.map(mm).join(' / ')} mm.</p>`;
   }
   function updateReadout(L) {
     const c = L.choice;
     const tables = statueTable(L, 0) + (state.decoupled ? statueTable(L, 1) : '<p class="note">Statue 2 mirrors statue 1.</p>');
     $('readout').innerHTML = `${tables}
-      <p class="note">r: tower centre to the circle centre, mm. az: azimuth from the statue's apex direction. gap: angular gap to the next silhouette from the eye; negative = the nearer tower hides part of the next (green = touching). top: elevation of the tower top above the eye line. lit: angle the lit part subtends.</p>
+      <p class="note">r: tower centre to the circle centre, mm. d: tower centre to this statue's eye point on the bench edge, mm. az: azimuth from that eye point, relative to the statue's apex direction. gap: angular gap to the next silhouette from the eye; negative = the nearer tower hides part of the next (green = touching). top: elevation of the tower top above the eye line. lit: angle the lit part subtends.</p>
       <p class="note">Free radius at the centre (nearest corner of any tower): <b>${mm(L.clear)} mm</b>. Farthest corner: ${mm(L.farMax)} mm from the centre (${L.farMax <= R() + 0.0005 ? 'inside' : 'outside'} the Ø ${state.diam} circle).</p>
+      ${L.benchGap >= 0 ? `<p class="note">Bench Ø ${state.bench}: the nearest tower corner is <b>${mm(L.benchGap)} mm</b> beyond the bench edge.</p>` : `<p class="warn">Bench Ø ${state.bench} overlaps the towers: the nearest tower corner is ${mm(-L.benchGap)} mm inside the bench edge.</p>`}
       ${L.solved ? '' : '<p class="warn">No solution: an arm reaches the centre before its tip tower. That tip is clamped at 200 mm.</p>'}`;
     // level-top heights, per statue when decoupled
     const lv = [levelHeights(L, 0)].concat(state.decoupled ? [levelHeights(L, 1)] : []);
     const same = lv.every((arr, s) => arr.every((v, i) => v === cfg(s).h[i]));
     $('levelNote').innerHTML = same
-      ? 'These heights put every top on one line from the eye at the centre.'
+      ? 'These heights put every top on one line from the eye on the bench edge.'
       : lv.map((arr, s) => `${state.decoupled ? `Statue ${s + 1}: ` : ''}${NAMES.map((n, i) => `${n} ${arr[i]}`).join(' · ')} mm`).join('<br>') + ' (T4 kept, for the current layout, side, circle and eye height).';
     levelPending = lv;
 
@@ -567,7 +584,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       const how = state.free ? 'Towers moved freely' : 'Individual spacings set by hand';
       res.innerHTML = L.fits
         ? `${how}. They fit: inside the circle, with ${mm(L.clear)} mm free at the centre.`
-        : `<span class="warn">${how}. They do not fit: ${L.farMax > R() + 0.0005 ? 'a tower crosses the circle; ' : ''}${L.clear < state.clear / 1000 - 1e-9 ? `only ${mm(L.clear)} mm free at the centre (wanted ${state.clear}); ` : ''}${L.solved ? '' : 'an arm reaches the centre.'}</span>`;
+        : `<span class="warn">${how}. They do not fit: ${L.farMax > R() + 0.0005 ? 'a tower crosses the circle; ' : ''}${L.clear < state.clear / 1000 - 1e-9 ? `only ${mm(L.clear)} mm free at the centre (wanted ${state.clear}); ` : ''}${L.benchGap < 0 ? `a tower stands ${mm(-L.benchGap)} mm into the Ø ${state.bench} bench; ` : ''}${L.solved ? '' : 'an arm reaches the centre.'}</span>`;
       return;
     }
     const sUsed = `<b>${mm(c.s)} mm</b>`;
@@ -707,10 +724,12 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     camTop.left = -hwid; camTop.right = hwid; camTop.top = hh; camTop.bottom = -hh; camTop.updateProjectionMatrix();
     scaleBar.position.set(hwid - 1.0, 0, hh - 0.7);           // bottom-right of the top-down frame
     scaleBar.visible = view === 'top';
-    person.visible = view !== 'centre';
+    persons.forEach((g, s) => { g.visible = !(view === 'centre' && s === povStatue); });
     controls.enabled = view === 'drone';
     look.enabled = view === 'centre';
-    ['Centre', 'Drone', 'Top'].forEach(n => $('btn' + n).setAttribute('aria-pressed', view === n.toLowerCase()));
+    $('btnCentre').setAttribute('aria-pressed', view === 'centre' && povStatue === 0);
+    $('btnCentre2').setAttribute('aria-pressed', view === 'centre' && povStatue === 1);
+    ['Drone', 'Top'].forEach(n => $('btn' + n).setAttribute('aria-pressed', view === n.toLowerCase()));
     const leftFree = !dragMode;      // left button and one finger go to the camera unless towers are being dragged
     controls.mouseButtons.LEFT = leftFree ? THREE.MOUSE.ROTATE : -1; controls.touches.ONE = leftFree ? THREE.TOUCH.ROTATE : -1;
     look.mouseButtons.LEFT = leftFree ? THREE.MOUSE.ROTATE : -1; look.touches.ONE = leftFree ? THREE.TOUCH.ROTATE : -1;
@@ -724,9 +743,10 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   }
   function resetCentre() {
     if (!current) return;
-    camCentre.position.set(0, state.eye / 1000, 0);
-    const apex = statueTowers(current, 0)[3];
-    const target = new THREE.Vector3(apex.x * 0.98, (cfg(0).h[3] / 1000 + BASE) / 2 * 0.9 + state.eye / 1000 * 0.1, apex.z * 0.98);
+    const p = povOf(povStatue);
+    camCentre.position.set(p.x, p.y, p.z);
+    const apex = statueTowers(current, povStatue)[3];
+    const target = new THREE.Vector3(apex.x * 0.98, (cfg(povStatue).h[3] / 1000 + BASE) / 2 * 0.9 + state.eye / 1000 * 0.1, apex.z * 0.98);
     const dir = target.sub(camCentre.position).normalize();
     look.target.copy(camCentre.position).addScaledVector(dir, 0.5);
     look.update();
@@ -880,7 +900,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
 
   // Solver settings: anything the solved layout depends on. Changing one while spacings or positions were set by
   // hand asks first; "keep mine" puts the setting back as it was.
-  const SOLVER_KEYS = ['smin', 'smax', 'sopt', 'diam', 'clear', 'side', 'arm', 'mode'];
+  const SOLVER_KEYS = ['smin', 'smax', 'sopt', 'diam', 'clear', 'bench', 'side', 'arm', 'mode'];
   let snap = null;
   const solverSetter = (key, fn) => v => { if (!askOpen && isCustom() && !snap) snap = Object.fromEntries(SOLVER_KEYS.map(k => [k, state[k]])); fn(v); };
   const solverAfter = () => {
@@ -927,6 +947,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   });
   paramRow($('circleParams'), 'diam', 'Circle diameter (to the farthest corners)', 3000, 20000, 100, 'mm', () => state.diam, solverSetter('diam', v => state.diam = v), solverAfter);
   paramRow($('circleParams'), 'clear', 'Free radius the viewer keeps at the centre', 0, 3000, 50, 'mm', () => state.clear, solverSetter('clear', v => state.clear = v), solverAfter);
+  paramRow($('circleParams'), 'bench', 'Bench diameter at the centre (eyes sit on its edge)', 0, 8000, 50, 'mm', () => state.bench, solverSetter('bench', v => state.bench = v), solverAfter);
   const repower = () => { if (powerShown) computePower(); };
   paramRow($('powerParams'), 'unlit', 'Unlit base at the foot of each face', 0, 500, 10, 'mm', () => state.unlit, v => state.unlit = v, repower);
   paramRow($('powerParams'), 'lpm', 'LEDs per metre', 30, 144, 1, '/m', () => state.lpm, v => state.lpm = v, repower);
@@ -947,7 +968,8 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     build();
   });
   // View buttons: switch, or reset the camera when the view is already active.
-  $('btnCentre').addEventListener('click', () => { if (view === 'centre') resetCentre(); view = 'centre'; applyView(); });
+  $('btnCentre').addEventListener('click', () => { const same = view === 'centre' && povStatue === 0; povStatue = 0; view = 'centre'; if (same) resetCentre(); else resetCentre(); applyView(); });
+  $('btnCentre2').addEventListener('click', () => { povStatue = 1; view = 'centre'; resetCentre(); applyView(); });
   $('btnDrone').addEventListener('click', () => { if (view === 'drone') droneHome(); view = 'drone'; applyView(); });
   $('btnTop').addEventListener('click', () => { view = 'top'; applyView(); });
   $('btnDrag').addEventListener('click', () => { dragMode = !dragMode; applyView(); });
@@ -972,7 +994,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       spacing_mm: { min: state.smin, max: state.smax, optimum: state.sopt, pairs: [...state.st[0].pairs], pair_names: PAIR_NAMES, manual: state.st[0].manual },
       statue2: state.decoupled ? statueParams(state.st[1]) : null,                 // null: statue 2 mirrors statue 1
       free_positions_mm: state.free ? { statue1: state.free.s1.map(([x, z]) => [mm(x), mm(-z)]), statue2: state.free.s2.map(([x, z]) => [mm(x), mm(-z)]) } : null,
-      circle_diameter_mm: state.diam, free_radius_mm: state.clear,
+      circle_diameter_mm: state.diam, free_radius_mm: state.clear, bench_diameter_mm: state.bench,
       arm: { method: state.mode, angle_deg: state.arm },
       viewer: { eye_mm: state.eye, fov_deg: state.hfov },
       leds: { unlit_base_mm: state.unlit, per_m: state.lpm, mA_per_led: state.mA, psu_max_A: state.psuA, reel_mm: state.reel },
@@ -998,11 +1020,13 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
         towers: T.map((t, i) => ({
           name: t.name, height_mm: Math.round(t.h * 1000), lit_mm: Math.round(pw.lit[i] * 1000), leds_per_face: pw.leds[i],
           r_mm: mm(t.r), azimuth_deg: r1(wrap(t.th) * DEG), x_mm: mm(t.x), y_mm: mm(-t.z),
+          d_eye_mm: mm(dPov(t, s)), azimuth_from_eye_deg: r1(azPov(t, s) * DEG),
           corner_towards_centre: true, box_yaw_deg: r1(((wrap(t.th) * DEG) + 45 + 360) % 360),
           spacing_to_next_mm: i < 6 ? mm(Math.hypot(T[i + 1].x - t.x, T[i + 1].z - t.z)) : null,
           full_white_A: r1(pw.amps[i]),
         })),
-        half_span_deg: r1(Math.max(...T.map(t => Math.abs(relAz(t, s)) + hw(t.r))) * DEG),
+        eye_point: { x_mm: mm(povOf(s).x), y_mm: mm(-povOf(s).z), eye_mm: state.eye },
+        half_span_deg: r1(Math.max(...T.map(t => Math.abs(azPov(t, s)) + hw(dPov(t, s)))) * DEG),
         level_top_heights_mm: levelHeights(L, s),
       };
     });
@@ -1019,7 +1043,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       params: paramsObject(),
       layout: {
         fits: L.fits, spacing_used_mm: L.choice ? mm(L.choice.s) : null, spacing_reason: L.choice ? L.choice.reason : (state.free ? 'free' : 'manual'),
-        free_radius_mm: mm(L.clear), farthest_corner_mm: mm(L.farMax), statues,
+        free_radius_mm: mm(L.clear), farthest_corner_mm: mm(L.farMax), bench_clearance_mm: mm(L.benchGap), statues,
       },
       leds_power: {
         per_side: side(pws[0]), side_2: state.decoupled ? side(pws[1]) : null,
@@ -1045,6 +1069,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     state.free = (F && Array.isArray(F.statue1) && F.statue1.length === 7 && Array.isArray(F.statue2) && F.statue2.length === 7)
       ? { s1: F.statue1.map(([x, y]) => [x / 1000, -y / 1000]), s2: F.statue2.map(([x, y]) => [x / 1000, -y / 1000]) } : null;
     setIf('diam', P.circle_diameter_mm); setIf('clear', P.free_radius_mm);
+    setParam('bench', typeof P.bench_diameter_mm === 'number' ? P.bench_diameter_mm : 0);   // older files had the eye at the centre
     if (P.arm) { if (P.arm.method === 'touch' || P.arm.method === 'straight') { state.mode = P.arm.method; $('mode').value = state.mode; $('armParams').hidden = state.mode !== 'straight'; } setIf('arm', P.arm.angle_deg); }
     if (P.viewer) { setIf('eye', P.viewer.eye_mm); setIf('hfov', P.viewer.fov_deg); }
     if (P.leds) { setIf('unlit', P.leds.unlit_base_mm); setIf('lpm', P.leds.per_m); setIf('mA', P.leds.mA_per_led); setIf('psuA', P.leds.psu_max_A); setIf('reel', P.leds.reel_mm); }
