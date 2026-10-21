@@ -6,7 +6,7 @@ Parent: [../README.md](../README.md)
 **Covers:** the towers and what feeds them: how a tower's 4 strips hang off its channel, the
 tower-base splitter, power from each box to its 7 towers, the current and brightness budget,
 and timing.
-**Code:** `tools/wiring_diagrams.py` (`supply_box()`, `neighbour_base()`, `statue_power()`, `SUPPLIES`, `TOWER_H`), `tools/statue_render.html`, `tools/projection_maker.html`, `renders/`, `guide/img/supply-box.svg`, `guide/img/neighbour-base.svg`, `guide/img/statue-power.svg`, `guide/wiring.md`, `guide/build.md`
+**Code:** `tools/wiring_diagrams.py` (`supply_box()`, `neighbour_base()`, `statue_power()`, `SUPPLIES`, `TOWER_H`), `tools/statue_render.html`, `renders/`, `guide/img/supply-box.svg`, `guide/img/neighbour-base.svg`, `guide/img/statue-power.svg`, `guide/wiring.md`, `guide/build.md`
 
 ## Design
 
@@ -32,7 +32,6 @@ and timing.
 ### Pages
 
 - [`tower_layout.md`](tower_layout.md) — 7 towers per statue, 4 faces per tower, same data on all faces, strips on the central post, no dividers.
-- [`projection_maker.md`](projection_maker.md) — pictures per viewpoint become the cut pattern of every face; LED render; DXF export (`tools/projection_maker.html`).
 - [`statue_geometry.md`](statue_geometry.md) — where the towers stand in the 8 m circle, what the eye at the centre sees, the 3D sightline check (`tools/statue_render.html`, `renders/`).
 - [`tower_base.md`](tower_base.md) — tower data splitting: 74AHCT125 in each supply box for its own tower; neighbour towers' bases are passive.
 - [`power_distribution.md`](power_distribution.md) — five supplies per statue, mains from the apex, JST-SM per strand, XT60 runs to the tip towers, cable types.

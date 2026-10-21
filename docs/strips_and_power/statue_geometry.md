@@ -2,7 +2,7 @@
 
 Path: [docs](../README.md) › [strips_and_power](README.md) › **statue_geometry**
 Parent: [README.md](README.md)
-**Code:** `tools/statue_render.html` (layout solver, mural projection, three camera views, LED/supply calculator, JSON export/load), `layout/statue-layout.json` (the handoff file), `renders/*.png`, `index.html`, `.nojekyll`
+**Code:** `tools/statue_render.html` (layout solver, four viewpoints, picture projection and cut masks, LED render, DXF export, LED/supply calculator, JSON export/load), `layout/statue-layout.json` (the handoff file), `renders/*.png`, `index.html`, `.nojekyll`
 **Covers:** where the 14 towers stand inside the 8 m circle, what a viewer at the centre sees, and
 the 3D check that the owner and the artist use to judge the tower heights. Not the wiring between
 towers ([trenches.md](trenches.md)).
@@ -124,6 +124,64 @@ audience); spacing range 1000–3000 mm with hand-set pairs 1120 / 1590 / 2200 /
 1102 mm. Statue 2 mirrors statue 1. Consequences recorded elsewhere: LED counts and currents
 ([led_power_budget.md](led_power_budget.md)), trench segments ([trenches.md](trenches.md)),
 the CAT5e length ([../data_link/cabling.md](../data_link/cabling.md)).
+
+### Pictures, cuts and the LED render (owner, 2026-10-21: one page, not two)
+
+The projection maker was built as a second page on 2026-10-21 and folded into this page the same
+day (owner: "I want just one page, the LEDs in the layout decider, the actual cut when moving the
+statues"). Four viewpoints each own 14 faces: the bench seat facing a statue owns its inner faces
+(the two that look at the centre), a back viewpoint on the apex axis behind the apex tower (owner's
+choice over the centre or the circle edge; default 3 m, eye 1600 mm, field of view 100°) owns the
+outer faces. A picture per viewpoint, raster (white is wood, the rest is cut and lit; a pixel is
+wood above 90 % luminance, transparency counts as white) or DXF (inside the closed shapes is cut;
+polylines, lines, circles, arcs and splines, open chains joined by endpoint), is stretched to the
+silhouette of the 14 faces as seen from that eye, shrinkable from left / right / top / bottom
+(owner), and projected onto the faces. Moving a tower re-projects its cuts; masks are cached per
+face so a slider only recomputes what it touches. The bench faces open with a demo smiley.
+
+- **A picture fits the whole silhouette of its 14 faces from the viewpoint, the tip towers' feet
+  included** (owner, 2026-10-21: "the whole point of this tool is to help us create an image that
+  would be displayed on all towers"). The artist draws for that box and pulls it in with the shrink
+  controls. Two band fits remain as options (the height every face of T2–T6, or of all seven, can
+  show); they were briefly the default on 2026-10-21 and rejected by the owner the same day.
+- **Each face gets its own wood canvas at its aspect; no texture repeat** (agent, 2026-10-21). In
+  three r128 the colour map's repeat/offset transform is applied to the alpha mask too, so a
+  repeated wood texture stretched the cut pattern by height over width. This bug is why the
+  projected smiley was unreadable before.
+- **Statue 2's viewpoints mirror statue 1's by default** (owner: "if I upload a file to one view it
+  should look identical on the other view"): same picture, insets, eye, distance and field of view;
+  untick to give statue 2 its own, starting from copies.
+- **The unlit base and the face border (default 20 mm, measured on the wood) are always wood**
+  (agent): no LED sits behind the base.
+- **Wood islands are reported per face, never fixed** (owner): a wood region not connected to the
+  plate edge, on the 2 mm mask, specks under ~4 mm² ignored; faces are named A/B (inner, left/right
+  from the bench) and C/D (outer, left/right from behind) so the message names a physical face.
+- **LEDs are a diffuser one plate thickness behind the cut face** (owner: thickness 6 mm default).
+  Each LED lights the line opposite it and blends additively with its neighbours over one pitch, in
+  a shader fed by one small colour texture per tower; all four faces share the strip as in the real
+  wiring. Night mode darkens the scene.
+- **The LED show is a registry of animations, and the moving rainbow is its first entry** (owner,
+  2026-10-21: "a slowly moving rainbow … the basis for the future animations work"). Each entry is
+  a `frame(ctx)` function called once per tower per frame with the time, the tower, its LED count and
+  an RGBA array in strip order, bottom to top (LED 0 at the foot of the tower), the same order the
+  controller sends
+  ([../firmware/README.md](../firmware/README.md)), so an effect written here maps one-to-one onto the
+  real LEDs. The registry is also `window.statueAnimations`, so a script can add a show without
+  editing the page. Entries: rainbow (default, 0.15 cycles/s), a chase as a template, all white,
+  off. **Shows compute as if every tower had the tallest tower's LED count** (owner, 2026-10-21):
+  LED i is the same colour on every tower at the same height, and a shorter tower simply ends
+  earlier, so the picture stays consistent across the V. The call also carries the tower's offset
+  into the controller's one logical strip, for porting 1D WLED effects. The speed slider is the one time base; a future show reads it from `ctx.params`.
+- **DXF export is R12 POLYLINE/VERTEX, mm, layers OUTLINE and CUT** (agent: the dialect every laser
+  program reads), traced from a 1 mm mask, simplified and smoothed once; one file per face, zipped
+  per viewpoint, tower, statue or everything, with a manifest of sizes and island counts.
+- **Pictures travel in the layout JSON** (owner: one file; version 3 adds `params.projection` with
+  the viewpoints, insets, border, thickness and the pictures as data URLs or DXF text). Versions 1
+  and 2 load as before. The browser store drops the pictures if they exceed its quota.
+- **Her distances ride the solver's rails** (owner, 2026-10-21): the default layout takes the six
+  spacings of her hand-placed file (1120 / 1590 / 2200 / 1340 / 1760 / 1102 mm) as hand-set pairs
+  and places the towers with the touching solver from the bench, because she placed them to look
+  like a solved statue; `?free=1` shows her raw positions.
 
 ### The bench at the centre (owner, 2026-10-21)
 

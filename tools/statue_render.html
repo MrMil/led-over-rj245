@@ -57,6 +57,11 @@ td.ok { color: #9be38a; }
 .warn { color: #ffb08a; font-size: 12px; margin: 6px 0 0; }
 .result { font-size: 13px; margin: 6px 0 0; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; }
 .check { display: flex; gap: 8px; align-items: center; margin: 6px 0; }
+.pov { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; margin: 8px 0; }
+.pov.active { border-color: var(--accent); }
+.pov h3 { font-size: 13px; margin: 0 0 4px; display: flex; justify-content: space-between; align-items: center; }
+.thumb { width: 100%; max-height: 110px; object-fit: contain; background: #fff; border-radius: 4px; margin-top: 6px; display: block; }
+.ok { color: #9be38a; }
 .bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 6px 0 0; }
 .badge { font-size: 10px; letter-spacing: 0.04em; background: var(--accent); color: #1a1208; border-radius: 10px; padding: 1px 7px; margin-left: 6px; vertical-align: middle; }
 .confirm { margin-top: 8px; padding: 8px 10px; border: 1px solid var(--accent); border-radius: 8px; background: #2b2217; }
@@ -79,11 +84,14 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
 <div id="view"></div>
 
 <div class="views" role="group" aria-label="Viewpoint">
-  <button id="btnCentre" aria-pressed="true" title="Eye on the bench edge, facing statue 1. Press again to reset the camera">Eye · statue 1</button>
-  <button id="btnCentre2" aria-pressed="false" title="Eye on the bench edge, facing statue 2. Press again to reset the camera">Eye · statue 2</button>
+  <button data-view="bench1" aria-pressed="true" title="Eye on the bench edge, facing statue 1. Press again to reset the camera">Bench · statue 1</button>
+  <button data-view="bench2" aria-pressed="false" title="Eye on the bench edge, facing statue 2. Press again to reset the camera">Bench · statue 2</button>
+  <button data-view="back1" aria-pressed="false" title="Behind statue 1, looking at the centre. Press again to reset the camera">Back · statue 1</button>
+  <button data-view="back2" aria-pressed="false" title="Behind statue 2, looking at the centre. Press again to reset the camera">Back · statue 2</button>
   <button id="btnDrone" aria-pressed="false" title="Press again to reset the camera">Drone view</button>
   <button id="btnTop" aria-pressed="false">Top-down view</button>
   <button id="btnDrag" aria-pressed="false" title="Move towers by dragging them in any view">✥ Drag towers</button>
+  <button id="btnNight" aria-pressed="false" title="Night: dark sky, the LEDs carry the picture">Night</button>
   <button id="btnPng">Save PNG</button>
   <button id="btnUndo" title="Undo (Ctrl/Cmd+Z)" disabled>↶ Undo</button>
   <button id="btnRedo" title="Redo (Ctrl/Cmd+Shift+Z)" disabled>↷ Redo</button>
@@ -104,7 +112,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
 <button id="btnUnfold" hidden aria-label="Show the settings panel">Settings ▸</button>
 <div class="panel" id="panel">
   <h1>Statue tower sightlines <button id="btnFold" class="small" title="Fold the panel to the side" aria-label="Hide the settings panel">◂ Hide</button></h1>
-  <div class="note">Two statues of 7 towers, corner to the centre of the circle. The defaults are the artist's final layout (21 Oct 2026): towers placed by hand. "Reset to the solved layout" places them so that, seen from the centre, neighbouring silhouettes exactly touch. The cut pattern is a smiley projected from the eye point. Lengths in mm.</div>
+  <div class="note">Two statues of 7 towers, corner to the centre of the circle, a bench at the centre. The defaults are the artist's final layout (21 Oct 2026): her heights and her six spacings, placed on the solver's rails so neighbouring silhouettes touch from the bench. "Reset to the solved layout" places them so that, seen from the bench, neighbouring silhouettes exactly touch. Each of the four viewpoints below owns 14 faces; its picture is projected from that eye onto them and cut into the wood, lit by the LEDs behind. Lengths in mm.</div>
 
   <h2>Towers</h2>
   <div id="towerParams"></div>
@@ -145,13 +153,30 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   <div class="check"><input id="labels" type="checkbox"><label for="labels">Tower labels</label></div>
   <div class="note">Eye view: drag to look around, right-drag (or arrow keys / WASD, or the pad) to walk. Drone: drag to orbit, right-drag or arrows to pan, wheel or ± to zoom. Press the active view button, or ⟲, to reset that camera.</div>
 
+  <h2>Pictures and cuts</h2>
+  <div class="note">White (or outside the DXF shapes) stays wood, the rest is cut and lit. A picture is stretched to the silhouette of its 14 faces as seen from the viewpoint, shrinkable from each side. Moving towers re-projects the cuts.</div>
+  <div id="cutParams"></div>
+  <div class="check"><input id="same2" type="checkbox" checked><label for="same2">Statue 2 uses statue 1's pictures and viewpoints (mirrored)</label></div>
+  <div id="povs"></div>
+  <h2>Islands and pieces</h2>
+  <div id="islands" class="note">Not computed yet.</div>
+  <h2>LED show</h2>
+  <div class="param"><label for="anim">Animation</label><span></span><select id="anim"></select></div>
+  <div id="showParams"></div>
+  <h2>Export DXF for the laser cutter</h2>
+  <div class="note">One DXF per face, mm, R12: layer OUTLINE is the plate, layer CUT the holes. Files are named statue-tower-face; faces A and B look at the bench (A on the left as seen from it), C and D look outwards (C on the left as seen from behind).</div>
+  <div class="bar"><label for="expPov">Viewpoint</label><select id="expPov"></select><button id="btnExpPov" class="small">Export viewpoint (14 faces)</button></div>
+  <div class="bar"><label for="expTower">Tower</label><select id="expTower"></select><button id="btnExpTower" class="small">Export tower (4 faces)</button></div>
+  <div class="bar"><label for="expStatue">Statue</label><select id="expStatue"><option value="0">Statue 1</option><option value="1">Statue 2</option></select><button id="btnExpStatue" class="small">Export statue (28 faces)</button></div>
+  <div class="bar"><button id="btnExpAll" class="small">Export everything (56 faces)</button><span id="expMsg" class="note"></span></div>
+
   <h2>LEDs and power supplies</h2>
   <div id="powerParams"></div>
   <button id="btnPower" class="small">Compute LEDs and power supplies</button>
   <div id="powerOut"></div>
 
   <h2>Export and load</h2>
-  <div class="note">The JSON carries every input and the solved layout (positions in mm, LED counts, supplies) for the blueprints and the LED order in the led-over-rj245 repository.</div>
+  <div class="note">The JSON carries every input, the pictures, and the solved layout (positions in mm, LED counts, supplies) for the blueprints and the LED order in the led-over-rj245 repository. Older files without pictures load too.</div>
   <div class="bar"><button id="btnExport" class="small">Export JSON</button><button id="btnLoadFile" class="small">Load JSON file</button><input id="fileIn" type="file" accept="application/json,.json" hidden></div>
   <textarea id="jsonBox" rows="6" spellcheck="false" placeholder="Exported JSON appears here. Paste JSON here and press Apply to load it."></textarea>
   <div class="bar"><button id="btnApplyJson" class="small">Apply pasted JSON</button><button id="btnCopyJson" class="small">Copy</button><span id="jsonMsg" class="note"></span></div>
@@ -163,6 +188,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 (function () {
   'use strict';
@@ -184,7 +210,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     side: num('side', 400),
     st: [newStatue(), newStatue()],    // per-statue heights, pair spacings and the "set by hand" flag; st[1] used only when decoupled
     decoupled: q.get('decoupled') === '1',
-    free: q.get('solved') === '1' ? null : { s1: DEFAULT_FREE.s1.map(p => [...p]), s2: DEFAULT_FREE.s2.map(p => [...p]) },   // the artist placed the towers by hand; ?solved=1 starts from the solver instead
+    free: q.get('free') === '1' ? { s1: DEFAULT_FREE.s1.map(p => [...p]), s2: DEFAULT_FREE.s2.map(p => [...p]) } : null,   // owner, 2026-10-21: her six distances ride the solver's rails (touching from the bench); ?free=1 shows her raw positions
     smin: num('smin', 1000), smax: num('smax', 3000), sopt: num('sopt', 3000),     // owner, 2026-10-21
     diam: num('d', 18000),
     clear: num('clear', 2350),          // smallest radius the viewer must have free at the centre
@@ -199,18 +225,31 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     mA: num('ma', 29.4),               // current per LED at full white, measured on the bought strip
     psuA: num('psua', 18),             // current ceiling per supply
     reel: num('reel', 5000),           // reel length, mm
+    border: num('border', 20),         // wood kept around every face, mm, measured on the wood
+    thick: num('thick', 6),            // plywood thickness, mm: the diffuser sits this far behind the cut face
+    same2: true,                       // statue 2's viewpoints mirror statue 1's: same picture, insets, eye, distance, field of view
+    night: q.get('night') === '1',
+    anim: 'rainbow', speed: 0.15, bright: 1.0,   // 0.15 cycles/s: one full rainbow pass every ~7 s, plainly moving
+    povs: {                            // per viewpoint: back ones have their own eye/fov/distance; bench ones use the viewer eye and field of view
+      bench1: { fit: 'full', insets: { l: 0, r: 0, t: 0, b: 0 }, image: null },
+      bench2: { fit: 'full', insets: { l: 0, r: 0, t: 0, b: 0 }, image: null },
+      back1: { fit: 'full', dist: 3000, eye: 1600, fov: 100, insets: { l: 0, r: 0, t: 0, b: 0 }, image: null },
+      back2: { fit: 'full', dist: 3000, eye: 1600, fov: 100, insets: { l: 0, r: 0, t: 0, b: 0 }, image: null },
+    },
   };
   state.st[0].h = state.st[0].h.map((v, i) => num('h' + (i + 1), v));
   if ([1, 2, 3, 4, 5, 6].some(i => q.has('p' + i))) { state.st[0].pairs = [1, 2, 3, 4, 5, 6].map(i => num('p' + i, 0)); state.st[0].manual = q.get('manual') === '1' && state.st[0].pairs.every(v => v > 0); state.free = null; }
-  if ([1, 2, 3, 4, 5, 6, 7].some(i => q.has('h' + i)) || q.has('solved')) { /* heights from the URL keep the artist's positions unless ?solved=1 */ }
-  if (q.get('solved') === '1') { state.st[0].manual = false; }
+  if (q.get('solved') === '1') { state.st[0].manual = false; }   // ?solved=1: uniform spacing from min/max/optimum instead of her distances
   state.st[1] = JSON.parse(JSON.stringify(state.st[0]));
   let powerShown = false;
-  let view = ['drone', 'top'].includes(q.get('view')) ? q.get('view') : 'centre';
-  let povStatue = q.get('pov') === '2' ? 1 : 0;   // which statue the eye view faces
+  const POV_KEYS = ['bench1', 'bench2', 'back1', 'back2'];
+  let view = ['drone', 'top', ...POV_KEYS].includes(q.get('view')) ? q.get('view') : (q.get('pov') === '2' ? 'bench2' : 'bench1');
+  const isPov = () => POV_KEYS.includes(view);
+  const povStatueOf = key => key.endsWith('2') ? 1 : 0;
+  const eff = key => (state.same2 && key.endsWith('2')) ? key.slice(0, -1) + '1' : key;   // where a viewpoint's settings come from
   let dragMode = false;                // "Drag towers": left-drag moves towers in the eye and drone views too (always on in the top view)
   const canDrag = () => view === 'top' || dragMode;
-  const activeCam = () => view === 'centre' ? camCentre : view === 'drone' ? camDrone : camTop;
+  const activeCam = () => isPov() ? camCentre : view === 'drone' ? camDrone : camTop;
   if (q.get('shot') === '1') document.body.classList.add('shot');
   const cfg = s => (state.decoupled ? state.st[s] : state.st[0]);
   const isCustom = () => !!state.free || state.st[0].manual || (state.decoupled && state.st[1].manual);
@@ -227,6 +266,17 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   const dPov = (t, s) => { const p = povOf(s); return Math.hypot(t.x - p.x, t.z - p.z); };
   const azPov = (t, s) => { const p = povOf(s); return wrap(Math.atan2(t.x - p.x, -(t.z - p.z)) - s * Math.PI); };
   const rfP = (t, s) => dPov(t, s) - HALF() / 2;   // face, mid-depth, from the eye
+  // A viewpoint: position, forward (horizontal), right, up. Bench seats are the eye points above; back viewpoints stand on the
+  // apex axis behind the apex tower's outer corner, looking at the centre (owner, 2026-10-21).
+  function povPose(key, L) {
+    const s = povStatueOf(key), e = state.povs[eff(key)], a = s * Math.PI, dir = new THREE.Vector3(Math.sin(a), 0, -Math.cos(a));   // towards the statue
+    let pos, F;
+    if (key.startsWith('bench')) { const p = povOf(s); pos = new THREE.Vector3(p.x, p.y, p.z); F = dir; }
+    else { const apex = statueTowers(L || current, s)[3]; const d = apex.r + HALF() + e.dist / 1000; pos = dir.clone().multiplyScalar(d).setY(e.eye / 1000); F = dir.clone().negate(); }
+    return { pos, F, Rt: new THREE.Vector3().crossVectors(F, new THREE.Vector3(0, 1, 0)), U: new THREE.Vector3(0, 1, 0), key };
+  }
+  const projectPt = (pose, X) => { const v = X.clone().sub(pose.pos); const d = v.dot(pose.F); return [v.dot(pose.Rt) / d, v.dot(pose.U) / d, d]; };
+  const povFov = key => key.startsWith('bench') ? state.hfov : state.povs[eff(key)].fov;
 
   // Arm from the apex (k = 0) towards the tip (k = 3): step k is a chord of chords[k] (m), each silhouette touching the last.
   function solveTouch(chords) {
@@ -323,29 +373,201 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     return T.map(t => Math.round((eye + c * rfP(t, s)) * 100) * 10);
   }
 
-  // Per-statue mural in the viewer's angular space (azimuth relative to the statue, elevation).
-  function muralSpec(L, s) {
-    const eye = state.eye / 1000, T = statueTowers(L, s);
-    const lo = Math.min(...T.map(t => azPov(t, s) - hw(dPov(t, s)))), hi = Math.max(...T.map(t => azPov(t, s) + hw(dPov(t, s))));
-    // the band every tower from T2 to T6 can show: lowest top among them, the apex tower's (highest) bottom
-    const elTop = Math.min(...[1, 2, 3, 4, 5].map(i => Math.atan((T[i].h - eye) / rfP(T[i], s))));
-    const elBot = Math.atan((BASE - eye) / rfP(T[3], s));
-    const cy = (elTop + elBot) / 2;
-    return { cx: (lo + hi) / 2, cy, rx: Math.max(0.05, (hi - lo) / 2 * 0.90), ry: Math.max(0.02, (elTop - elBot) / 2 * 0.84), stroke: 2.0 / DEG };
+  // ---------- Pictures: raster (white = wood) or DXF (inside = cut), both rasterised to a mask ----------
+  function maskFromRaster(img) {
+    const c = document.createElement('canvas'); const sc = Math.min(1, 2048 / Math.max(img.width, img.height));
+    c.width = Math.max(1, Math.round(img.width * sc)); c.height = Math.max(1, Math.round(img.height * sc));
+    const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+    const d = g.getImageData(0, 0, c.width, c.height), m = new Uint8Array(c.width * c.height);
+    for (let i = 0; i < m.length; i++) { const r = d.data[i * 4], gg = d.data[i * 4 + 1], b = d.data[i * 4 + 2], a = d.data[i * 4 + 3]; const lum = (0.299 * r + 0.587 * gg + 0.114 * b) * a / 255 + (255 - a); m[i] = lum < 230 ? 1 : 0; }
+    return { w: c.width, h: c.height, data: m };               // row 0 at the top
   }
-  // 0 wood, 1 outline, 2 eyes, 3 mouth
-  function muralAt(spec, az, el) {
-    const ex = (az - spec.cx) / spec.rx, ey = (el - spec.cy) / spec.ry;
-    const d = (Math.hypot(ex, ey) - 1) * Math.min(spec.rx, spec.ry);
-    if (Math.abs(d) < spec.stroke / 2) return 1;
-    for (const sx of [-0.36, 0.36]) {
-      const dx = (ex - sx) / 0.10, dy = (ey - 0.28) / 0.22;
-      if (dx * dx + dy * dy < 1) return 2;
+  // Minimal DXF reader: LWPOLYLINE, POLYLINE/VERTEX, LINE, CIRCLE, ARC, SPLINE (fit or control points). Open chains are joined by endpoints.
+  function parseDxf(text) {
+    const lines = text.split(/\r?\n/), pairs = [];
+    for (let i = 0; i + 1 < lines.length; i += 2) pairs.push([parseInt(lines[i].trim(), 10), lines[i + 1].trim()]);
+    const rings = [], chains = []; let i = 0;
+    const arcPts = (cx, cy, r, a0, a1) => { const n = Math.max(8, Math.ceil(Math.abs(a1 - a0) / (Math.PI / 24))); const out = []; for (let k = 0; k <= n; k++) { const a = a0 + (a1 - a0) * k / n; out.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); } return out; };
+    const bulgeArc = (p0, p1, b) => { const dx = p1[0] - p0[0], dy = p1[1] - p0[1], ch = Math.hypot(dx, dy); if (!b || ch < 1e-9) return [p1]; const th = 4 * Math.atan(b), r = ch / (2 * Math.sin(th / 2)); const mx = (p0[0] + p1[0]) / 2, my = (p0[1] + p1[1]) / 2; const h = Math.sqrt(Math.max(0, r * r - ch * ch / 4)) * Math.sign(b); const cx = mx - h * dy / ch, cy = my + h * dx / ch; const a0 = Math.atan2(p0[1] - cy, p0[0] - cx); const n = Math.max(4, Math.ceil(Math.abs(th) / (Math.PI / 24))); const out = []; for (let k = 1; k <= n; k++) { const a = a0 + th * k / n; out.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); } return out; };
+    while (i < pairs.length) {
+      const [code, val] = pairs[i];
+      if (code === 0 && val === 'LWPOLYLINE') {
+        const pts = [], bulges = []; let closed = false; i++;
+        while (i < pairs.length && pairs[i][0] !== 0) { const [c, v] = pairs[i]; if (c === 10) { pts.push([parseFloat(v), 0]); bulges.push(0); } else if (c === 20) pts[pts.length - 1][1] = parseFloat(v); else if (c === 42) bulges[pts.length - 1] = parseFloat(v); else if (c === 70) closed = (parseInt(v, 10) & 1) === 1; i++; }
+        let poly = []; for (let k = 0; k < pts.length; k++) { if (k === 0) poly.push(pts[0]); const nxt = pts[(k + 1) % pts.length]; if (k < pts.length - 1 || closed) poly = poly.concat(bulgeArc(pts[k], nxt, bulges[k])); }
+        (closed ? rings : chains).push(poly); continue;
+      }
+      if (code === 0 && val === 'POLYLINE') {
+        let closed = false, pts = []; i++;
+        while (i < pairs.length && !(pairs[i][0] === 0 && pairs[i][1] === 'SEQEND')) { const [c, v] = pairs[i]; if (c === 70 && pts.length === 0) closed = (parseInt(v, 10) & 1) === 1; if (c === 0 && v === 'VERTEX') pts.push([0, 0]); else if (c === 10 && pts.length) pts[pts.length - 1][0] = parseFloat(v); else if (c === 20 && pts.length) pts[pts.length - 1][1] = parseFloat(v); i++; }
+        (closed ? rings : chains).push(pts); continue;
+      }
+      if (code === 0 && (val === 'LINE' || val === 'CIRCLE' || val === 'ARC' || val === 'SPLINE')) {
+        const e = { fit: [], ctrl: [] }; const kind = val; i++;
+        while (i < pairs.length && pairs[i][0] !== 0) { const [c, v] = pairs[i]; const f = parseFloat(v);
+          if (c === 10) { if (kind === 'SPLINE') e.ctrl.push([f, 0]); else e.x1 = f; } else if (c === 20) { if (kind === 'SPLINE') e.ctrl[e.ctrl.length - 1][1] = f; else e.y1 = f; }
+          else if (c === 11) { if (kind === 'SPLINE') e.fit.push([f, 0]); else e.x2 = f; } else if (c === 21) { if (kind === 'SPLINE') e.fit[e.fit.length - 1][1] = f; else e.y2 = f; }
+          else if (c === 40) e.r = f; else if (c === 50) e.a0 = f; else if (c === 51) e.a1 = f; else if (c === 70) e.flags = parseInt(v, 10); i++; }
+        if (kind === 'LINE') chains.push([[e.x1, e.y1], [e.x2, e.y2]]);
+        else if (kind === 'CIRCLE') rings.push(arcPts(e.x1, e.y1, e.r, 0, 2 * Math.PI).slice(0, -1));
+        else if (kind === 'ARC') { let a0 = e.a0 / DEG, a1 = e.a1 / DEG; if (a1 < a0) a1 += 2 * Math.PI; chains.push(arcPts(e.x1, e.y1, e.r, a0, a1)); }
+        else if (kind === 'SPLINE') { const pts = e.fit.length ? e.fit : e.ctrl; if (pts.length > 1) ((e.flags & 1) ? rings : chains).push(pts); }
+        continue;
+      }
+      i++;
     }
-    const mx = ex / 0.56, my = (ey - 0.12) / 0.62;
-    const md = (Math.hypot(mx, my) - 1) * Math.min(spec.rx * 0.56, spec.ry * 0.62);
-    if (Math.abs(md) < spec.stroke / 2 && ey < -0.08) return 3;
-    return 0;
+    const all = rings.concat(chains).flat(); if (!all.length) return [];
+    const ext = Math.max(...all.map(p => Math.abs(p[0])), ...all.map(p => Math.abs(p[1])), 1); const tol = ext * 1e-4;
+    const near = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]) <= tol;
+    let pool = chains.map(c => c.slice());
+    while (pool.length) {
+      let cur = pool.shift(); let grew = true;
+      while (grew && !near(cur[0], cur[cur.length - 1])) {
+        grew = false;
+        for (let k = 0; k < pool.length; k++) { const c = pool[k]; if (near(cur[cur.length - 1], c[0])) { cur = cur.concat(c.slice(1)); pool.splice(k, 1); grew = true; break; } if (near(cur[cur.length - 1], c[c.length - 1])) { cur = cur.concat(c.slice(0, -1).reverse()); pool.splice(k, 1); grew = true; break; } }
+      }
+      if (cur.length > 2) rings.push(cur);
+    }
+    return rings.filter(r => r.length > 2);
+  }
+  function maskFromDxf(text) {
+    const rings = parseDxf(text); if (!rings.length) throw new Error('no closed shapes found in the DXF');
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    rings.forEach(r => r.forEach(([x, y]) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }));
+    const bw = x1 - x0 || 1, bh = y1 - y0 || 1, sc = 2000 / Math.max(bw, bh);
+    const c = document.createElement('canvas'); c.width = Math.max(2, Math.round(bw * sc)); c.height = Math.max(2, Math.round(bh * sc));
+    const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.fillStyle = '#000'; g.beginPath();
+    rings.forEach(r => { r.forEach(([x, y], k) => { const px = (x - x0) * sc, py = c.height - (y - y0) * sc; if (k) g.lineTo(px, py); else g.moveTo(px, py); }); g.closePath(); });
+    g.fill('evenodd');
+    const d = g.getImageData(0, 0, c.width, c.height), m = new Uint8Array(c.width * c.height);
+    for (let k = 0; k < m.length; k++) m[k] = d.data[k * 4] < 128 ? 1 : 0;
+    return { w: c.width, h: c.height, data: m, rings: rings.length };
+  }
+  const sampleMask = (img, u, v) => { if (u < 0 || u > 1 || v < 0 || v > 1) return 0; const px = Math.min(img.w - 1, Math.floor(u * img.w)), py = Math.min(img.h - 1, Math.floor((1 - v) * img.h)); return img.data[py * img.w + px]; };
+  function demoSmiley() {
+    const c = document.createElement('canvas'); c.width = 900; c.height = 400; const g = c.getContext('2d');
+    g.fillStyle = '#fff'; g.fillRect(0, 0, 900, 400); g.strokeStyle = '#000'; g.fillStyle = '#000'; g.lineWidth = 30;
+    g.beginPath(); g.ellipse(450, 200, 400, 150, 0, 0, Math.PI * 2); g.stroke();
+    g.beginPath(); g.ellipse(300, 150, 45, 35, 0, 0, Math.PI * 2); g.fill(); g.beginPath(); g.ellipse(600, 150, 45, 35, 0, 0, Math.PI * 2); g.fill();
+    g.lineWidth = 26; g.beginPath(); g.ellipse(450, 190, 220, 90, 0, Math.PI * 0.15, Math.PI * 0.85); g.stroke();
+    return c;
+  }
+  const demoPicture = () => { const c = demoSmiley(); return Object.assign(maskFromRaster(c), { name: 'demo smiley', type: 'raster', source: c.toDataURL('image/png') }); };
+  state.povs.bench1.image = demoPicture();                      // the page opens with the smiley cut into the bench faces…
+  state.povs.back1.image = demoPicture();                       // …and into the backs (owner, 2026-10-21); statue 2 mirrors both
+
+  // The picture's box in the viewpoint's tangent plane, shrunk by the insets. 'full' (owner's default): the whole silhouette of the
+  // 14 faces from this eye, tip towers' feet included, so the picture is designed for all towers at once. 'band' / 'band7': only the
+  // height every face of T2–T6 / of all seven can show.
+  function povBox(key, L, faceList) {
+    const pose = povPose(key, L), e = state.povs[eff(key)]; let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity, bandTop = Infinity, bandBot = -Infinity;
+    const inBand = f => e.fit !== 'band' || (f.tower.name !== 'T1' && f.tower.name !== 'T7');   // 'band': the five inner towers; 'band7': all seven
+    faceList.filter(f => f.povKey === key).forEach(f => {
+      let topMin = Infinity, botMax = -Infinity;
+      f.corners.forEach((c, k) => { const [sx, sy, d] = projectPt(pose, c); if (d <= 0.05) return; x0 = Math.min(x0, sx); x1 = Math.max(x1, sx); y0 = Math.min(y0, sy); y1 = Math.max(y1, sy); if (k >= 2) topMin = Math.min(topMin, sy); });
+      [f.corners[0], f.corners[1]].forEach(c => { const [sx, sy, d] = projectPt(pose, c.clone().setY(state.unlit / 1000)); if (d > 0.05) botMax = Math.max(botMax, sy); });
+      if (inBand(f)) { bandTop = Math.min(bandTop, topMin); bandBot = Math.max(bandBot, botMax); }
+    });
+    let by0 = y0, by1 = y1;
+    if (e.fit !== 'full' && bandTop - bandBot > 0.02) { by0 = bandBot; by1 = bandTop; }
+    const bw = x1 - x0, bh = by1 - by0, I = e.insets;
+    return { pose, full: [x0, y0, x1, y1], x0: x0 + bw * I.l, x1: x1 - bw * I.r, y0: by0 + bh * I.b, y1: by1 - bh * I.t };
+  }
+  // The cut mask of a face: cut (1) or wood (0) per cell of `res` mm, row 0 at the bottom. The unlit base and the border are wood.
+  function faceMask(f, res, box) {
+    const w = W(), h = f.tower.h, cols = Math.max(2, Math.round(w * 1000 / res)), rows = Math.max(2, Math.round(h * 1000 / res));
+    const m = new Uint8Array(cols * rows);
+    const img = state.povs[eff(f.povKey)].image;
+    if (!img) return { cols, rows, data: m, res };
+    const pose = box.pose, border = state.border / 1000, unlit = state.unlit / 1000, bw = box.x1 - box.x0, bh = box.y1 - box.y0;
+    const o = f.origin.clone().sub(pose.pos), rw = f.rw;            // v = o + rw·u + ŷ·y: each dot product is linear in u and y
+    const oF = o.dot(pose.F), rF = rw.dot(pose.F), uF = pose.F.y, oR = o.dot(pose.Rt), rR = rw.dot(pose.Rt), uR = pose.Rt.y, oU = o.dot(pose.U), rU = rw.dot(pose.U), uU = pose.U.y;
+    for (let j = 0; j < rows; j++) {
+      const y = (j + 0.5) * res / 1000;
+      if (y < unlit || y < border || h - y < border) continue;
+      for (let i = 0; i < cols; i++) {
+        const u = (i + 0.5) / cols, xw = u * w;
+        if (xw < border || w - xw < border) continue;
+        const d = oF + rF * u + uF * y; if (d <= 0.05) continue;
+        const sx = (oR + rR * u + uR * y) / d, sy = (oU + rU * u + uU * y) / d;
+        if (sampleMask(img, (sx - box.x0) / bw, (sy - box.y0) / bh)) m[j * cols + i] = 1;
+      }
+    }
+    return { cols, rows, data: m, res };
+  }
+  // Wood islands: wood regions touching no plate edge (they would fall out of the cut). Pieces: edge-touching regions.
+  function analyse(mask) {
+    const { cols, rows, data } = mask, lab = new Int32Array(cols * rows).fill(-1); let n = 0; const comps = [], stack = [];
+    for (let st = 0; st < data.length; st++) {
+      if (data[st] || lab[st] >= 0) continue;
+      const id = n++; let size = 0, edge = false; stack.push(st); lab[st] = id;
+      while (stack.length) {
+        const k = stack.pop(); size++; const i = k % cols, j = (k / cols) | 0;
+        if (i === 0 || j === 0 || i === cols - 1 || j === rows - 1) edge = true;
+        [[i - 1, j], [i + 1, j], [i, j - 1], [i, j + 1]].forEach(([a, b]) => { if (a < 0 || b < 0 || a >= cols || b >= rows) return; const t = b * cols + a; if (!data[t] && lab[t] < 0) { lab[t] = id; stack.push(t); } });
+      }
+      comps.push({ size, edge });
+    }
+    const minCells = Math.max(2, Math.round(4 / (mask.res * mask.res)));
+    return { islands: comps.filter(c => !c.edge && c.size >= minCells).length, pieces: comps.filter(c => c.edge).length };
+  }
+  // Contours of the cut areas → DXF (R12: POLYLINE/VERTEX, read by every laser program)
+  function contours(mask) {
+    const { cols, rows, data, res } = mask; const at = (i, j) => (i < 0 || j < 0 || i >= cols || j >= rows) ? 0 : data[j * cols + i];
+    const edges = new Map(); const add = (x0, y0, x1, y1) => { const k = x0 + ',' + y0; (edges.get(k) || edges.set(k, []).get(k)).push([x1, y1]); };
+    for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+      if (!data[j * cols + i]) continue;
+      if (!at(i, j - 1)) add(i, j, i + 1, j); if (!at(i + 1, j)) add(i + 1, j, i + 1, j + 1); if (!at(i, j + 1)) add(i + 1, j + 1, i, j + 1); if (!at(i - 1, j)) add(i, j + 1, i, j);
+    }
+    const loops = [];
+    for (const [k, outs] of edges) {
+      while (outs.length) {
+        const start = k.split(',').map(Number); let cur = outs.pop(); const loop = [start];
+        while (!(cur[0] === start[0] && cur[1] === start[1])) { loop.push(cur); const nx = edges.get(cur[0] + ',' + cur[1]); if (!nx || !nx.length) break; cur = nx.pop(); }
+        loops.push(loop);
+      }
+    }
+    const dp = (pts, tol) => {
+      if (pts.length < 4) return pts;
+      const keep = new Uint8Array(pts.length); keep[0] = 1;
+      const rec = (a, b) => { let md = -1, mi = -1; const ax = pts[a][0], ay = pts[a][1], bx = pts[b][0], by = pts[b][1]; const Ln = Math.hypot(bx - ax, by - ay) || 1e-9;
+        for (let k = a + 1; k < b; k++) { const d = Math.abs((bx - ax) * (ay - pts[k][1]) - (ax - pts[k][0]) * (by - ay)) / Ln; if (d > md) { md = d; mi = k; } }
+        if (md > tol) { keep[mi] = 1; rec(a, mi); rec(mi, b); } };
+      let far = 0, fd = 0; pts.forEach((pp, k) => { const d = Math.hypot(pp[0] - pts[0][0], pp[1] - pts[0][1]); if (d > fd) { fd = d; far = k; } });
+      keep[far] = 1; rec(0, far); rec(far, pts.length - 1); keep[pts.length - 1] = 1;
+      const out = pts.filter((pp, k) => keep[k]); if (out.length > 1 && out[0][0] === out[out.length - 1][0] && out[0][1] === out[out.length - 1][1]) out.pop(); return out;
+    };
+    const chaikin = pts => { if (pts.length < 4) return pts; const out = []; for (let k = 0; k < pts.length; k++) { const a = pts[k], b = pts[(k + 1) % pts.length]; out.push([0.75 * a[0] + 0.25 * b[0], 0.75 * a[1] + 0.25 * b[1]], [0.25 * a[0] + 0.75 * b[0], 0.25 * a[1] + 0.75 * b[1]]); } return out; };
+    return loops.map(l => chaikin(dp(l.map(([x, y]) => [x * res, y * res]), 0.45 * res))).filter(l => l.length >= 3);
+  }
+  function faceDxf(f, mask) {
+    const w = W() * 1000, h = f.tower.h * 1000, Lx = [];
+    const push = (...a) => Lx.push(...a);
+    push('0', 'SECTION', '2', 'HEADER', '9', '$ACADVER', '1', 'AC1009', '9', '$EXTMIN', '10', '0', '20', '0', '30', '0', '9', '$EXTMAX', '10', w.toFixed(3), '20', h.toFixed(3), '30', '0', '0', 'ENDSEC');
+    push('0', 'SECTION', '2', 'TABLES', '0', 'TABLE', '2', 'LAYER', '70', '2', '0', 'LAYER', '2', 'OUTLINE', '70', '0', '62', '7', '6', 'CONTINUOUS', '0', 'LAYER', '2', 'CUT', '70', '0', '62', '1', '6', 'CONTINUOUS', '0', 'ENDTAB', '0', 'ENDSEC');
+    push('0', 'SECTION', '2', 'ENTITIES');
+    const poly = (layer, pts) => { push('0', 'POLYLINE', '8', layer, '66', '1', '70', '1'); pts.forEach(([x, y]) => push('0', 'VERTEX', '8', layer, '10', x.toFixed(3), '20', y.toFixed(3))); push('0', 'SEQEND'); };
+    poly('OUTLINE', [[0, 0], [w, 0], [w, h], [0, h]]);
+    contours(mask).forEach(c => poly('CUT', c));
+    push('0', 'ENDSEC', '0', 'EOF');
+    return Lx.join('\r\n') + '\r\n';
+  }
+  const faceFile = f => `S${f.tower.statue}-${f.tower.name}-${f.letter || '?'}.dxf`;
+  async function exportFaces(list, name) {
+    if (!window.JSZip) { $('expMsg').textContent = 'The zip library did not load.'; return; }
+    $('expMsg').textContent = `Tracing ${list.length} faces…`; await new Promise(r => setTimeout(r, 30));
+    const zip = new JSZip(); const manifest = []; const boxes = {};
+    for (const f of list) {
+      if (!boxes[f.povKey]) boxes[f.povKey] = povBox(f.povKey, current, faceList);
+      const m = faceMask(f, 1, boxes[f.povKey]); const a = analyse(m);
+      zip.file(`statue${f.tower.statue}/${f.tower.name}/${faceFile(f)}`, faceDxf(f, m));
+      manifest.push({ file: faceFile(f), statue: f.tower.statue, tower: f.tower.name, face: f.letter, viewpoint: f.povKey, width_mm: state.side, height_mm: Math.round(f.tower.h * 1000), wood_islands: a.islands, pieces: a.pieces });
+    }
+    zip.file('manifest.json', JSON.stringify({ generated: new Date().toISOString(), border_mm: state.border, thickness_mm: state.thick, faces: manifest }, null, 2));
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const a = document.createElement('a'); a.download = name; a.href = URL.createObjectURL(blob); a.click();
+    const isl = manifest.filter(x => x.wood_islands).length;
+    $('expMsg').textContent = `Saved ${name} (${list.length} faces${isl ? `, ${isl} with wood islands` : ''}).`;
   }
 
   // ---------- Three.js scene ----------
@@ -360,7 +582,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xc9dbea);
   scene.fog = new THREE.Fog(0xc9dbea, 30, 90);
-  scene.add(new THREE.HemisphereLight(0xdfe9f3, 0x9a7f5c, 0.5));
+  const hemi = new THREE.HemisphereLight(0xdfe9f3, 0x9a7f5c, 0.5); scene.add(hemi);
   const sun = new THREE.DirectionalLight(0xfff1dc, 1.05);
   sun.position.set(-9, 13, 7); sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
@@ -391,7 +613,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   mark.rotation.x = -Math.PI / 2; mark.position.y = 0.004; scene.add(mark);
 
   // Human figures for scale, 1.75 m, one at each eye point on the bench edge. The one whose eye the camera uses is hidden.
-  const persons = [0, 1].map(() => {
+  const persons = [0, 1, 2, 3].map(() => {   // one at each viewpoint, in POV_KEYS order
     const person = new THREE.Group();
     const cloth = new THREE.MeshStandardMaterial({ color: 0x2f5fb8, roughness: 0.9 });
     const skin = new THREE.MeshStandardMaterial({ color: 0xe3b48f, roughness: 0.8 });
@@ -407,53 +629,72 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   });
   const towersGroup = new THREE.Group(); scene.add(towersGroup);
 
-  // ---------- Textures ----------
-  const PX_PER_M = 160;
-  function hash(x, y, s) { const v = Math.sin(x * 12.9898 + y * 78.233 + s * 37.719) * 43758.5453; return v - Math.floor(v); }
-  const FEATURE_RGB = { 1: [255, 177, 59], 2: [79, 216, 255], 3: [255, 95, 168] };
-
-  function faceTextures(h, worldAt, statueAz, spec, seed, lit, eyePos) {
-    const w = W();
-    const cols = Math.max(8, Math.round(w * PX_PER_M)), rows = Math.max(8, Math.round(h * PX_PER_M));
-    const c1 = document.createElement('canvas'), c2 = document.createElement('canvas');
-    c1.width = c2.width = cols; c1.height = c2.height = rows;
-    const g1 = c1.getContext('2d'), g2 = c2.getContext('2d');
-    const d1 = g1.createImageData(cols, rows), d2 = g2.createImageData(cols, rows);
-    const eye = eyePos.clone();
-    const p = new THREE.Vector3();
-    const tint = 0.9 + 0.2 * hash(seed, 1, 2);
-    for (let j = 0; j < rows; j++) {
-      const v = 1 - (j + 0.5) / rows, y = v * h;
-      for (let i = 0; i < cols; i++) {
-        const u = (i + 0.5) / cols;
-        const wave = Math.sin(u * 26 * (w / 0.4) + 4 * Math.sin(y * 1.7 + seed) + 1.5 * Math.sin(y * 7 + u * 3)) * 0.5 + 0.5;
-        const g = Math.pow(wave, 1.6) * 0.55 + hash(i, j, seed) * 0.12;
-        let r = (178 + 55 * g) * tint, gg = (122 + 48 * g) * tint, b = (72 + 32 * g) * tint;
-        if (y < BASE) { r *= 0.62; gg *= 0.58; b *= 0.55; }
-        let f = 0;
-        if (lit && y >= BASE) {
-          worldAt(u, v, p); p.sub(eye);
-          const az = wrap(Math.atan2(p.x, -p.z) - statueAz);
-          f = muralAt(spec, az, Math.atan2(p.y, Math.hypot(p.x, p.z)));
-        }
-        const k = (j * cols + i) * 4;
-        if (f) {
-          const c = FEATURE_RGB[f], glow = 0.85 + 0.15 * (0.5 + 0.5 * Math.sin(y * 9));
-          d1.data[k] = c[0]; d1.data[k + 1] = c[1]; d1.data[k + 2] = c[2];
-          d2.data[k] = c[0] * glow; d2.data[k + 1] = c[1] * glow; d2.data[k + 2] = c[2] * glow;
-        } else {
-          d1.data[k] = r; d1.data[k + 1] = gg; d1.data[k + 2] = b;
-          d2.data[k] = 0; d2.data[k + 1] = 0; d2.data[k + 2] = 0;
-        }
-        d1.data[k + 3] = 255; d2.data[k + 3] = 255;
-      }
-    }
-    g1.putImageData(d1, 0, 0); g2.putImageData(d2, 0, 0);
-    const t1 = new THREE.CanvasTexture(c1), t2 = new THREE.CanvasTexture(c2);
-    t1.encoding = t2.encoding = THREE.sRGBEncoding;
-    t1.anisotropy = t2.anisotropy = renderer.capabilities.getMaxAnisotropy();
-    return { map: t1, emissiveMap: t2 };
+  // ---------- Night, wood and the lit diffuser ----------
+  function applyNight() {
+    const n = state.night;
+    scene.background.set(n ? 0x0b1020 : 0xc9dbea); scene.fog.color.set(n ? 0x0b1020 : 0xc9dbea);
+    hemi.intensity = n ? 0.12 : 0.5; sun.intensity = n ? 0.15 : 1.05; sun.color.set(n ? 0x9fb4ff : 0xfff1dc);
+    ground.material.color.set(n ? 0x4a4030 : 0xc9ad83); grid.material.transparent = true; grid.material.opacity = n ? 0.25 : 1;
+    $('btnNight').setAttribute('aria-pressed', n);
   }
+  function hash(x, y, s) { const v = Math.sin(x * 12.9898 + y * 78.233 + s * 37.719) * 43758.5453; return v - Math.floor(v); }
+  // One wood tile; each face gets its own canvas at the face's aspect. No texture repeat: in three r128 the map's
+  // repeat/offset is applied to the alpha mask too, which would stretch the cut pattern.
+  const woodTile = (() => {
+    const c = document.createElement('canvas'); c.width = 128; c.height = 512; const g = c.getContext('2d'); const d = g.createImageData(128, 512);
+    for (let j = 0; j < 512; j++) for (let i = 0; i < 128; i++) { const u = i / 128, y = j / 128; const wave = Math.sin(u * 26 + 4 * Math.sin(y * 1.7) + 1.5 * Math.sin(y * 7 + u * 3)) * 0.5 + 0.5; const gg = Math.pow(wave, 1.6) * 0.55 + hash(i, j, 1) * 0.12; const k = (j * 128 + i) * 4; d.data[k] = 178 + 55 * gg; d.data[k + 1] = 122 + 48 * gg; d.data[k + 2] = 72 + 32 * gg; d.data[k + 3] = 255; }
+    g.putImageData(d, 0, 0); return c;
+  })();
+  const woodCache = new Map();
+  function woodFor(h) {                           // texture for a face of height h (m), 128 px per side width
+    const rows = Math.max(8, Math.round(128 * h / W())); const key = rows;
+    if (woodCache.has(key)) return woodCache.get(key);
+    const c = document.createElement('canvas'); c.width = 128; c.height = rows; const g = c.getContext('2d');
+    for (let y = 0; y < rows; y += 512) g.drawImage(woodTile, 0, y);
+    const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; woodCache.set(key, t); return t;
+  }
+  const woodTex = null;
+  // Each LED lights the horizontal line opposite it and blends additively with its neighbours (linear falloff over one pitch).
+  const diffuserShader = {
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: `uniform sampler2D leds; uniform float nLeds; uniform float pitch; uniform float base; uniform float height; uniform float gain; varying vec2 vUv;
+      void main(){ float y = vUv.y * height; vec3 c = vec3(0.0); float fi = (y - base) / pitch - 0.5; int i0 = int(floor(fi));
+        for (int k = 0; k < 2; k++) { int i = i0 + k; if (i < 0 || float(i) >= nLeds) continue; float yi = base + (float(i) + 0.5) * pitch; float w = max(0.0, 1.0 - abs(y - yi) / pitch);
+          c += w * texture2D(leds, vec2((float(i) + 0.5) / nLeds, 0.5)).rgb; }
+        c = min(vec3(1.0), c * gain); gl_FragColor = vec4(c, 1.0); }`,
+  };
+  // ---------- LED animations: the basis for the real show (owner, 2026-10-21) ----------
+  // One entry per show in ANIMATIONS (also reachable as window.statueAnimations, so a script can add shows without editing this
+  // page). Every frame, each tower's entry is called once with
+  //   ctx.t      seconds since the page opened
+  //   ctx.tower  { statue (1|2), name ('T1'…'T7'), idx (0…13), h (m), x, z (m, world) }
+  //   ctx.n      LEDs on this tower's strip, bottom to top (all four faces show the same strip, as in the real wiring)
+  //   ctx.nMax   LEDs on the tallest tower: a show computes as if every tower had this many, so LED i is the same colour on
+  //              every tower at the same height (owner, 2026-10-21); a shorter tower simply has no LEDs beyond ctx.n
+  //   ctx.offset first index of this tower in the controller's one logical strip (S1-T1 … S1-T7, S2-T1 … S2-T7); ctx.total its length
+  //   ctx.out    Uint8Array(n * 4) RGBA to fill, LED 0 at the bottom; alpha is ignored
+  //   ctx.params the page state (speed, bright, …)
+  // and writes LED colours in strip order. The diffuser shader then blends neighbouring LEDs additively by height.
+  // The future show will mirror what the controller sends: the same per-tower, bottom-to-top strip order
+  // (docs/firmware/README.md), so an effect written here maps one-to-one onto the real LEDs.
+  const ANIMATIONS = {
+    rainbow: { label: 'Moving rainbow (full gradient by height)', frame(ctx) { const { n, nMax, out, t } = ctx; for (let i = 0; i < n; i++) { const [r, g, b] = hsv((i / nMax + t * state.speed) % 1, 1, 1); out[i * 4] = r; out[i * 4 + 1] = g; out[i * 4 + 2] = b; out[i * 4 + 3] = 255; } } },
+    chase: { label: 'Chase (template for a new show: one bright LED runs up each tower)', frame(ctx) { const { n, nMax, out, t, tower } = ctx; out.fill(0); const head = ((t * state.speed * 4 + tower.idx * 0.1) % 1) * nMax; for (let i = 0; i < n; i++) { const d = Math.abs(i - head); const v = Math.max(0, 1 - d / 6) * 255; out[i * 4] = v; out[i * 4 + 1] = v * 0.6; out[i * 4 + 2] = 40; out[i * 4 + 3] = 255; } } },
+    white: { label: 'All white (worst case, for brightness)', frame(ctx) { ctx.out.fill(255); } },
+    off: { label: 'Off (daylight look)', frame(ctx) { ctx.out.fill(0); } },
+  };
+  window.statueAnimations = ANIMATIONS;
+  function hsv(h, sat, v) { const i = Math.floor(h * 6), f = h * 6 - i, p = v * (1 - sat), qq = v * (1 - f * sat), tt = v * (1 - (1 - f) * sat); const [r, g, b] = [[v, tt, p], [qq, v, p], [p, v, tt], [p, qq, v], [tt, p, v], [v, p, qq]][i % 6]; return [r * 255, g * 255, b * 255]; }
+  let ledTextures = [];
+  function animate(t) {
+    const anim = ANIMATIONS[state.anim] || ANIMATIONS.rainbow;
+    const nMax = Math.max(1, ...ledTextures.map(l => l.n)), total = ledTextures.reduce((a, l) => a + l.n, 0);
+    let offset = 0;
+    ledTextures.forEach(({ tex, n, tower }) => { if (n >= 1) { anim.frame({ t, tower, n, nMax, offset, total, out: tex.image.data, params: state }); tex.needsUpdate = true; } offset += n; });
+  }
+  const maskCache = new Map();                      // "towerIdx:fi" → { key, mask, analysis }: a change only recomputes the faces it touches
+  let faceList = [], boxLines = null;
+  const FEATURE_RGB = { 1: [255, 177, 59], 2: [79, 216, 255], 3: [255, 95, 168] };
 
   function labelTexture(text) {
     const c = document.createElement('canvas'); c.width = 256; c.height = 96;
@@ -474,7 +715,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   let dimText = 'Ø 8 m';
 
   const labels = [], towerGroups = [];
-  const disposeGroup = g => g.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) { const m = o.material; ['map', 'emissiveMap'].forEach(k => m[k] && m[k].dispose()); m.dispose(); } });
+  const disposeGroup = g => g.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) { const m = o.material; ['emissiveMap', 'alphaMap'].forEach(k => m[k] && m[k].dispose()); /* wood maps are shared and cached */ if (m.uniforms && m.uniforms.leds) m.uniforms.leds.value.dispose(); m.dispose(); } });
 
   let current = null, levelPending = null;
   function placeGroup(g, x, z) { g.position.set(x, 0, z); g.rotation.y = Math.atan2(-x, -z) - Math.PI / 4; }   // one corner points at the centre
@@ -490,10 +731,8 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     dimLabel.position.set(-(R() + 0.9) * 0.707, 0.35, (R() + 0.9) * 0.707);   // bottom-left of the circle, clear of both apex labels
 
     const L = layout(); current = L;
-    const specs = [muralSpec(L, 0), muralSpec(L, 1)];
-    const eyes = [0, 1].map(s => { const p = povOf(s); return new THREE.Vector3(p.x, p.y, p.z); });
-    persons.forEach((g, s) => { const p = povOf(s); g.position.set(p.x, 0, p.z); g.rotation.y = s * Math.PI; });
-    const w = W();
+    const w = W(), thick = state.thick / 1000, pitch = 1 / state.lpm, base = state.unlit / 1000;
+    ledTextures = []; faceList = [];
     const edgeMat = new THREE.LineBasicMaterial({ color: 0x2a1a0e });
     const hullMat = new THREE.MeshBasicMaterial({ color: 0x1e120a, side: THREE.BackSide });
     const pickMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
@@ -505,21 +744,18 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       placeGroup(g, t.x, t.z);
       g.updateMatrixWorld(true);
       const toCentre = new THREE.Vector3(-t.x, 0, -t.z).normalize();
-      const statueAz = (t.statue - 1) * Math.PI, spec = specs[t.statue - 1];
-      const texCache = {};
+      const n = Math.floor((t.h - base) * state.lpm + 1e-9);
+      const tex = new THREE.DataTexture(new Uint8Array(Math.max(1, n) * 4), Math.max(1, n), 1, THREE.RGBAFormat); tex.magFilter = tex.minFilter = THREE.NearestFilter; tex.needsUpdate = true;
+      ledTextures.push({ tex, n, tower: t });
       faces.forEach((f, fi) => {
         const normal = new THREE.Vector3(0, 0, 1).applyAxisAngle(Y, f.ry).applyAxisAngle(Y, g.rotation.y);
         const inner = normal.dot(toCentre) > 0.01;
         const right = new THREE.Vector3(Math.cos(f.ry), 0, -Math.sin(f.ry));
-        const centre = new THREE.Vector3(f.c[0], t.h / 2, f.c[2]);
-        const worldAt = (u, v, out) => { out.copy(centre).addScaledVector(right, (u - 0.5) * w); out.y = v * t.h; return g.localToWorld(out); };
-        const key = inner ? fi : (fi + 2) % 4;      // outer faces repeat the face opposite: all faces show the same pixels
-        if (!texCache[key]) texCache[key] = faceTextures(t.h, worldAt, statueAz, spec, t.idx * 7 + fi, inner, eyes[t.statue - 1]);
-        const tex = texCache[key];
-        const mat = new THREE.MeshStandardMaterial({ map: tex.map, emissiveMap: tex.emissiveMap, emissive: 0xffffff, emissiveIntensity: 1.1, roughness: 0.9, metalness: 0 });
-        const m = new THREE.Mesh(new THREE.PlaneGeometry(w, t.h), mat);
-        m.position.copy(centre); m.rotation.y = f.ry; m.castShadow = true; m.receiveShadow = true;
-        g.add(m);
+        const centre = new THREE.Vector3(f.c[0], 0, f.c[2]);
+        const worldAt = (u, y) => g.localToWorld(centre.clone().addScaledVector(right, (u - 0.5) * w).setY(y));
+        const corners = [worldAt(0, 0), worldAt(1, 0), worldAt(1, t.h), worldAt(0, t.h)];
+        const origin = worldAt(0, 0), rw = worldAt(1, 0).sub(origin);
+        faceList.push({ tower: t, fi, ry: f.ry, inner, centre, corners, origin, rw, worldAt, group: g, tex, n, povKey: (inner ? 'bench' : 'back') + t.statue });
       });
       const cap = new THREE.Mesh(new THREE.PlaneGeometry(w, w), new THREE.MeshStandardMaterial({ color: 0xa87a4a, roughness: 0.95 }));
       cap.rotation.x = -Math.PI / 2; cap.position.y = t.h; cap.castShadow = true; g.add(cap);
@@ -535,10 +771,41 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       lab.visible = state.labels; towersGroup.add(lab); labels.push(lab);
       towersGroup.add(g); towerGroups.push(g);
     });
+    // faces: letters as seen from the owning viewpoint, picture boxes, masks (cached), plates with holes and lit diffusers
+    const boxes = {};
+    POV_KEYS.forEach(key => { boxes[key] = povBox(key, L, faceList); const pose = boxes[key].pose; const mine = faceList.filter(f => f.povKey === key);
+      L.towers.filter(t => t.statue === povStatueOf(key) + 1).forEach(t => { const two = mine.filter(f => f.tower === t).sort((a, b) => projectPt(pose, a.worldAt(0.5, 0.5))[0] - projectPt(pose, b.worldAt(0.5, 0.5))[0]); two.forEach((f, i) => { f.side = i === 0 ? 'left' : 'right'; f.letter = (key.startsWith('bench') ? 'AB' : 'CD')[i]; }); }); });
+    const islandReport = [];
+    const maskKey = f => { const e = state.povs[eff(f.povKey)]; return JSON.stringify([f.povKey, e.fit, e.dist, e.eye, e.insets, e.image ? [e.image.name, e.image.w, e.image.h] : null, state.border, state.unlit, state.side, state.bench, state.eye, f.tower.x, f.tower.z, f.tower.h]); };
+    faceList.forEach(f => {
+      const t = f.tower, g = f.group, ck = t.idx + ':' + f.fi, key = maskKey(f); let hit = maskCache.get(ck);
+      if (!hit || hit.key !== key) { const mm = faceMask(f, 2, boxes[f.povKey]); hit = { key, mask: mm, analysis: analyse(mm) }; maskCache.set(ck, hit); }
+      f.mask = hit.mask; f.analysis = hit.analysis;
+      if (f.analysis.islands) islandReport.push(`Statue ${t.statue}, tower ${t.name}, face ${f.letter} (${f.inner ? 'inner' : 'outer'} ${f.side}) has ${f.analysis.islands} wood island${f.analysis.islands > 1 ? 's' : ''}`);
+      if (f.analysis.pieces > 1) islandReport.push(`Statue ${t.statue}, tower ${t.name}, face ${f.letter} falls into ${f.analysis.pieces} separate pieces`);
+      const m = f.mask, d = new Uint8Array(m.cols * m.rows * 4); for (let k = 0; k < m.data.length; k++) { const v = m.data[k] ? 0 : 255; d[k * 4] = d[k * 4 + 1] = d[k * 4 + 2] = v; d[k * 4 + 3] = 255; }
+      const alpha = new THREE.DataTexture(d, m.cols, m.rows, THREE.RGBAFormat); alpha.needsUpdate = true;   // alphaMap reads green: cut → hole
+      const plate = new THREE.Mesh(new THREE.PlaneGeometry(w, t.h), new THREE.MeshStandardMaterial({ map: woodFor(t.h), alphaMap: alpha, alphaTest: 0.5, roughness: 0.9, metalness: 0, side: THREE.DoubleSide }));
+      plate.position.copy(f.centre).setY(t.h / 2); plate.rotation.y = f.ry; plate.castShadow = true; plate.receiveShadow = true; g.add(plate);
+      const diff = new THREE.Mesh(new THREE.PlaneGeometry(w - 2 * thick, t.h), new THREE.ShaderMaterial({ uniforms: { leds: { value: f.tex }, nLeds: { value: f.n }, pitch: { value: pitch }, base: { value: base }, height: { value: t.h }, gain: { value: state.bright } }, vertexShader: diffuserShader.vertexShader, fragmentShader: diffuserShader.fragmentShader, side: THREE.DoubleSide }));
+      diff.position.copy(f.centre).multiplyScalar(1 - 2 * thick / w).setY(t.h / 2); diff.rotation.y = f.ry; g.add(diff);   // one plate thickness behind the cut face
+    });
+    $('islands').innerHTML = islandReport.length ? islandReport.map(x => `<div class="warn">${x}</div>`).join('') : '<span class="ok">No wood islands; every face is one piece.</span>';
+    POV_KEYS.forEach((key, k) => { const pose = povPose(key, L); persons[k].position.set(pose.pos.x, 0, pose.pos.z); });
+    drawBox();
     updateReadout(L);
     if (powerShown) computePower();
     if (typeof saveSettings === 'function') saveSettings();
     if (typeof recordHistory === 'function') recordHistory();
+  }
+  // the picture's box for the active viewpoint, drawn at the apex tower's depth
+  function drawBox() {
+    if (boxLines) { scene.remove(boxLines); boxLines.geometry.dispose(); boxLines = null; }
+    if (!isPov() || !current) return;
+    const b = povBox(view, current, faceList), pose = b.pose; const apex = statueTowers(current, povStatueOf(view))[3];
+    const D = projectPt(pose, new THREE.Vector3(apex.x, 0, apex.z))[2];
+    const pt = (sx, sy) => pose.pos.clone().addScaledVector(pose.F, D).addScaledVector(pose.Rt, sx * D).addScaledVector(pose.U, sy * D);
+    boxLines = new THREE.Line(new THREE.BufferGeometry().setFromPoints([pt(b.x0, b.y0), pt(b.x1, b.y0), pt(b.x1, b.y1), pt(b.x0, b.y1), pt(b.x0, b.y0)]), new THREE.LineBasicMaterial({ color: 0xffb347 })); scene.add(boxLines);
   }
 
   // ---------- Readout ----------
@@ -713,40 +980,42 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
 
   function applyView() {
     const aspect = viewEl.clientWidth / Math.max(1, viewEl.clientHeight);
-    camCentre.fov = 2 * Math.atan(Math.tan(state.hfov / 2 / DEG) / aspect) * DEG;
+    camCentre.fov = 2 * Math.atan(Math.tan((isPov() ? povFov(view) : state.hfov) / 2 / DEG) / aspect) * DEG;
     camCentre.aspect = aspect; camCentre.updateProjectionMatrix();
     camDrone.aspect = aspect; camDrone.updateProjectionMatrix();
-    const dy = state.eye / 1000 - camCentre.position.y;            // eye height follows the slider; the walked position stays
-    if (Math.abs(dy) > 1e-9) { camCentre.position.y += dy; look.target.y += dy; look.update(); }
+    const eyeY = (view.startsWith('back') ? state.povs[eff(view)].eye : state.eye) / 1000;
+    const dy = eyeY - camCentre.position.y;                        // eye height follows the slider; the walked position stays
+    if (isPov() && Math.abs(dy) > 1e-9) { camCentre.position.y += dy; look.target.y += dy; look.update(); }
     const k = Math.max(1, R() / 4);
     if (k !== droneScale) { camDrone.position.multiplyScalar(k / droneScale); droneScale = k; }
     const hh = R() + 1.2, hwid = hh * aspect;                // top-down: the whole circle plus a margin
     camTop.left = -hwid; camTop.right = hwid; camTop.top = hh; camTop.bottom = -hh; camTop.updateProjectionMatrix();
     scaleBar.position.set(hwid - 1.0, 0, hh - 0.7);           // bottom-right of the top-down frame
     scaleBar.visible = view === 'top';
-    persons.forEach((g, s) => { g.visible = !(view === 'centre' && s === povStatue); });
+    persons.forEach((g, k) => { g.visible = !(isPov() && POV_KEYS[k] === view); });
     controls.enabled = view === 'drone';
-    look.enabled = view === 'centre';
-    $('btnCentre').setAttribute('aria-pressed', view === 'centre' && povStatue === 0);
-    $('btnCentre2').setAttribute('aria-pressed', view === 'centre' && povStatue === 1);
+    look.enabled = isPov();
+    document.querySelectorAll('.views button[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === view));
     ['Drone', 'Top'].forEach(n => $('btn' + n).setAttribute('aria-pressed', view === n.toLowerCase()));
+    document.querySelectorAll('.pov').forEach(el => el.classList.toggle('active', el.dataset.key === view));
+    if (boxLines) boxLines.visible = isPov();
     const leftFree = !dragMode;      // left button and one finger go to the camera unless towers are being dragged
     controls.mouseButtons.LEFT = leftFree ? THREE.MOUSE.ROTATE : -1; controls.touches.ONE = leftFree ? THREE.TOUCH.ROTATE : -1;
     look.mouseButtons.LEFT = leftFree ? THREE.MOUSE.ROTATE : -1; look.touches.ONE = leftFree ? THREE.TOUCH.ROTATE : -1;
     $('btnDrag').setAttribute('aria-pressed', dragMode);
     $('pad').hidden = view === 'top';
     $('padIn').hidden = $('padOut').hidden = view !== 'drone';
-    $('hint').textContent = view === 'centre' ? (dragMode ? 'Drag a tower to move it · right-drag, arrows / WASD or the pad to walk' : 'Drag to look · right-drag, arrows / WASD or the pad to walk · press the view button again to reset')
+    $('hint').textContent = isPov() ? (dragMode ? 'Drag a tower to move it · right-drag, arrows / WASD or the pad to walk' : 'Drag to look · right-drag, arrows / WASD or the pad to walk · the orange frame is the picture box · press the view button again to reset')
       : view === 'drone' ? (dragMode ? 'Drag a tower to move it · right-drag or arrows to pan · wheel or ± to zoom' : 'Drag to orbit · right-drag or arrows to pan · wheel or ± to zoom · press the view button again to reset')
       : 'Drag a tower to move it freely · the panel reports the new spacings';
     renderer.domElement.style.cursor = canDrag() ? 'grab' : '';
   }
   function resetCentre() {
-    if (!current) return;
-    const p = povOf(povStatue);
-    camCentre.position.set(p.x, p.y, p.z);
-    const apex = statueTowers(current, povStatue)[3];
-    const target = new THREE.Vector3(apex.x * 0.98, (cfg(povStatue).h[3] / 1000 + BASE) / 2 * 0.9 + state.eye / 1000 * 0.1, apex.z * 0.98);
+    if (!current || !isPov()) return;
+    const pose = povPose(view, current), s = povStatueOf(view);
+    camCentre.position.copy(pose.pos);
+    const apex = statueTowers(current, s)[3];
+    const target = new THREE.Vector3(apex.x * 0.98, (cfg(s).h[3] / 1000 + BASE) / 2 * 0.9 + pose.pos.y * 0.1, apex.z * 0.98);
     const dir = target.sub(camCentre.position).normalize();
     look.target.copy(camCentre.position).addScaledVector(dir, 0.5);
     look.update();
@@ -773,7 +1042,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   let rdrag = null;
   renderer.domElement.addEventListener('contextmenu', ev => ev.preventDefault());
   renderer.domElement.addEventListener('pointerdown', ev => {
-    if (view === 'centre' && ev.button === 2) { rdrag = { x: ev.clientX, y: ev.clientY }; renderer.domElement.setPointerCapture(ev.pointerId); }
+    if (isPov() && ev.button === 2) { rdrag = { x: ev.clientX, y: ev.clientY }; renderer.domElement.setPointerCapture(ev.pointerId); }
   });
   renderer.domElement.addEventListener('pointermove', ev => {
     if (rdrag) { walk((rdrag.y - ev.clientY) * 0.01, (ev.clientX - rdrag.x) * 0.01); rdrag = { x: ev.clientX, y: ev.clientY }; }
@@ -781,10 +1050,10 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   renderer.domElement.addEventListener('pointerup', () => { rdrag = null; });
   // Keyboard: arrows / WASD walk the eye camera (the drone's arrows are handled by OrbitControls).
   const keys = new Set();
-  window.addEventListener('keydown', ev => { if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return; keys.add(ev.key.toLowerCase()); if (view === 'centre' && ['arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(ev.key.toLowerCase())) ev.preventDefault(); });
+  window.addEventListener('keydown', ev => { if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return; keys.add(ev.key.toLowerCase()); if (isPov() && ['arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(ev.key.toLowerCase())) ev.preventDefault(); });
   window.addEventListener('keyup', ev => keys.delete(ev.key.toLowerCase()));
   function keyWalk() {
-    if (view !== 'centre') return;
+    if (!isPov()) return;
     const step = 0.04;
     if (keys.has('w') || keys.has('arrowup')) walk(step, 0);
     if (keys.has('s') || keys.has('arrowdown')) walk(-step, 0);
@@ -794,8 +1063,8 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   // On-screen pad: hold to repeat; works by touch.
   let padTimer = null;
   const padStep = move => {
-    if (move === 'reset') { if (view === 'centre') resetCentre(); else if (view === 'drone') droneHome(); return; }
-    if (view === 'centre') { if (move === 'fwd') walk(0.08, 0); if (move === 'back') walk(-0.08, 0); if (move === 'left') walk(0, -0.08); if (move === 'right') walk(0, 0.08); }
+    if (move === 'reset') { if (isPov()) resetCentre(); else if (view === 'drone') droneHome(); return; }
+    if (isPov()) { if (move === 'fwd') walk(0.08, 0); if (move === 'back') walk(-0.08, 0); if (move === 'left') walk(0, -0.08); if (move === 'right') walk(0, 0.08); }
     else if (view === 'drone') {
       const s = 0.08 * Math.max(1, R() / 4);
       if (move === 'fwd') dronePan(0, s); if (move === 'back') dronePan(0, -s); if (move === 'left') dronePan(-s, 0); if (move === 'right') dronePan(s, 0);
@@ -847,15 +1116,16 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   renderer.domElement.addEventListener('pointercancel', endDrag);
 
   const tmp = new THREE.Vector3();
+  let t0 = performance.now();
   function render() {
-    keyWalk();
-    const cam = view === 'centre' ? camCentre : view === 'drone' ? camDrone : camTop;
+    keyWalk(); animate((performance.now() - t0) / 1000);
+    const cam = isPov() ? camCentre : view === 'drone' ? camDrone : camTop;
     if (view === 'drone') controls.update();
-    const base = view === 'centre' ? 0.09 : 0.032;        // small in the drone view so labels never hide towers
+    const base = isPov() ? 0.09 : 0.032;        // small in the drone view so labels never hide towers
     labels.forEach(l => {
       const u = l.userData;
       // centre view: above the tower top; drone and top views: beside the tower, on its outer side, so the label never covers it
-      if (view === 'centre') l.position.set(u.pos.x, u.h + 0.22, u.pos.z);
+      if (isPov()) l.position.set(u.pos.x, u.h + 0.22, u.pos.z);
       else l.position.set(u.pos.x + u.out.x * 0.8, view === 'drone' ? u.h * 0.5 : 0.05, u.pos.z + u.out.z * 0.8);
       const w = view === 'top' ? 0.7 : l.position.distanceTo(cam.position) * base;
       l.scale.set(w, w / u.ratio, 1);
@@ -949,13 +1219,73 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   paramRow($('circleParams'), 'clear', 'Free radius the viewer keeps at the centre', 0, 3000, 50, 'mm', () => state.clear, solverSetter('clear', v => state.clear = v), solverAfter);
   paramRow($('circleParams'), 'bench', 'Bench diameter at the centre (eyes sit on its edge)', 0, 8000, 50, 'mm', () => state.bench, solverSetter('bench', v => state.bench = v), solverAfter);
   const repower = () => { if (powerShown) computePower(); };
-  paramRow($('powerParams'), 'unlit', 'Unlit base at the foot of each face', 0, 500, 10, 'mm', () => state.unlit, v => state.unlit = v, repower);
-  paramRow($('powerParams'), 'lpm', 'LEDs per metre', 30, 144, 1, '/m', () => state.lpm, v => state.lpm = v, repower);
+  paramRow($('powerParams'), 'unlit', 'Unlit base at the foot of each face', 0, 500, 10, 'mm', () => state.unlit, v => state.unlit = v, () => { build(); repower(); });
+  paramRow($('powerParams'), 'lpm', 'LEDs per metre', 30, 144, 1, '/m', () => state.lpm, v => state.lpm = v, () => { build(); repower(); });
   paramRow($('powerParams'), 'mA', 'Current per LED at full white', 5, 60, 0.1, 'mA', () => state.mA, v => state.mA = v, repower);
   paramRow($('powerParams'), 'psuA', 'Max current per power supply', 5, 60, 0.5, 'A', () => state.psuA, v => state.psuA = v, repower);
   paramRow($('powerParams'), 'reel', 'Reel length', 1000, 10000, 100, 'mm', () => state.reel, v => state.reel = v, repower);
   $('btnPower').addEventListener('click', computePower);
   paramRow($('armParams'), 'arm', 'Arm angle from the radial line', 0, 80, 1, '°', () => state.arm, solverSetter('arm', v => state.arm = v), solverAfter);
+  const recut = () => { build(); };
+  paramRow($('cutParams'), 'border', 'Tower face border (wood kept around every face)', 0, 100, 1, 'mm', () => state.border, v => state.border = v, recut);
+  paramRow($('cutParams'), 'thick', 'Wood thickness', 3, 25, 0.5, 'mm', () => state.thick, v => state.thick = v, recut);
+  const POV_LABEL = { bench1: 'Bench · statue 1', bench2: 'Bench · statue 2', back1: 'Back · statue 1', back2: 'Back · statue 2' };
+  function showPicture(key) {
+    const el = document.querySelector(`.pov[data-key="${key}"]`), p = state.povs[key], img = el.querySelector('.thumb');
+    el.querySelector('.imgname').textContent = p.image ? `${p.image.name} (${p.image.type}${p.image.rings ? `, ${p.image.rings} shapes` : ''})` : 'no picture: faces stay wood';
+    if (!p.image) { img.hidden = true; return; }
+    const c = document.createElement('canvas'); c.width = p.image.w; c.height = p.image.h; const g = c.getContext('2d'); const d = g.createImageData(c.width, c.height);
+    for (let k = 0; k < p.image.data.length; k++) { const cut = p.image.data[k]; d.data[k * 4] = 255; d.data[k * 4 + 1] = cut ? 179 : 255; d.data[k * 4 + 2] = cut ? 71 : 255; d.data[k * 4 + 3] = 255; }
+    g.putImageData(d, 0, 0); img.src = c.toDataURL('image/png'); img.hidden = false;
+  }
+  function loadPicture(key, file) {
+    const p = state.povs[key], name = file.name, isDxf = /\.dxf$/i.test(name) || /dxf/i.test(file.type), rd = new FileReader();
+    const done = () => { showPicture(key); build(); };
+    if (isDxf) { rd.onload = () => { try { p.image = Object.assign(maskFromDxf(rd.result), { name, type: 'dxf', source: rd.result }); done(); } catch (e) { document.querySelector(`.pov[data-key="${key}"] .imgname`).textContent = 'Could not read the DXF: ' + e.message; } }; rd.readAsText(file); }
+    else { rd.onload = () => { const img = new Image(); img.onload = () => { p.image = Object.assign(maskFromRaster(img), { name, type: 'raster', source: rd.result }); done(); }; img.src = rd.result; }; rd.readAsDataURL(file); }
+  }
+  POV_KEYS.forEach(key => {
+    const p = state.povs[key], el = document.createElement('div'); el.className = 'pov'; el.dataset.key = key;
+    el.innerHTML = `<h3>${POV_LABEL[key]} <button class="small" data-go="${key}">View</button></h3><div class="params"></div>
+      <div class="bar"><button class="small" data-up>Upload picture (PNG/JPG or DXF)</button><input type="file" accept="image/*,.dxf,application/dxf" hidden><button class="small" data-demo>Demo smiley</button><button class="small" data-clear>Clear</button><span class="note imgname"></span></div>
+      <img class="thumb" alt="" hidden>
+      <div class="param"><label for="fit_${key}">Fit the picture to</label><span></span><select id="fit_${key}" data-fit><option value="full">the whole silhouette of the 14 faces (default)</option><option value="band">the band towers T2–T6 share</option><option value="band7">the band all seven towers share</option></select></div>
+      <div class="note">Then shrink the picture box from each side (fraction of that box):</div><div class="insets"></div>`;
+    $('povs').appendChild(el);
+    const P = el.querySelector('.params');
+    if (key.startsWith('back')) {
+      paramRow(P, key + '_dist', 'Distance behind the apex tower', 500, 30000, 100, 'mm', () => p.dist, v => p.dist = v, () => { build(); applyView(); });
+      paramRow(P, key + '_eye', 'Eye height', 400, 2200, 10, 'mm', () => p.eye, v => p.eye = v, () => { build(); applyView(); });
+      paramRow(P, key + '_fov', 'Horizontal field of view (render only)', 60, 140, 5, '°', () => p.fov, v => p.fov = v, () => { applyView(); saveSettings(); });
+    } else P.innerHTML = '<div class="note">Eye on the bench edge: eye height and field of view from the Viewer section.</div>';
+    [['l', 'left'], ['r', 'right'], ['t', 'top'], ['b', 'bottom']].forEach(([sd, nm]) => paramRow(el.querySelector('.insets'), key + '_in_' + sd, `Shrink from ${nm}`, 0, 0.45, 0.01, '', () => p.insets[sd], v => p.insets[sd] = v, recut));
+    el.querySelector('[data-go]').addEventListener('click', () => { view = key; resetCentre(); applyView(); drawBox(); });
+    el.querySelector('[data-fit]').value = p.fit; el.querySelector('[data-fit]').addEventListener('change', ev => { p.fit = ev.target.value; recut(); });
+    const fileIn = el.querySelector('input[type=file]');
+    el.querySelector('[data-up]').addEventListener('click', () => fileIn.click());
+    fileIn.addEventListener('change', () => { const f = fileIn.files[0]; if (f) loadPicture(key, f); fileIn.value = ''; });
+    el.querySelector('[data-clear]').addEventListener('click', () => { p.image = null; showPicture(key); build(); });
+    el.querySelector('[data-demo]').addEventListener('click', () => { p.image = demoPicture(); showPicture(key); build(); });
+    showPicture(key);
+  });
+  const showSame2 = () => { document.querySelectorAll('.pov').forEach(el => { el.hidden = state.same2 && el.dataset.key.endsWith('2'); }); $('same2').checked = state.same2; };
+  showSame2();
+  $('same2').addEventListener('change', () => {
+    state.same2 = $('same2').checked;
+    if (!state.same2) ['bench', 'back'].forEach(k => { const a = state.povs[k + '1'], b = state.povs[k + '2']; b.image = a.image; b.insets = Object.assign({}, a.insets); b.fit = a.fit; document.querySelector(`#fit_${k}2`).value = b.fit; if (k === 'back') { b.eye = a.eye; b.dist = a.dist; b.fov = a.fov; } Object.keys(inputs).filter(x => x.startsWith(k + '2')).forEach(x => inputs[x]()); showPicture(k + '2'); });
+    showSame2(); build();
+  });
+  const fillAnimSelect = () => { const cur = $('anim').value || state.anim; $('anim').innerHTML = ''; Object.entries(ANIMATIONS).forEach(([k, a]) => { const o = document.createElement('option'); o.value = k; o.textContent = a.label; $('anim').appendChild(o); }); $('anim').value = ANIMATIONS[cur] ? cur : state.anim; };
+  fillAnimSelect(); $('anim').addEventListener('focus', fillAnimSelect);
+  $('anim').value = state.anim; $('anim').addEventListener('change', () => { state.anim = $('anim').value; saveSettings(); });
+  paramRow($('showParams'), 'speed', 'Animation speed', 0, 0.5, 0.01, 'cyc/s', () => state.speed, v => state.speed = v, () => saveSettings());
+  paramRow($('showParams'), 'bright', 'Diffuser brightness', 0.2, 3, 0.1, '×', () => state.bright, v => state.bright = v, () => { towersGroup.traverse(o => { if (o.material && o.material.uniforms && o.material.uniforms.gain) o.material.uniforms.gain.value = state.bright; }); saveSettings(); });
+  POV_KEYS.forEach(key => { const o = document.createElement('option'); o.value = key; o.textContent = POV_LABEL[key]; $('expPov').appendChild(o); });
+  const fillTowerSelect = () => { $('expTower').innerHTML = ''; (current ? current.towers : []).forEach(t => { const o = document.createElement('option'); o.value = t.idx; o.textContent = `Statue ${t.statue} · ${t.name}`; $('expTower').appendChild(o); }); };
+  $('btnExpPov').addEventListener('click', () => exportFaces(faceList.filter(f => f.povKey === $('expPov').value), `dxf-${$('expPov').value}.zip`));
+  $('btnExpTower').addEventListener('click', () => { const t = current.towers[+$('expTower').value]; exportFaces(faceList.filter(f => f.tower === t), `dxf-statue${t.statue}-${t.name}.zip`); });
+  $('btnExpStatue').addEventListener('click', () => exportFaces(faceList.filter(f => f.tower.statue === +$('expStatue').value + 1), `dxf-statue${+$('expStatue').value + 1}.zip`));
+  $('btnExpAll').addEventListener('click', () => exportFaces(faceList.slice(), 'dxf-all-faces.zip'));
   paramRow($('viewerParams'), 'eye', 'Eye height', 400, 2000, 10, 'mm', () => state.eye, v => state.eye = v, () => { applyView(); build(); });
   paramRow($('viewerParams'), 'hfov', 'Horizontal field of view', 60, 140, 5, '°', () => state.hfov, v => state.hfov = v, applyView);
   $('mode').value = state.mode; $('armParams').hidden = state.mode !== 'straight';
@@ -968,10 +1298,10 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     build();
   });
   // View buttons: switch, or reset the camera when the view is already active.
-  $('btnCentre').addEventListener('click', () => { const same = view === 'centre' && povStatue === 0; povStatue = 0; view = 'centre'; if (same) resetCentre(); else resetCentre(); applyView(); });
-  $('btnCentre2').addEventListener('click', () => { povStatue = 1; view = 'centre'; resetCentre(); applyView(); });
-  $('btnDrone').addEventListener('click', () => { if (view === 'drone') droneHome(); view = 'drone'; applyView(); });
-  $('btnTop').addEventListener('click', () => { view = 'top'; applyView(); });
+  document.querySelectorAll('.views button[data-view]').forEach(b => b.addEventListener('click', () => { view = b.dataset.view; resetCentre(); applyView(); drawBox(); }));
+  $('btnNight').addEventListener('click', () => { state.night = !state.night; applyNight(); saveSettings(); });
+  $('btnDrone').addEventListener('click', () => { if (view === 'drone') droneHome(); view = 'drone'; applyView(); drawBox(); });
+  $('btnTop').addEventListener('click', () => { view = 'top'; applyView(); drawBox(); });
   $('btnDrag').addEventListener('click', () => { dragMode = !dragMode; applyView(); });
   // Save PNG: a download where the host allows it; the frame is also shown full-size so it can be saved
   // by right-click or long-press where downloads are blocked (hosted viewers).
@@ -998,7 +1328,32 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       arm: { method: state.mode, angle_deg: state.arm },
       viewer: { eye_mm: state.eye, fov_deg: state.hfov },
       leds: { unlit_base_mm: state.unlit, per_m: state.lpm, mA_per_led: state.mA, psu_max_A: state.psuA, reel_mm: state.reel },
+      projection: {
+        border_mm: state.border, thickness_mm: state.thick, statue2_mirrors_statue1: state.same2, animation: state.anim, speed: state.speed, brightness: state.bright, night: state.night,
+        viewpoints: POV_KEYS.map(key => { const p = state.povs[key]; return { key, fit: p.fit, distance_mm: p.dist, eye_mm: p.eye, fov_deg: p.fov, insets: Object.assign({}, p.insets), picture: p.image ? { name: p.image.name, type: p.image.type, source: p.image.source } : null }; }),
+      },
     };
+  }
+  // pictures come back from their saved source; raster decoding is asynchronous, so loaders call build() again when done
+  function applyProjection(PR) {
+    if (!PR) return Promise.resolve();
+    const num = (v, d) => typeof v === 'number' && !isNaN(v) ? v : d;
+    state.border = num(PR.border_mm, state.border); state.thick = num(PR.thickness_mm, state.thick); state.speed = num(PR.speed, state.speed); state.bright = num(PR.brightness, state.bright);
+    if (typeof PR.statue2_mirrors_statue1 === 'boolean') state.same2 = PR.statue2_mirrors_statue1; if (typeof PR.night === 'boolean') state.night = PR.night;
+    if (PR.animation && ANIMATIONS[PR.animation]) state.anim = PR.animation;
+    const pending = [];
+    (PR.viewpoints || []).forEach(v => {
+      const p = state.povs[v.key]; if (!p) return;
+      if (v.key.startsWith('back')) { p.dist = num(v.distance_mm, p.dist); p.eye = num(v.eye_mm, p.eye); p.fov = num(v.fov_deg, p.fov); }
+      if (v.insets) ['l', 'r', 't', 'b'].forEach(sd => p.insets[sd] = num(v.insets[sd], 0));
+      p.fit = ['band', 'band7'].includes(v.fit) ? v.fit : 'full'; const fs = document.getElementById('fit_' + v.key); if (fs) fs.value = p.fit;
+      p.image = null;
+      if (v.picture && v.picture.source) {
+        if (v.picture.type === 'dxf') { try { p.image = Object.assign(maskFromDxf(v.picture.source), { name: v.picture.name, type: 'dxf', source: v.picture.source }); } catch (e) { /* skip a bad picture */ } }
+        else pending.push(new Promise(res => { const img = new Image(); img.onload = () => { p.image = Object.assign(maskFromRaster(img), { name: v.picture.name, type: 'raster', source: v.picture.source }); res(); }; img.onerror = res; img.src = v.picture.source; }));
+      }
+    });
+    return Promise.all(pending);
   }
   // Last settings live in this browser only. URL state parameters win (headless renders and shared links stay
   // deterministic) and are never saved; view flags alone still restore the store.
@@ -1008,7 +1363,8 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   try { if (!urlHasParams) storedParams = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); } catch (e) { storedParams = null; }
   function saveSettings() {
     if (urlHasParams) return;
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(paramsObject())); } catch (e) { /* storage unavailable */ }
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(paramsObject())); }
+    catch (e) { try { const o = paramsObject(); o.projection.viewpoints.forEach(v => { v.picture = null; }); localStorage.setItem(STORE_KEY, JSON.stringify(o)); } catch (e2) { /* storage unavailable */ } }   // pictures too big for the store: keep the rest
   }
   function exportObject() {
     const L = current, r1 = v => Math.round(v * 10) / 10;
@@ -1038,7 +1394,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     });
     const pooled = packBins([...pws[0].strips, ...pws[1].strips], state.reel);
     return {
-      format: JSON_FORMAT, version: 2, generated: new Date().toISOString(),
+      format: JSON_FORMAT, version: 3, generated: new Date().toISOString(),
       units: 'mm, degrees, A; plan x east, y north with statue 1 apex on +y; azimuth clockwise from +y',
       params: paramsObject(),
       layout: {
@@ -1076,7 +1432,9 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     $('decoupled').checked = state.decoupled; showDecoupled();
     [1, 2, 3, 4, 5, 6, 7].forEach(i => inputs['h2_' + i]()); [1, 2, 3, 4, 5, 6].forEach(i => { inputs['p' + i](); inputs['p2_' + i](); });
     askOpen = null; snap = null; $('confirmBox').hidden = true;
-    applyView(); build();
+    const after = () => { Object.values(inputs).forEach(f => f()); if (typeof showSame2 === 'function') { showSame2(); POV_KEYS.forEach(showPicture); $('anim').value = state.anim; applyNight(); } applyView(); build(); };
+    if (P.projection) { applyProjection(P.projection).then(after); if (P.projection.viewpoints && P.projection.viewpoints.some(v => v.picture && v.picture.type === 'raster')) { applyView(); build(); return; } }   // raster pictures arrive a moment later
+    after();
   }
   const jsonMsg = t => { $('jsonMsg').textContent = t; };
   $('btnExport').addEventListener('click', () => {
@@ -1146,6 +1504,8 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   try { if (localStorage.getItem('panelFolded') === '1') setFolded(true); } catch (e) { /* storage unavailable */ }
   $('shotClose').addEventListener('click', () => { $('shotOverlay').hidden = true; $('shotImg').src = ''; });
 
+  window.statueDebug = { get faces() { return faceList; }, get current() { return current; }, povPose, povBox, projectPt, faceMask, analyse, contours, state };   // for tests and scripts
+  applyNight();
   resize();
   build();
   resetCentre();

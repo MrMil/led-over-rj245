@@ -5,13 +5,11 @@ diffused faces, run as one show from a single controller. Controlled from a phon
 controller's own WiFi; no internet needed.
 
 **Layout tool:** [mrmil.github.io/led-over-rj245](https://mrmil.github.io/led-over-rj245/) — 3D
-view of the two statues from the centre, from above and from a drone, with the tower heights,
-spacings, LED and power-supply counts. Export the JSON from it into
+view of the two statues from the bench, from behind, from above and from a drone, with the tower
+heights, spacings, the pictures cut into the faces over the LEDs, DXF files for the laser cutter,
+and the LED and power-supply counts. Export the JSON from it into
 [`layout/`](layout/statue-layout.json).
 
-**Projection maker:** [mrmil.github.io/led-over-rj245/tools/projection_maker.html](https://mrmil.github.io/led-over-rj245/tools/projection_maker.html) —
-upload a picture per viewpoint, see it cut into the faces over the LEDs, export the DXF files for
-the laser cutter.
 
 <!-- META-DOCS:BEGIN -->
 ## Documentation
