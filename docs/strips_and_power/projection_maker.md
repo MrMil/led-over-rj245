@@ -24,6 +24,17 @@ reports wood islands, and exports one DXF per face.
   `layout/statue-layout.json` (fetched on GitHub Pages, a built-in copy as a fallback, or any
   loaded file) and only needs the towers' positions, heights, side, bench and eye. The artist
   edits placement in the layout tool and cut patterns here, so neither page duplicates the other.
+- **The bench diameter is a control here too, and both tools must agree** (owner, 2026-10-21: the
+  projection maker showed gaps that the layout tool did not, because the handoff file carried a
+  bench placeholder while the artist's file had none). On GitHub Pages the page also reads the
+  layout tool's saved state from the shared browser store when the towers were placed by hand, so
+  the two pages show the same statue without a file round trip. One Load button takes either the
+  layout file or this page's project file, and the project file embeds the layout it was made with.
+- **Statue 2's viewpoints mirror statue 1's by default** (owner, 2026-10-21: "if I upload a file
+  to one view it should look identical on the other view"). The bench and back viewpoints of
+  statue 2 take statue 1's picture, insets, eye, distance and field of view, and their panels are
+  hidden; unticking the switch copies the settings over and frees them. With a mirrored layout
+  the result is identical; with a decoupled layout it is the same picture on different towers.
 - **The back viewpoint's distance is measured behind the apex tower's outer corner, on the apex
   axis** (owner, 2026-10-21, chosen over the centre or the circle edge). Defaults: 3 m away,
   eye 1600 mm, field of view 100°, the same as the layout tool's eye view.

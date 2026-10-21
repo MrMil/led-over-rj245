@@ -72,12 +72,15 @@ body.shot .panel, body.shot .views, body.shot #hint, body.shot #btnUnfold { disp
 
   <h2>Layout</h2>
   <div id="layoutInfo" class="note"></div>
-  <div class="bar"><button id="btnLoadLayout" class="small">Load layout JSON</button><input id="layoutIn" type="file" accept="application/json,.json" hidden></div>
+  <div class="bar"><button id="btnLoadLayout" class="small">Load JSON (layout file or project file)</button><input id="layoutIn" type="file" accept="application/json,.json" hidden></div>
+  <div id="layoutParams"></div>
+  <div class="note">The bench diameter comes from the layout file (0 = no bench, eyes at the centre, which is how the artist's own file was made). Set it here or in the layout tool; both must agree.</div>
 
   <h2>Wood and faces</h2>
   <div id="woodParams"></div>
 
   <h2>Viewpoints</h2>
+  <div class="check"><input id="same2" type="checkbox" checked><label for="same2">Statue 2 uses statue 1's pictures and settings (mirrored)</label></div>
   <div id="povs"></div>
 
   <h2>Islands and pieces</h2>
@@ -111,8 +114,18 @@ body.shot .panel, body.shot .views, body.shot #hint, body.shot #btnUnfold { disp
   if (q.get('shot') === '1') document.body.classList.add('shot');
 
   // ---------- The layout: from layout/statue-layout.json (fetched on a server), a loaded file, or this embedded copy ----------
-  const DEFAULT_LAYOUT = {"side_mm":400,"unlit_base_mm":150,"leds_per_m":60,"bench_diameter_mm":3000,"eye_mm":1200,"fov_deg":100,"circle_diameter_mm":18000,"towers":[{"statue":1,"name":"T1","height_mm":1100,"x_mm":-1207,"y_mm":3960},{"statue":1,"name":"T2","height_mm":1400,"x_mm":-882,"y_mm":5031},{"statue":1,"name":"T3","height_mm":1700,"x_mm":-496,"y_mm":6574},{"statue":1,"name":"T4","height_mm":2000,"x_mm":0,"y_mm":8717},{"statue":1,"name":"T5","height_mm":1700,"x_mm":526,"y_mm":7485},{"statue":1,"name":"T6","height_mm":1400,"x_mm":908,"y_mm":5767},{"statue":1,"name":"T7","height_mm":1100,"x_mm":1275,"y_mm":4727},{"statue":2,"name":"T1","height_mm":1100,"x_mm":1207,"y_mm":-3960},{"statue":2,"name":"T2","height_mm":1400,"x_mm":882,"y_mm":-5031},{"statue":2,"name":"T3","height_mm":1700,"x_mm":496,"y_mm":-6574},{"statue":2,"name":"T4","height_mm":2000,"x_mm":0,"y_mm":-8717},{"statue":2,"name":"T5","height_mm":1700,"x_mm":-526,"y_mm":-7485},{"statue":2,"name":"T6","height_mm":1400,"x_mm":-908,"y_mm":-5767},{"statue":2,"name":"T7","height_mm":1100,"x_mm":-1275,"y_mm":-4727}]};
+  const DEFAULT_LAYOUT = {"side_mm":400,"unlit_base_mm":150,"leds_per_m":60,"bench_diameter_mm":0,"eye_mm":1200,"fov_deg":100,"circle_diameter_mm":18000,"towers":[{"statue":1,"name":"T1","height_mm":1100,"x_mm":-1207,"y_mm":3960},{"statue":1,"name":"T2","height_mm":1400,"x_mm":-882,"y_mm":5031},{"statue":1,"name":"T3","height_mm":1700,"x_mm":-496,"y_mm":6574},{"statue":1,"name":"T4","height_mm":2000,"x_mm":0,"y_mm":8717},{"statue":1,"name":"T5","height_mm":1700,"x_mm":526,"y_mm":7485},{"statue":1,"name":"T6","height_mm":1400,"x_mm":908,"y_mm":5767},{"statue":1,"name":"T7","height_mm":1100,"x_mm":1275,"y_mm":4727},{"statue":2,"name":"T1","height_mm":1100,"x_mm":1207,"y_mm":-3960},{"statue":2,"name":"T2","height_mm":1400,"x_mm":882,"y_mm":-5031},{"statue":2,"name":"T3","height_mm":1700,"x_mm":496,"y_mm":-6574},{"statue":2,"name":"T4","height_mm":2000,"x_mm":0,"y_mm":-8717},{"statue":2,"name":"T5","height_mm":1700,"x_mm":-526,"y_mm":-7485},{"statue":2,"name":"T6","height_mm":1400,"x_mm":-908,"y_mm":-5767},{"statue":2,"name":"T7","height_mm":1100,"x_mm":-1275,"y_mm":-4727}]};
   let layout = null, layoutSource = 'built-in copy of layout/statue-layout.json';
+  function layoutFromStore(P) {                     // the layout tool's saved params (same origin on GitHub Pages); needs hand-placed positions
+    const F = P && P.free_positions_mm; if (!F || !Array.isArray(F.statue1) || F.statue1.length !== 7) return null;
+    const h1 = P.heights_mm, h2 = (P.statue2 && P.statue2.heights_mm) || h1;
+    const s2 = P.statue2 ? F.statue2 : F.statue1.map(([x, y]) => [-x, -y]);
+    const towers = [];
+    F.statue1.forEach(([x, y], i) => towers.push({ statue: 1, name: 'T' + (i + 1), height_mm: h1[i], x_mm: x, y_mm: y }));
+    s2.forEach(([x, y], i) => towers.push({ statue: 2, name: 'T' + (i + 1), height_mm: h2[i], x_mm: x, y_mm: y }));
+    return { side_mm: P.side_mm || 400, unlit_base_mm: (P.leds && P.leds.unlit_base_mm) || 150, leds_per_m: (P.leds && P.leds.per_m) || 60, bench_diameter_mm: typeof P.bench_diameter_mm === 'number' ? P.bench_diameter_mm : 0,
+      eye_mm: (P.viewer && P.viewer.eye_mm) || 1200, fov_deg: (P.viewer && P.viewer.fov_deg) || 100, circle_diameter_mm: P.circle_diameter_mm || 18000, towers };
+  }
   function layoutFromHandoff(o) {                   // led-over-rj245/statue-layout (any version) → compact layout
     const P = o.params || {}, L = o.layout || {};
     const towers = [];
@@ -131,6 +144,7 @@ body.shot .panel, body.shot .views, body.shot #hint, body.shot #btnUnfold { disp
     speed: 0.04,           // rainbow cycles per second
     brightness: 1.0,
     labels: true,
+    same2: true,           // statue 2's viewpoints mirror statue 1's: same picture, insets, eye, distance and field of view
     povs: [
       { key: 'bench1', label: 'Bench · statue 1', statue: 0, kind: 'bench', eye: 1200, fov: 100, dist: 0 },
       { key: 'bench2', label: 'Bench · statue 2', statue: 1, kind: 'bench', eye: 1200, fov: 100, dist: 0 },
@@ -175,13 +189,15 @@ body.shot .panel, body.shot .views, body.shot #hint, body.shot #btnUnfold { disp
   }
   // A viewpoint: position, forward (horizontal), right, up. Bench seats face their statue from the bench edge;
   // back viewpoints stand on the apex axis behind the apex tower's outer corner, looking at the centre.
+  const eff = p => (state.same2 && p.statue === 1) ? state.povs.find(x => x.kind === p.kind && x.statue === 0) : p;   // settings source
   function povPose(p) {
+    const e = eff(p);
     const sgn = p.statue === 0 ? -1 : 1;            // statue 1 lies towards −z
     const F = new THREE.Vector3(0, 0, p.kind === 'bench' ? sgn : -sgn);
     let z;
     if (p.kind === 'bench') z = sgn * (layout.bench_diameter_mm / 2000);   // the seat facing a statue is on that statue's side of the centre
-    else { const apex = towers.find(t => t.statue === p.statue && t.name === 'T4'); z = sgn * (Math.hypot(apex.x, apex.z) + HALF() + p.dist / 1000); }
-    const pos = new THREE.Vector3(0, p.eye / 1000, z);
+    else { const apex = towers.find(t => t.statue === p.statue && t.name === 'T4'); z = sgn * (Math.hypot(apex.x, apex.z) + HALF() + e.dist / 1000); }
+    const pos = new THREE.Vector3(0, e.eye / 1000, z);
     const Rt = new THREE.Vector3().crossVectors(F, Y);
     return { pos, F, Rt, U: Y.clone(), p };
   }
@@ -190,7 +206,7 @@ body.shot .panel, body.shot .views, body.shot #hint, body.shot #btnUnfold { disp
   function povBox(p) {
     const pose = povPose(p); let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
     faces.filter(f => f.povKey === p.key).forEach(f => f.corners.forEach(c => { const [sx, sy, d] = project(pose, c); if (d <= 0.05) return; x0 = Math.min(x0, sx); x1 = Math.max(x1, sx); y0 = Math.min(y0, sy); y1 = Math.max(y1, sy); }));
-    const bw = x1 - x0, bh = y1 - y0, I = p.insets;
+    const bw = x1 - x0, bh = y1 - y0, I = eff(p).insets;
     return { pose, full: [x0, y0, x1, y1], x0: x0 + bw * I.l, x1: x1 - bw * I.r, y0: y0 + bh * I.b, y1: y1 - bh * I.t };
   }
 
@@ -277,7 +293,7 @@ body.shot .panel, body.shot .views, body.shot #hint, body.shot #btnUnfold { disp
   function faceMask(f, res) {
     const w = W(), h = f.tower.h, cols = Math.max(2, Math.round(w * 1000 / res)), rows = Math.max(2, Math.round(h * 1000 / res));
     const m = new Uint8Array(cols * rows);
-    const p = state.povs.find(p => p.key === f.povKey); const img = p.image;
+    const p = state.povs.find(p => p.key === f.povKey); const img = eff(p).image;
     if (!img) return { cols, rows, data: m, res };
     const box = povBox(p), pose = box.pose, border = state.border / 1000, unlit = layout.unlit_base_mm / 1000;
     const bw = box.x1 - box.x0, bh = box.y1 - box.y0;
@@ -440,7 +456,7 @@ body.shot .panel, body.shot .views, body.shot #hint, body.shot #btnUnfold { disp
   for (let k = 0; k < 4; k++) persons.push(makePerson());
 
   const maskCache = new Map();                      // "towerIdx:fi" → { key, mask, analysis }; a slider change only recomputes the faces it touches
-  const maskKey = f => { const p = state.povs.find(p => p.key === f.povKey); return JSON.stringify([p.key, p.dist, p.eye, p.insets, p.image ? [p.image.name, p.image.w, p.image.h] : null, state.border, layout.side_mm, layout.unlit_base_mm, layout.bench_diameter_mm, f.tower.x, f.tower.z, f.tower.h]); };
+  const maskKey = f => { const p = eff(state.povs.find(p => p.key === f.povKey)); return JSON.stringify([p.key, p.dist, p.eye, p.insets, p.image ? [p.image.name, p.image.w, p.image.h] : null, state.border, layout.side_mm, layout.unlit_base_mm, layout.bench_diameter_mm, f.tower.x, f.tower.z, f.tower.h]); };
   let ledTextures = [];                             // one 1 × N RGBA texture per tower, updated every frame by the animation
   function build() {
     dispose(towersGroup); towersGroup.clear(); labels.length = 0; ledTextures = [];
@@ -513,7 +529,7 @@ body.shot .panel, body.shot .views, body.shot #hint, body.shot #btnUnfold { disp
   function droneHome() { const k = Math.max(1, R() / 4); camDrone.position.set(5.2 * k, 6.2 * k, 7.6 * k); controls.target.set(0, 0.5, 0); controls.update(); }
   function resetPov() {
     const p = state.povs.find(p => p.key === view); if (!p) return;
-    const pose = povPose(p); camPov.position.copy(pose.pos); camPov.fov = 2 * Math.atan(Math.tan(p.fov / 2 / DEG) / camPov.aspect) * DEG; camPov.updateProjectionMatrix();
+    const pose = povPose(p); camPov.position.copy(pose.pos); camPov.fov = 2 * Math.atan(Math.tan(eff(p).fov / 2 / DEG) / camPov.aspect) * DEG; camPov.updateProjectionMatrix();
     const apex = towers.find(t => t.statue === p.statue && t.name === 'T4');
     const target = new THREE.Vector3(apex.x, apex.h * 0.5, apex.z); const dir = target.sub(pose.pos).normalize();
     look.target.copy(pose.pos).addScaledVector(dir, 0.5); look.update();
@@ -605,6 +621,9 @@ body.shot .panel, body.shot .views, body.shot #hint, body.shot #btnUnfold { disp
   }
   function setDemo(p) { const c = demoSmiley(); const img = new Image(); img.src = c.toDataURL('image/png'); const m = maskFromRaster(c); p.image = Object.assign(m, { name: 'demo smiley', type: 'raster', source: img.src }); }
   state.povs.forEach(povPanel);
+  const showSame2 = () => { document.querySelectorAll('.pov').forEach(el => { const p = state.povs.find(p => p.key === el.dataset.key); el.hidden = state.same2 && p.statue === 1; }); $('same2').checked = state.same2; };
+  showSame2();
+  $('same2').addEventListener('change', () => { state.same2 = $('same2').checked; if (!state.same2) { [0, 1].forEach(k => { const a = state.povs[k], b = state.povs.find(x => x.kind === a.kind && x.statue === 1); b.image = a.image; b.insets = Object.assign({}, a.insets); b.eye = a.eye; b.dist = a.dist; b.fov = a.fov; Object.keys(inputs).filter(key => key.startsWith(b.key)).forEach(key => inputs[key]()); showPicture(b); }); } showSame2(); build(); });
   // exports
   state.povs.forEach(p => { const o = document.createElement('option'); o.value = p.key; o.textContent = p.label; $('expPov').appendChild(o); });
   const fillTowerSelect = () => { $('expTower').innerHTML = ''; towers.forEach(t => { const o = document.createElement('option'); o.value = t.idx; o.textContent = `Statue ${t.statue + 1} · ${t.name}`; $('expTower').appendChild(o); }); };
@@ -619,21 +638,35 @@ body.shot .panel, body.shot .views, body.shot #hint, body.shot #btnUnfold { disp
   const setFolded = f => { $('panel').classList.toggle('folded', f); $('btnUnfold').hidden = !f; };
   $('btnFold').addEventListener('click', () => setFolded(true)); $('btnUnfold').addEventListener('click', () => setFolded(false));
   // layout file
-  function useLayout(o, source) { layout = o; layoutSource = source; $('layoutInfo').textContent = `${source}: 14 towers, side ${layout.side_mm} mm, bench Ø ${layout.bench_diameter_mm} mm, eye ${layout.eye_mm} mm.`; fillTowerSelect && towers.length; build(); fillTowerSelect(); }
+  function useLayout(o, source) {
+    layout = o; layoutSource = source; maskCache.clear();
+    if (inputs.bench) inputs.bench();
+    $('layoutInfo').textContent = `${source}: 14 towers, side ${layout.side_mm} mm, bench Ø ${layout.bench_diameter_mm} mm, layout eye ${layout.eye_mm} mm.`;
+    state.povs.filter(p => p.kind === 'bench').forEach(p => { p.eye = layout.eye_mm; inputs[p.key + '_eye'] && inputs[p.key + '_eye'](); });
+    build(); fillTowerSelect();
+  }
+  paramRow($('layoutParams'), 'bench', 'Bench diameter at the centre', 0, 8000, 50, 'mm', () => layout ? layout.bench_diameter_mm : 0, v => { layout.bench_diameter_mm = v; maskCache.clear(); }, () => { $('layoutInfo').textContent = `${layoutSource}: 14 towers, side ${layout.side_mm} mm, bench Ø ${layout.bench_diameter_mm} mm, layout eye ${layout.eye_mm} mm.`; rebuildSoon(); });
+  // One button loads either file: the layout tool's export (led-over-rj245/statue-layout) or this page's project file.
+  function loadAnyJson(txt, name) {
+    const o = JSON.parse(txt);
+    if (o.format === 'led-over-rj245/statue-layout') { useLayout(layoutFromHandoff(o), name); return Promise.resolve('layout'); }
+    if (o.format === PROJ_FORMAT) { if (o.layout && o.layout.towers) useLayout(o.layout, name + ' (embedded layout)'); return applyProject(o).then(() => 'project'); }
+    throw new Error('not a layout file or a projection project');
+  }
   $('btnLoadLayout').addEventListener('click', () => $('layoutIn').click());
-  $('layoutIn').addEventListener('change', () => { const f = $('layoutIn').files[0]; if (!f) return; const rd = new FileReader(); rd.onload = () => { try { useLayout(layoutFromHandoff(JSON.parse(rd.result)), f.name); } catch (e) { $('layoutInfo').textContent = 'Could not load: ' + e.message; } }; rd.readAsText(f); $('layoutIn').value = ''; });
+  $('layoutIn').addEventListener('change', () => { const f = $('layoutIn').files[0]; if (!f) return; const rd = new FileReader(); rd.onload = () => { loadAnyJson(rd.result, f.name).then(k => { $('layoutInfo').textContent += k === 'project' ? ' Project loaded.' : ''; }).catch(e => { $('layoutInfo').textContent = 'Could not load: ' + e.message; }); }; rd.readAsText(f); $('layoutIn').value = ''; });
 
   // ---------- Project file and browser store ----------
   const PROJ_FORMAT = 'led-over-rj245/projection-project';
   function projectObject() {
-    return { format: PROJ_FORMAT, version: 1, generated: new Date().toISOString(), border_mm: state.border, thickness_mm: state.thickness, animation: animName, speed: state.speed, brightness: state.brightness, night: state.night,
+    return { format: PROJ_FORMAT, version: 1, generated: new Date().toISOString(), layout, layout_source: layoutSource, statue2_mirrors_statue1: state.same2, border_mm: state.border, thickness_mm: state.thickness, animation: animName, speed: state.speed, brightness: state.brightness, night: state.night,
       viewpoints: state.povs.map(p => ({ key: p.key, distance_mm: p.dist, eye_mm: p.eye, fov_deg: p.fov, insets: p.insets, picture: p.image ? { name: p.image.name, type: p.image.type, source: p.image.source } : null })) };
   }
   function applyProject(o) {
     if (!o || o.format !== PROJ_FORMAT) throw new Error('not a ' + PROJ_FORMAT + ' file');
     const num = (v, d) => typeof v === 'number' && !isNaN(v) ? v : d;
     state.border = num(o.border_mm, state.border); state.thickness = num(o.thickness_mm, state.thickness); state.speed = num(o.speed, state.speed); state.brightness = num(o.brightness, state.brightness);
-    if (typeof o.night === 'boolean') state.night = o.night; if (o.animation && ANIMATIONS[o.animation]) { animName = o.animation; $('anim').value = animName; }
+    if (typeof o.night === 'boolean') state.night = o.night; if (typeof o.statue2_mirrors_statue1 === 'boolean') state.same2 = o.statue2_mirrors_statue1; if (o.animation && ANIMATIONS[o.animation]) { animName = o.animation; $('anim').value = animName; }
     const pending = [];
     (o.viewpoints || []).forEach(v => {
       const p = state.povs.find(p => p.key === v.key); if (!p) return;
@@ -645,22 +678,24 @@ body.shot .panel, body.shot .views, body.shot #hint, body.shot #btnUnfold { disp
       }
     });
     Object.values(inputs).forEach(f => f()); applyNight();
-    return Promise.all(pending).then(() => { state.povs.forEach(p => showPicture(p)); build(); });
+    return Promise.all(pending).then(() => { state.povs.forEach(p => showPicture(p)); if (typeof showSame2 === 'function') showSame2(); build(); });
   }
   const STORE = 'projectionProject';
   function saveSettings() { try { localStorage.setItem(STORE, JSON.stringify(projectObject())); } catch (e) { /* too big or unavailable */ } }
   $('btnProjExport').addEventListener('click', () => { const txt = JSON.stringify(projectObject(), null, 2); const a = document.createElement('a'); a.download = `projection-project-${new Date().toISOString().slice(0, 10)}.json`; a.href = URL.createObjectURL(new Blob([txt], { type: 'application/json' })); a.click(); $('projMsg').textContent = 'Exported.'; });
   $('btnProjLoad').addEventListener('click', () => $('projIn').click());
-  $('projIn').addEventListener('change', () => { const f = $('projIn').files[0]; if (!f) return; const rd = new FileReader(); rd.onload = () => { applyProject(JSON.parse(rd.result)).then(() => { $('projMsg').textContent = `Loaded ${f.name}.`; }).catch(e => { $('projMsg').textContent = 'Could not load: ' + e.message; }); }; rd.readAsText(f); $('projIn').value = ''; });
+  $('projIn').addEventListener('change', () => { const f = $('projIn').files[0]; if (!f) return; const rd = new FileReader(); rd.onload = () => { loadAnyJson(rd.result, f.name).then(() => { $('projMsg').textContent = `Loaded ${f.name}.`; }).catch(e => { $('projMsg').textContent = 'Could not load: ' + e.message; }); }; rd.readAsText(f); $('projIn').value = ''; });
 
   window.projDebug = { get faces() { return faces; }, faceMask, faceDxf, analyse, contours, povBox, state, get layout() { return layout; } };   // for tests and scripts
   // ---------- Start ----------
   applyNight();
   useLayout(DEFAULT_LAYOUT, layoutSource);
   droneHome(); resize(); render();
-  fetch('../layout/statue-layout.json').then(r => r.ok ? r.json() : null).then(o => { if (o) useLayout(layoutFromHandoff(o), 'layout/statue-layout.json'); }).catch(() => { /* file:// or offline: keep the built-in copy */ });
+  fetch('../layout/statue-layout.json').then(r => r.ok ? r.json() : null).then(o => { if (o && layoutSource.startsWith('built-in')) useLayout(layoutFromHandoff(o), 'layout/statue-layout.json'); }).catch(() => { /* file:// or offline: keep the built-in copy */ });
   let stored = null; try { stored = JSON.parse(localStorage.getItem(STORE) || 'null'); } catch (e) { stored = null; }
   if (stored && [...q.keys()].length === 0) applyProject(stored).catch(() => { /* stale store */ });
+  // On the same site as the layout tool, its saved state (hand-placed towers) is the freshest layout there is.
+  try { const lt = layoutFromStore(JSON.parse(localStorage.getItem('statueSettings') || 'null')); if (lt && [...q.keys()].length === 0) useLayout(lt, "the layout tool's saved state in this browser"); } catch (e) { /* none */ }
   if (q.get('demo') === '1') { state.povs.forEach(p => { setDemo(p); showPicture(p); }); build(); }
 })();
 </script>

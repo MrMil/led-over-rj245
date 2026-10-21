@@ -188,7 +188,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     smin: num('smin', 1000), smax: num('smax', 3000), sopt: num('sopt', 3000),     // owner, 2026-10-21
     diam: num('d', 18000),
     clear: num('clear', 2350),          // smallest radius the viewer must have free at the centre
-    bench: num('bench', 3000),         // circular bench at the centre, mm; the audience sits on its edge facing out. PLACEHOLDER: the artist has not given the size
+    bench: num('bench', 0),            // circular bench at the centre, mm; the audience sits on its edge facing out. 0 until the artist gives the size (owner, 2026-10-21)
     mode: q.get('mode') === 'straight' ? 'straight' : 'touch',
     arm: num('arm', 25),
     eye: num('eye', 1200),               // owner, 2026-10-21: the audience sits
