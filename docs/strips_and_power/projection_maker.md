@@ -25,8 +25,8 @@ reports wood islands, and exports one DXF per face.
   loaded file) and only needs the towers' positions, heights, side, bench and eye. The artist
   edits placement in the layout tool and cut patterns here, so neither page duplicates the other.
 - **The bench diameter is a control here too, and both tools must agree** (owner, 2026-10-21: the
-  projection maker showed gaps that the layout tool did not, because the handoff file carried a
-  bench placeholder while the artist's file had none). On GitHub Pages the page also reads the
+  bench stays in the view; the working value is 3000 mm until the real size is known, and a loaded
+  file without a bench keeps the current one). On GitHub Pages the page also reads the
   layout tool's saved state from the shared browser store when the towers were placed by hand, so
   the two pages show the same statue without a file round trip. One Load button takes either the
   layout file or this page's project file, and the project file embeds the layout it was made with.

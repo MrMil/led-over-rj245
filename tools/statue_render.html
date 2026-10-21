@@ -188,7 +188,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     smin: num('smin', 1000), smax: num('smax', 3000), sopt: num('sopt', 3000),     // owner, 2026-10-21
     diam: num('d', 18000),
     clear: num('clear', 2350),          // smallest radius the viewer must have free at the centre
-    bench: num('bench', 0),            // circular bench at the centre, mm; the audience sits on its edge facing out. 0 until the artist gives the size (owner, 2026-10-21)
+    bench: num('bench', 3000),         // circular bench at the centre, mm; the audience sits on its edge facing out. 3000 is the working value until the artist gives the size (owner, 2026-10-21)
     mode: q.get('mode') === 'straight' ? 'straight' : 'touch',
     arm: num('arm', 25),
     eye: num('eye', 1200),               // owner, 2026-10-21: the audience sits
@@ -1069,7 +1069,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     state.free = (F && Array.isArray(F.statue1) && F.statue1.length === 7 && Array.isArray(F.statue2) && F.statue2.length === 7)
       ? { s1: F.statue1.map(([x, y]) => [x / 1000, -y / 1000]), s2: F.statue2.map(([x, y]) => [x / 1000, -y / 1000]) } : null;
     setIf('diam', P.circle_diameter_mm); setIf('clear', P.free_radius_mm);
-    setParam('bench', typeof P.bench_diameter_mm === 'number' ? P.bench_diameter_mm : 0);   // older files had the eye at the centre
+    if (typeof P.bench_diameter_mm === 'number') setParam('bench', P.bench_diameter_mm);   // a file without a bench keeps the current bench (owner, 2026-10-21: the bench stays in the view)
     if (P.arm) { if (P.arm.method === 'touch' || P.arm.method === 'straight') { state.mode = P.arm.method; $('mode').value = state.mode; $('armParams').hidden = state.mode !== 'straight'; } setIf('arm', P.arm.angle_deg); }
     if (P.viewer) { setIf('eye', P.viewer.eye_mm); setIf('hfov', P.viewer.fov_deg); }
     if (P.leds) { setIf('unlit', P.leds.unlit_base_mm); setIf('lpm', P.leds.per_m); setIf('mA', P.leds.mA_per_led); setIf('psuA', P.leds.psu_max_A); setIf('reel', P.leds.reel_mm); }

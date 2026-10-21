@@ -123,9 +123,10 @@ the CAT5e length ([../data_link/cabling.md](../data_link/cabling.md)).
 
 A circular bench stands at the centre; the audience sits on its edge facing out, which is why
 the eye height is 1200 mm. The artist placed the towers before mentioning it. **Its diameter
-is not known yet**, so the default is 0 (eyes at the centre, exactly as the artist's own file was
-made) until the owner enters the size (changed 2026-10-21: a 3000 mm placeholder first stood here,
-and it made the projection maker show gaps the artist never saw). Consequences in the tool:
+is not known yet**: 3000 mm is the working value in both tools until the owner enters the real
+size (owner, 2026-10-21: the bench stays in the view). A loaded file without a bench field keeps
+the current bench rather than removing it, for the same reason. (Briefly on 2026-10-21 the default
+was 0, a misreading of the owner; reverted the same day.) Consequences in the tool:
 - **One eye point per statue, on the bench edge, on the apex axis** (owner): the eye view has a
   button per statue, the figure stands at each eye point (the bench itself is not drawn), and
   the mural, the level-top heights, the gaps and the readout angles are all taken from that
