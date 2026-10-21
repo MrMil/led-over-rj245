@@ -119,7 +119,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   <h2>Spacing between towers (centre to centre)</h2>
   <div id="spacingParams"></div>
   <div id="result" class="result"></div>
-  <h2>Individual spacings <span id="manualBadge" class="badge" hidden>set by hand</span><span id="freeBadge" class="badge" hidden>moved freely</span></h2>
+  <h2>Individual spacings <span id="manualBadge" class="badge" hidden>set by hand</span><span id="freeBadge" class="badge" hidden>placed by hand</span></h2>
   <div class="note">Solved from the values above until you change one here. In the top-down view you can also drag any tower to wherever you like; the spacings below then just report the distances. Changing a solver setting afterwards asks before re-solving.</div>
   <div id="pairParams"></div>
   <div id="pairParams2" hidden></div>
@@ -581,7 +581,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     $('freeBadge').hidden = !state.free;
     const res = $('result');
     if (state.free || !c) {
-      const how = state.free ? 'Towers moved freely' : 'Individual spacings set by hand';
+      const how = state.free ? 'Tower positions placed by hand (as in the layout file, not solved)' : 'Individual spacings set by hand';
       res.innerHTML = L.fits
         ? `${how}. They fit: inside the circle, with ${mm(L.clear)} mm free at the centre.`
         : `<span class="warn">${how}. They do not fit: ${L.farMax > R() + 0.0005 ? 'a tower crosses the circle; ' : ''}${L.clear < state.clear / 1000 - 1e-9 ? `only ${mm(L.clear)} mm free at the centre (wanted ${state.clear}); ` : ''}${L.benchGap < 0 ? `a tower stands ${mm(-L.benchGap)} mm into the Ø ${state.bench} bench; ` : ''}${L.solved ? '' : 'an arm reaches the centre.'}</span>`;
@@ -832,7 +832,6 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     if (!hit) return;
     const g = hit.object.parent, p = groundAt(ev);
     if (!p) return;
-    initFree();
     tdrag = { idx: g.userData.idx, dx: g.position.x - p.x, dz: g.position.z - p.z, moved: false };
     renderer.domElement.setPointerCapture(ev.pointerId);
     renderer.domElement.style.cursor = 'grabbing';
@@ -840,6 +839,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   renderer.domElement.addEventListener('pointermove', ev => {
     if (!tdrag) return;
     const p = groundAt(ev); if (!p) return;
+    if (!tdrag.moved) { const gx = p.x + tdrag.dx, gz = p.z + tdrag.dz; const g = towerGroups[tdrag.idx]; if (Math.hypot(gx - g.position.x, gz - g.position.z) < 0.01) return; initFree(); }   // first real movement starts hand placement
     tdrag.moved = true; moveTower(tdrag.idx, p.x + tdrag.dx, p.z + tdrag.dz);
   });
   const endDrag = () => { if (!tdrag) return; const moved = tdrag.moved; tdrag = null; renderer.domElement.style.cursor = canDrag() ? 'grab' : ''; if (moved) build(); };
@@ -993,7 +993,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       side_mm: state.side, heights_mm: [...state.st[0].h],
       spacing_mm: { min: state.smin, max: state.smax, optimum: state.sopt, pairs: [...state.st[0].pairs], pair_names: PAIR_NAMES, manual: state.st[0].manual },
       statue2: state.decoupled ? statueParams(state.st[1]) : null,                 // null: statue 2 mirrors statue 1
-      free_positions_mm: state.free ? { statue1: state.free.s1.map(([x, z]) => [mm(x), mm(-z)]), statue2: state.free.s2.map(([x, z]) => [mm(x), mm(-z)]) } : null,
+      free_positions_mm: state.free ? { statue1: state.free.s1.map(([x, z]) => [mm(x), mm(-z)]), statue2: (state.decoupled ? state.free.s2 : state.free.s1.map(([x, z]) => [-x, -z])).map(([x, z]) => [mm(x), mm(-z)]) } : null,
       circle_diameter_mm: state.diam, free_radius_mm: state.clear, bench_diameter_mm: state.bench,
       arm: { method: state.mode, angle_deg: state.arm },
       viewer: { eye_mm: state.eye, fov_deg: state.hfov },

@@ -59,6 +59,12 @@ mine" also puts the three range values back. The page's own confirmation box is 
   a tower while coupled moves its mirror on statue 2. Any solver setting (spacing range, circle,
   free radius, side, arm method or angle) asks before re-solving, exactly as for hand-set pairs;
   "keep mine" puts the setting back.
+- **Hand-placed positions are labelled "placed by hand", not "moved"** (owner, 2026-10-21: the
+  artist's file is a hand-placed layout, and "moved freely" on the default read as if the tool had
+  moved her towers). A drag only switches a solved layout to hand placement once the tower actually
+  moves; a plain click leaves it solved. While statue 2 mirrors statue 1, the export writes statue 2's
+  positions as the mirror, never the snapshot taken when dragging began (her file carried such a
+  stale snapshot; loading ignores it while mirrored, so nothing was lost).
 - **Undo and redo keep a stack of parameter snapshots**, one per change that rebuilt the layout
   (owner, 2026-10-19). A slider drag collapses into one step (same control within 0.8 s). Undo
   restores through the same loader as the JSON file, so it is as complete as the export. The stack
