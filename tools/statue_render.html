@@ -374,8 +374,11 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   }
 
   // ---------- Pictures: raster (white = wood) or DXF (inside = cut), both rasterised to a mask ----------
+  // Pictures are kept up to 4096 px on the long side (owner, 2026-10-22: at 2048 the apex tower seen from the bench got
+  // 3.5 mm per picture pixel and its cuts came out stepped; 4096 keeps every face under the 2 mm mask cell).
+  const PICTURE_MAX = 4096;
   function maskFromRaster(img) {
-    const c = document.createElement('canvas'); const sc = Math.min(1, 2048 / Math.max(img.width, img.height));
+    const c = document.createElement('canvas'); const sc = Math.min(1, PICTURE_MAX / Math.max(img.width, img.height));
     c.width = Math.max(1, Math.round(img.width * sc)); c.height = Math.max(1, Math.round(img.height * sc));
     const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
     const d = g.getImageData(0, 0, c.width, c.height), m = new Uint8Array(c.width * c.height);
@@ -434,7 +437,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     const rings = parseDxf(text); if (!rings.length) throw new Error('no closed shapes found in the DXF');
     let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
     rings.forEach(r => r.forEach(([x, y]) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }));
-    const bw = x1 - x0 || 1, bh = y1 - y0 || 1, sc = 2000 / Math.max(bw, bh);
+    const bw = x1 - x0 || 1, bh = y1 - y0 || 1, sc = PICTURE_MAX / Math.max(bw, bh);
     const c = document.createElement('canvas'); c.width = Math.max(2, Math.round(bw * sc)); c.height = Math.max(2, Math.round(bh * sc));
     const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.fillStyle = '#000'; g.beginPath();
     rings.forEach(r => { r.forEach(([x, y], k) => { const px = (x - x0) * sc, py = c.height - (y - y0) * sc; if (k) g.lineTo(px, py); else g.moveTo(px, py); }); g.closePath(); });
@@ -453,8 +456,20 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     return c;
   }
   const demoPicture = () => { const c = demoSmiley(); return Object.assign(maskFromRaster(c), { name: 'demo smiley', type: 'raster', source: c.toDataURL('image/png') }); };
-  state.povs.bench1.image = demoPicture();                      // the page opens with the smiley cut into the bench faces…
-  state.povs.back1.image = demoPicture();                       // …and into the backs (owner, 2026-10-21); statue 2 mirrors both
+  state.povs.bench1.image = demoPicture();                      // the smiley until the default pictures arrive (see loadDefaultPictures)
+  state.povs.back1.image = demoPicture();
+  // The four generated pictures (art/<viewpoint>.png, tools/face_art.py) are the defaults (owner, 2026-10-22: "make all 4 the
+  // default in the 3d demo"); they are a working state, not final. Fetched next to the page, so they need the repository
+  // (GitHub Pages or a local server); as a bare file the smiley stays. Statue 2 gets its own, so the mirror box unticks.
+  function loadDefaultPictures() {
+    const keys = POV_KEYS.slice();
+    return Promise.all(keys.map(key => new Promise(res => {
+      const img = new Image(); const src = `../art/${key}.png`;
+      img.onload = () => { const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; c.getContext('2d').drawImage(img, 0, 0);
+        state.povs[key].image = Object.assign(maskFromRaster(img), { name: `${key} (art/${key}.png)`, type: 'raster', source: c.toDataURL('image/png') }); res(true); };
+      img.onerror = () => res(false); img.src = src;
+    }))).then(ok => { if (ok.every(x => x)) { state.same2 = false; const cb = document.getElementById('same2'); if (cb) cb.checked = false; if (typeof showSame2 === 'function') showSame2(); POV_KEYS.forEach(k => { if (typeof showPicture === 'function') showPicture(k); }); build(); } return ok.every(x => x); });
+  }
 
   // The picture's box in the viewpoint's tangent plane, shrunk by the insets. 'full' (owner's default): the whole silhouette of the
   // 14 faces from this eye, tip towers' feet included, so the picture is designed for all towers at once. 'band' / 'band7': only the
@@ -1433,8 +1448,8 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     [1, 2, 3, 4, 5, 6, 7].forEach(i => inputs['h2_' + i]()); [1, 2, 3, 4, 5, 6].forEach(i => { inputs['p' + i](); inputs['p2_' + i](); });
     askOpen = null; snap = null; $('confirmBox').hidden = true;
     const after = () => { Object.values(inputs).forEach(f => f()); if (typeof showSame2 === 'function') { showSame2(); POV_KEYS.forEach(showPicture); $('anim').value = state.anim; applyNight(); } applyView(); build(); };
-    if (P.projection) { applyProjection(P.projection).then(after); if (P.projection.viewpoints && P.projection.viewpoints.some(v => v.picture && v.picture.type === 'raster')) { applyView(); build(); return; } }   // raster pictures arrive a moment later
-    after();
+    if (P.projection) { const done = applyProjection(P.projection).then(after); if (P.projection.viewpoints && P.projection.viewpoints.some(v => v.picture && v.picture.type === 'raster')) { applyView(); build(); return done; } }   // raster pictures arrive a moment later
+    after(); return Promise.resolve();
   }
   const jsonMsg = t => { $('jsonMsg').textContent = t; };
   $('btnExport').addEventListener('click', () => {
@@ -1510,7 +1525,14 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   build();
   resetCentre();
   if (storedParams) { try { applyObject({ format: JSON_FORMAT, params: storedParams }); resetCentre(); } catch (e) { /* ignore a stale or foreign store */ } }
-  if (q.get('dump') === '1') { document.body.textContent = ''; const pre = document.createElement('pre'); pre.id = 'dump'; pre.textContent = window.statueExport(); document.body.appendChild(pre); return; }
-  render();
+  // ?load=<url>: open a saved layout JSON by link (the handoff file with its pictures), so headless renders and shared links
+  // show the real file; like every URL parameter it is never written to the store.
+  const storedPictures = !!(storedParams && storedParams.projection && (storedParams.projection.viewpoints || []).some(v => v.picture));
+  const loaded = q.get('load') ? fetch(q.get('load')).then(r => r.json()).then(o => applyObject(o)).then(() => { resetCentre(); jsonMsg(`Loaded ${q.get('load')}.`); }).catch(e => jsonMsg('Could not load ' + q.get('load') + ': ' + e.message))
+    : (storedPictures ? Promise.resolve() : loadDefaultPictures());   // the store's own pictures win; otherwise the four defaults
+  loaded.then(() => {
+    if (q.get('dump') === '1') { document.body.textContent = ''; const pre = document.createElement('pre'); pre.id = 'dump'; pre.textContent = window.statueExport(); document.body.appendChild(pre); return; }
+    render();
+  });
 })();
 </script>

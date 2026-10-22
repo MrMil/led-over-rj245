@@ -31,6 +31,8 @@ picture when viewed from the centre; tower edges fall in the middle of the pictu
 shapes come from the cuts, not from the LEDs**; the LEDs light the faces from behind. People
 look from all angles, so every face is lit. All 4 faces of a tower show the same pixels.
 The animation is a rolled 2D map: x = tower, y = height ([firmware/](firmware/README.md)).
+The pictures themselves (a blessing woman, an eye, a bird with a third eye, a mushroom; owner,
+2026-10-22) are generated and checked for cuttability in [art/](art/README.md).
 
 **Two statues** (owner, 2026-10-18: "we are doing 2 statues"). Reduced from the four-statue
 design Midburn originally approved, 3 weeks before the event, for less work.
@@ -126,6 +128,7 @@ failure — mitigated by a pre-flashed spare ESP32 in a socket ([controller/](co
 - [`strips_and_power/`](strips_and_power/README.md) — towers, strips and power: tower layout, tower-base splitter, power distribution, current budget, timing.
 - [`firmware/`](firmware/README.md) — WLED on the controller: configuration, logical LED order, presets, animation authoring.
 - [`field_docs/`](field_docs/README.md) — the human guide (`README.md`, `guide/`) and the generated wiring diagrams.
+- [`art/`](art/README.md) — the four pictures cut into the faces (one per viewpoint, not final), their generator and the cuttability rules.
 
 ## Files
 

@@ -2,7 +2,7 @@
 
 Path: [docs](../README.md) › [strips_and_power](README.md) › **statue_geometry**
 Parent: [README.md](README.md)
-**Code:** `tools/statue_render.html` (layout solver, four viewpoints, picture projection and cut masks, LED render, DXF export, LED/supply calculator, JSON export/load), `layout/statue-layout.json` (the handoff file), `renders/*.png`, `index.html`, `.nojekyll`
+**Code:** `tools/statue_render.html` (layout solver, four viewpoints, picture projection and cut masks, LED render, DXF export, LED/supply calculator, JSON export/load, `?load=`), `layout/statue-layout.json` (the handoff file, with the pictures from [../art/README.md](../art/README.md)), `renders/*.png`, `index.html`, `.nojekyll`
 **Covers:** where the 14 towers stand inside the 8 m circle, what a viewer at the centre sees, and
 the 3D check that the owner and the artist use to judge the tower heights. Not the wiring between
 towers ([trenches.md](trenches.md)).
@@ -137,7 +137,7 @@ wood above 90 % luminance, transparency counts as white) or DXF (inside the clos
 polylines, lines, circles, arcs and splines, open chains joined by endpoint), is stretched to the
 silhouette of the 14 faces as seen from that eye, shrinkable from left / right / top / bottom
 (owner), and projected onto the faces. Moving a tower re-projects its cuts; masks are cached per
-face so a slider only recomputes what it touches. The bench faces open with a demo smiley.
+face so a slider only recomputes what it touches. The bench faces opened with a demo smiley; since 2026-10-22 the page opens with the four generated pictures ([../art/README.md](../art/README.md), not final) when it can fetch them, the smiley otherwise.
 
 - **A picture fits the whole silhouette of its 14 faces from the viewpoint, the tip towers' feet
   included** (owner, 2026-10-21: "the whole point of this tool is to help us create an image that
@@ -150,7 +150,8 @@ face so a slider only recomputes what it touches. The bench faces open with a de
   projected smiley was unreadable before.
 - **Statue 2's viewpoints mirror statue 1's by default** (owner: "if I upload a file to one view it
   should look identical on the other view"): same picture, insets, eye, distance and field of view;
-  untick to give statue 2 its own, starting from copies.
+  untick to give statue 2 its own, starting from copies. The handoff file now carries four different
+  pictures, so it loads with the box unticked ([../art/README.md](../art/README.md)).
 - **The unlit base and the face border (default 20 mm, measured on the wood) are always wood**
   (agent): no LED sits behind the base.
 - **Wood islands are reported per face, never fixed** (owner): a wood region not connected to the
@@ -174,10 +175,23 @@ face so a slider only recomputes what it touches. The bench faces open with a de
   into the controller's one logical strip, for porting 1D WLED effects. The speed slider is the one time base; a future show reads it from `ctx.params`.
 - **DXF export is R12 POLYLINE/VERTEX, mm, layers OUTLINE and CUT** (agent: the dialect every laser
   program reads), traced from a 1 mm mask, simplified and smoothed once; one file per face, zipped
-  per viewpoint, tower, statue or everything, with a manifest of sizes and island counts.
+  per viewpoint, tower, statue or everything, with a manifest of sizes and island counts. For the
+  generated pictures this export is superseded: their cut files are written as vectors by the
+  generator ([../art/README.md](../art/README.md), `art/dxf/`), because a trace of a mask is never
+  smooth; the export remains for pictures uploaded by hand.
 - **Pictures travel in the layout JSON** (owner: one file; version 3 adds `params.projection` with
   the viewpoints, insets, border, thickness and the pictures as data URLs or DXF text). Versions 1
   and 2 load as before. The browser store drops the pictures if they exceed its quota.
+  `tools/embed_pictures.py` writes the generated pictures into the file ([../art/README.md](../art/README.md)).
+- **`?load=<url>` opens a layout JSON by link** (agent, 2026-10-22): headless renders and shared
+  links can show the real handoff file with its pictures, instead of the page defaults and the demo
+  smiley. Like every URL parameter it is never written to the browser store, and `?dump=1` waits
+  for it, so `?load=...&dump=1` round-trips the file through the page.
+- **Pictures are kept at up to 4096 px on the long side (`PICTURE_MAX`), raster and DXF alike**
+  (owner, 2026-10-22: the cuts must not be pixelated). At the previous 2048 the apex tower seen from
+  the bench got 3.5 mm per picture pixel, coarser than the 2 mm mask cells; 4096 keeps every face
+  under 2 mm per pixel. Reason for the old cap: unknown, presumably memory; 4096 × 2691 loads in
+  well under a second.
 - **Her distances ride the solver's rails** (owner, 2026-10-21): the default layout takes the six
   spacings of her hand-placed file (1120 / 1590 / 2200 / 1340 / 1760 / 1102 mm) as hand-set pairs
   and places the towers with the touching solver from the bench, because she placed them to look
