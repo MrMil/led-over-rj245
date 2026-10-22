@@ -34,6 +34,14 @@ each apex from the camp's supply, ~20 m away, in its own trench (owner).
 - **Trenches only along the arms and between the apexes** (agent, 2026-10-10). Every cable
   follows the V. The box sits at the apex, so data cables fan out along the arms with the
   power.
+- **Trenches never cross each other, so nothing is cabled across the inside of the V** (owner,
+  2026-10-22). The trench between the apexes leaves each apex through the inside of its V, and
+  cutting a second trench across a first one puts a pickaxe into a buried 230 V line. So a 5 V
+  run from a supply reaches only towers next to it along the arm trench, and a supply can never
+  be shared by towers on the two arms: the fewest supplies is counted over runs of neighbours
+  in trench order, not over free pairings (`tools/statue_render.html`,
+  [statue_geometry.md](statue_geometry.md)). Running such a cable the long way round through the
+  apex would cross nothing, but 7 m of 5 V at 9 A is not an option either.
 - **Nothing above ground** (owner, 2026-10-09; police safety check). Cables surface inside
   the tower bases.
 

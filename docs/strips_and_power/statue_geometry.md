@@ -102,9 +102,16 @@ length; defaults from [led_power_budget.md](led_power_budget.md): 150 mm, 60/m, 
   no joins ([tower_layout.md](tower_layout.md)); first-fit decreasing, so a 2.6 m tower takes 4
   reels. The both-sides figure also shows what pooling offcuts across the sides would save.
 - **Supplies are bin-packed with whole towers**: no tower may be fed by two supplies (owner,
-  2026-10-19). The count is the exact minimum (search over 7 towers); the grouping shown prefers
-  neighbouring towers on one supply when that reaches the same count, because each supply sits by
-  the towers it feeds ([power_distribution.md](power_distribution.md)).
+  2026-10-19).
+- **Towers sharing a supply are neighbours along the V** (owner, 2026-10-22). The count is the
+  fewest runs of consecutive towers in trench order T1 … T7 that each stay under the ceiling, and
+  the groups shown are those runs. 5 V cable runs only in the trench along the V; the trench to the
+  other statue leaves the apex through the inside of the V; and trenches never cross
+  ([trenches.md](trenches.md)), so a supply can never feed a tower on the far arm.
+  **Changed 2026-10-22:** before, the count was the minimum over free pairings and the same-count
+  neighbour grouping was only preferred. At the final heights and 18 A that gave 4 supplies per
+  statue with T2 + T6 (and T1 + T3, T5 + T7) on one supply, cabled across the V, and the handoff
+  file carried that plan.
 
 ### Hosting
 
@@ -180,8 +187,9 @@ face so a slider only recomputes what it touches. The bench faces opened with a 
   generator ([../art/README.md](../art/README.md), `art/dxf/`), because a trace of a mask is never
   smooth; the export remains for pictures uploaded by hand.
 - **Pictures travel in the layout JSON** (owner: one file; version 3 adds `params.projection` with
-  the viewpoints, insets, border, thickness and the pictures as data URLs or DXF text). Versions 1
-  and 2 load as before. The browser store drops the pictures if they exceed its quota.
+  the viewpoints, insets, border, thickness and the pictures as data URLs or DXF text; version 4
+  only changes the derived `leds_power` block to the neighbours-only supply grouping). Versions 1
+  to 3 load as before. The browser store drops the pictures if they exceed its quota.
   `tools/embed_pictures.py` writes the generated pictures into the file ([../art/README.md](../art/README.md)).
 - **`?load=<url>` opens a layout JSON by link** (agent, 2026-10-22): headless renders and shared
   links can show the real handoff file with its pictures, instead of the page defaults and the demo

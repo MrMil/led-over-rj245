@@ -35,7 +35,11 @@ alongside. The tip tower's base splits both passively to its 4 strands
   smaller heights). The new heights put four towers' worth (23.6 A) on one supply in the
   four-supply grouping.
   **Rejected.** *4 per statue:* only by splitting the 2000 tower between the two 1700 supplies
-  (17.5 A each): more XT60 runs (4 per statue) and a split tower. *7 per statue* (one per
+  (17.5 A each): more XT60 runs (4 per statue) and a split tower. Four with whole towers exists
+  on paper (T4 alone, T1 + T3, T5 + T7, T2 + T6 at 17.6 A each), but T2 + T6 is cabled across the
+  inside of the V, where the trench to the other statue runs, and trenches never cross
+  ([trenches.md](trenches.md)); the layout tool's calculator no longer offers it (owner,
+  2026-10-22). *7 per statue* (one per
   tower): no 5 V between towers, but 14 supplies for no electrical need.
 - **Each supply sits by the towers it feeds** (agent, 2026-10-10). Mains is easy to carry far;
   5 V at several amps is not.

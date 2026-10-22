@@ -71,8 +71,9 @@ strands ([neighbour-base.svg](img/neighbour-base.svg)).
 2. Lay the 3 CAT5e cables and the mains cords on the surface and connect everything. Power
    up and run test presets 1 and 2 ([operating.md](operating.md#test-presets)). Fix anything
    wrong now.
-3. Dig the trenches (20–30 cm) and bury the runs per the table. **No cable above ground**:
-   cables surface inside the bases. Coil spare length inside the base.
+3. Dig the trenches (20–30 cm) and bury the runs per the table. **Trenches never cross each
+   other** (a pickaxe into a buried 230 V cord), and no cable leaves the table's trenches.
+   **No cable above ground**: cables surface inside the bases. Coil spare length inside the base.
 4. Reconnect, power up, run presets 1 and 2 again.
 5. Slide the lids shut and zip-tie each lid's lock lug.
 6. Switch the controller off and on. The show must start by itself within about 10 s.

@@ -1,7 +1,7 @@
 {
  "format": "led-over-rj245/statue-layout",
- "version": 3,
- "generated": "2026-10-21T19:54:35.043Z",
+ "version": 4,
+ "generated": "2026-10-22T11:32:53.178Z",
  "units": "mm, degrees, A; plan x east, y north with statue 1 apex on +y; azimuth clockwise from +y",
  "params": {
   "side_mm": 400,
@@ -418,8 +418,21 @@
    "leds": 2244,
    "full_white_A": 66,
    "reels": 8,
-   "supplies": 4,
+   "supplies": 5,
    "supply_groups": [
+    {
+     "towers": [
+      "T1",
+      "T2"
+     ],
+     "A": 15.5
+    },
+    {
+     "towers": [
+      "T3"
+     ],
+     "A": 10.9
+    },
     {
      "towers": [
       "T4"
@@ -428,27 +441,19 @@
     },
     {
      "towers": [
-      "T3",
-      "T1"
+      "T5"
      ],
-     "A": 17.6
+     "A": 10.9
     },
     {
      "towers": [
-      "T5",
+      "T6",
       "T7"
      ],
-     "A": 17.6
-    },
-    {
-     "towers": [
-      "T2",
-      "T6"
-     ],
-     "A": 17.6
+     "A": 15.5
     }
    ],
-   "note": "4 supplies only work with non-neighbouring towers sharing a supply; neighbours only: 5 \u2014 T1+T2 (15.5 A) \u00b7 T3 (10.9 A) \u00b7 T4 (13.1 A) \u00b7 T5 (10.9 A) \u00b7 T6+T7 (15.5 A)",
+   "note": "towers sharing a supply are neighbours along the V; nothing is cabled across the inside of the V (trenches never cross)",
    "towers_over_limit": []
   },
   "side_2": null,
@@ -456,7 +461,7 @@
    "strip_m": 74.8,
    "reels": 16,
    "reels_if_pooled": 16,
-   "supplies": 8
+   "supplies": 10
   }
  }
 }

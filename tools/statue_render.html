@@ -879,6 +879,9 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   // ---------- LEDs and power supplies ----------
   // Every face is one strip cut whole from one reel (no joins), so reels are bin-packed with whole strips.
   // A tower is never split between two supplies (owner, 2026-10-19), so supplies are bin-packed with whole towers.
+  // Towers sharing a supply are neighbours along the V (owner, 2026-10-22): 5 V cable runs only in the trench along
+  // the V, the trench to the other statue leaves the apex through the inside of the V, and trenches never cross (a
+  // pickaxe into a buried 230 V line). So the minimum is over runs of neighbours, never over free pairings across the V.
   function packBins(items, cap) {                      // first-fit decreasing; items: [{len, tag}]
     const bins = [];
     [...items].sort((a, b) => b.len - a.len).forEach(it => {
@@ -888,33 +891,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     });
     return bins;
   }
-  function minBins(items, cap) {                       // exact minimum for a handful of items (7 towers)
-    const sorted = [...items].sort((a, b) => b.len - a.len);
-    if (sorted.some(it => it.len > cap + 1e-9)) return null;
-    for (let k = 1; k <= sorted.length; k++) {
-      const bins = new Array(k).fill(0), assign = new Array(sorted.length);
-      const dfs = i => {
-        if (i === sorted.length) return true;
-        const seen = new Set();
-        for (let b = 0; b < k; b++) {
-          if (seen.has(bins[b])) continue; seen.add(bins[b]);
-          if (bins[b] + sorted[i].len <= cap + 1e-9) {
-            bins[b] += sorted[i].len; assign[i] = b;
-            if (dfs(i + 1)) return true;
-            bins[b] -= sorted[i].len;
-          }
-        }
-        return false;
-      };
-      if (dfs(0)) {
-        const groups = Array.from({ length: k }, () => ({ used: 0, items: [] }));
-        sorted.forEach((it, i) => { groups[assign[i]].items.push(it); groups[assign[i]].used += it.len; });
-        return groups;
-      }
-    }
-    return null;
-  }
-  function contiguousBins(items, cap, k) {             // k contiguous groups along the V (short cable runs), or null
+  function contiguousBins(items, cap, k) {             // k runs of neighbours along the V, in tower order, or null
     const n = items.length, best = {};
     const rec = (i, left) => {
       if (i === n) return left === 0 ? [] : null;
@@ -931,6 +908,11 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     return rec(0, k);
   }
   const fmtGroups = g => g.map(b => `${b.items.map(it => it.tag).join('+')} (${b.used.toFixed(1)} A)`).join(' · ');
+  function minRuns(towers, cap) {                      // fewest supplies, each feeding a run of neighbours along the V, or null
+    if (towers.some(it => it.len > cap + 1e-9)) return null;
+    for (let k = 1; k <= towers.length; k++) { const g = contiguousBins(towers, cap, k); if (g) return g; }
+    return null;
+  }
   function powerModel(heights) {
     const lit = heights.map(h => Math.max(0, h - state.unlit) / 1000);            // m per face
     const leds = lit.map(l => Math.floor(l * state.lpm + 1e-9));
@@ -939,19 +921,9 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     const metres = lit.reduce((a, l) => a + 4 * l, 0);
     const strips = NAMES.flatMap((n, i) => [0, 1, 2, 3].map(() => ({ tag: n, len: lit[i] * 1000 })));
     const reels = packBins(strips, state.reel);
-    const exact = minBins(towers, state.psuA);
-    let groups = exact, note = '';
-    if (exact) {
-      const cont = contiguousBins(towers, state.psuA, exact.length);
-      if (cont) { groups = cont; note = 'grouped along the V so each supply sits by its towers'; }
-      else {
-        let alt = null;
-        for (let k = exact.length + 1; k <= towers.length && !alt; k++) alt = contiguousBins(towers, state.psuA, k);
-        note = `${exact.length} supplies only work with non-neighbouring towers sharing a supply` + (alt ? `; neighbours only: ${alt.length} — ${fmtGroups(alt)}` : '');
-      }
-    }
+    const groups = minRuns(towers, state.psuA);
     const tooBig = NAMES.filter((n, i) => amps[i] > state.psuA + 1e-9);
-    return { heights, lit, leds, amps, metres, strips, reels, exact, groups, note, tooBig };
+    return { heights, lit, leds, amps, metres, strips, reels, groups, tooBig };
   }
   function computePower() {
     powerShown = true;
@@ -966,7 +938,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
         LED strip: <b>${pw.metres.toFixed(1)} m</b> (${pw.leds.reduce((a, n) => a + 4 * n, 0)} LEDs, ${pw.amps.reduce((a, x) => a + x, 0).toFixed(1)} A at full white)<br>
         Reels of ${(state.reel / 1000).toFixed(1)} m, every face strip cut whole from one reel: <b>${pw.reels.length}</b>
         (${(pw.reels.length * state.reel / 1000 - pw.metres).toFixed(1)} m left over)<br>
-        Power supplies at ≤ ${state.psuA} A each, no tower split: <b>${pw.exact ? pw.exact.length : 'impossible'}</b>${pw.exact ? ` — ${fmtGroups(pw.groups)}; ${pw.note}` : ''}
+        Power supplies at ≤ ${state.psuA} A each, no tower split, shared only between neighbours along the V: <b>${pw.groups ? pw.groups.length : 'impossible'}</b>${pw.groups ? ` — ${fmtGroups(pw.groups)}` : ''}
       </div>
       ${pw.tooBig.length ? `<p class="warn">${pw.tooBig.join(', ')} alone draw${pw.tooBig.length > 1 ? '' : 's'} more than ${state.psuA} A: no single supply can carry the tower. Raise the ceiling, lower the per-LED current (the firmware current cap), or shorten the tower.</p>` : ''}`;
     };
@@ -974,9 +946,9 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     $('powerOut').innerHTML = sides.map(sideHtml).join('') + `
       <div class="result" style="margin-top:6px">
         <b>Both sides:</b> ${sum(pw => pw.metres).toFixed(1)} m of strip, ${sum(pw => pw.reels.length)} reels
-        (${pooled.length} if the cutting plan pools both sides' offcuts), ${both.every(pw => pw.exact) ? sum(pw => pw.exact.length) : '—'} supplies.
+        (${pooled.length} if the cutting plan pools both sides' offcuts), ${both.every(pw => pw.groups) ? sum(pw => pw.groups.length) : '—'} supplies.
       </div>
-      <p class="note">Full-white worst case. Lit length = height − unlit base. LEDs per face rounded down to whole LEDs at ${state.lpm}/m. A tower's 4 faces draw 4 × its LEDs × ${state.mA} mA.</p>`;
+      <p class="note">Full-white worst case. Lit length = height − unlit base. LEDs per face rounded down to whole LEDs at ${state.lpm}/m. A tower's 4 faces draw 4 × its LEDs × ${state.mA} mA. A supply feeds a run of neighbouring towers along the V and nothing is cabled across the inside of the V: 5 V runs only in the trench along the V, the trench to the other statue leaves the apex through the inside of the V, and trenches never cross.</p>`;
   }
 
   // ---------- Cameras and controls ----------
@@ -1403,13 +1375,13 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     });
     const side = pw => ({
       strip_m: r1(pw.metres), leds: pw.leds.reduce((a, n) => a + 4 * n, 0), full_white_A: r1(pw.amps.reduce((a, x) => a + x, 0)),
-      reels: pw.reels.length, supplies: pw.exact ? pw.exact.length : null,
-      supply_groups: pw.exact ? pw.groups.map(g => ({ towers: g.items.map(it => it.tag), A: r1(g.used) })) : null,
-      note: pw.note, towers_over_limit: pw.tooBig,
+      reels: pw.reels.length, supplies: pw.groups ? pw.groups.length : null,
+      supply_groups: pw.groups ? pw.groups.map(g => ({ towers: g.items.map(it => it.tag), A: r1(g.used) })) : null,
+      note: 'towers sharing a supply are neighbours along the V; nothing is cabled across the inside of the V (trenches never cross)', towers_over_limit: pw.tooBig,
     });
     const pooled = packBins([...pws[0].strips, ...pws[1].strips], state.reel);
     return {
-      format: JSON_FORMAT, version: 3, generated: new Date().toISOString(),
+      format: JSON_FORMAT, version: 4, generated: new Date().toISOString(),
       units: 'mm, degrees, A; plan x east, y north with statue 1 apex on +y; azimuth clockwise from +y',
       params: paramsObject(),
       layout: {
@@ -1418,7 +1390,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       },
       leds_power: {
         per_side: side(pws[0]), side_2: state.decoupled ? side(pws[1]) : null,
-        both_sides: { strip_m: r1(pws[0].metres + pws[1].metres), reels: pws[0].reels.length + pws[1].reels.length, reels_if_pooled: pooled.length, supplies: (pws[0].exact && pws[1].exact) ? pws[0].exact.length + pws[1].exact.length : null },
+        both_sides: { strip_m: r1(pws[0].metres + pws[1].metres), reels: pws[0].reels.length + pws[1].reels.length, reels_if_pooled: pooled.length, supplies: (pws[0].groups && pws[1].groups) ? pws[0].groups.length + pws[1].groups.length : null },
       },
     };
   }
