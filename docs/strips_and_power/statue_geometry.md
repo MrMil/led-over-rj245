@@ -2,7 +2,7 @@
 
 Path: [docs](../README.md) › [strips_and_power](README.md) › **statue_geometry**
 Parent: [README.md](README.md)
-**Code:** `tools/statue_render.html` (layout solver, four viewpoints, picture projection and cut masks, LED render, DXF export, LED/supply calculator, JSON export/load, `?load=`), `layout/statue-layout.json` (the handoff file: the artist's final layout, with the demo smiley), `renders/*.png`, `index.html`, `.nojekyll`
+**Code:** `tools/statue_render.html` (layout solver, four viewpoints, picture projection and cut masks, LED render, DXF export, LED/supply calculator, JSON export/load, `?load=`), `layout/statue-layout.json` (the handoff file: the artist's final layout, with the demo smiley), `renders/*.png`, `index.html`, `.nojekyll`, `.claude/launch.json`
 **Covers:** where the 14 towers stand inside the 8 m circle, what a viewer at the centre sees, and
 the 3D check that the owner and the artist use to judge the tower heights. Not the wiring between
 towers ([trenches.md](trenches.md)).
@@ -119,6 +119,10 @@ length; defaults from [led_power_budget.md](led_power_budget.md): 150 mm, 60/m, 
 it). `index.html` at the repo root only redirects to `tools/statue_render.html`, and `.nojekyll`
 stops Jekyll from processing the site, since nothing here is a Jekyll site and it would only add
 build time and surprises. The same file is also published as a private claude.ai artifact.
+Locally, `.claude/launch.json` serves the repository root on 127.0.0.1:8765 (`python3 -m
+http.server`) for Claude Code's preview browser, so agents can open the page, `?load=` the layout
+file and run `?dump=1` against it; a bare `file://` page cannot fetch the layout file (agent,
+2026-10-23; committed at the owner's request).
 
 ## Final layout (artist, 2026-10-23)
 
