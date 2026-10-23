@@ -43,12 +43,18 @@ Parent: [README.md](README.md)
   contour or cuttability rule, so a defect can be told apart as design or plate pass. It showed
   the mushroom's gills were one 300 mm slab on the side plates (a fixed ray count from the focus;
   now banded rays) and that the bird's feathers were right in the design and wrecked on the plates.
-- **The four pictures are the tool's defaults** (owner, 2026-10-22: "make all 4 the default in the
-  3d demo"). On opening, `tools/statue_render.html` fetches `art/<viewpoint>.png` next to itself and
-  unticks the mirror box; pictures saved in the browser store or given by `?load=` win over them, and
-  as a bare file (no server) the fetch fails and the demo smiley stays.
+- **The tool opens with the demo smiley, not these pictures** (owner, 2026-10-23: "leave the
+  smiley faces for now"). They were made for the 2026-10-21 layout and the artist is drawing
+  different art ([README.md](README.md)), so projecting them on the final layout would show cuts
+  that will never exist. To look at one anyway, upload `art/<viewpoint>.png` in the tool's
+  picture panel.
+  **Changed 2026-10-23:** previously the four pictures were the tool's defaults (owner,
+  2026-10-22: "make all 4 the default in the 3d demo"): on opening, the page fetched
+  `art/<viewpoint>.png` and unticked the mirror box. Changed because the layout moved under the
+  pictures and they are no longer the art.
 - **Statue 2 has its own pictures** (owner's brief). `tools/embed_pictures.py` writes the four
-  preview pictures into `layout/statue-layout.json` and unticks "statue 2 uses statue 1's
+  preview pictures into `layout/statue-layout.json` (not since 2026-10-23: the file is now the
+  artist's final layout with the smiley, see [README.md](README.md)) and unticks "statue 2 uses statue 1's
   pictures", since the default mirrors statue 1
   ([../strips_and_power/statue_geometry.md](../strips_and_power/statue_geometry.md)). The tool then
   shows the plates in 3D and its island report is a second opinion on the 1 mm preview; the DXF
@@ -68,7 +74,7 @@ Parent: [README.md](README.md)
       const P = c => { const [sx,sy] = D.projectPt(pose, c); return [r((sx-x0)/bw), r((sy-y0)/bh)]; };
       const a = P(f.worldAt(0, f.tower.h/2)), b = P(f.worldAt(1, f.tower.h/2)), c2 = P(f.worldAt(0.5, 0.2)), d2 = P(f.worldAt(0.5, f.tower.h-0.2));
       return { tower: f.tower.name, face: f.letter, h_mm: Math.round(f.tower.h*1000), corners: f.corners.map(P), unlit: [f.corners[0], f.corners[1]].map(c => P(c.clone().setY(D.state.unlit/1000))),
-               u_per_m: r(Math.hypot(a[0]-b[0], a[1]-b[1]) / 0.4), v_per_m: r(Math.hypot(c2[0]-d2[0], c2[1]-d2[1]) / (f.tower.h-0.4)) }; }) }; }
+               u_per_m: r(Math.hypot(a[0]-b[0], a[1]-b[1]) / f.pw), v_per_m: r(Math.hypot(c2[0]-d2[0], c2[1]-d2[1]) / (f.tower.h-0.4)) }; }) }; }
   JSON.stringify(out)
   ```
   Statue 2's viewpoints see the same silhouette as statue 1's (mirrored layout), so bench2 and

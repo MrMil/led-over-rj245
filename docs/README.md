@@ -19,7 +19,7 @@ source of truth for what happens. These docs are the source of truth for why.
 
 The system: **two statues** facing each other across an 18 m circle at Midburn (Negev desert),
 apexes 17.4 m apart, each a V of 7 towers
-(1100–2000 mm tall, 40 × 40 cm, CNC-cut faces with a diffuser behind, a structural post in the
+(1100–2000 mm tall, 412 × 412 mm outside: two 400 mm and two 412 mm plywood sides, CNC-cut faces with a diffuser behind, a structural post in the
 middle). WS2812B 60/m strips inside, 4 per tower (one per face, on the post, facing out), run
 one show from one controller. Outdoors for the event: dust,
 40 °C+ days, near-freezing nights, generator power, heavy 2.4 GHz congestion, Leave No Trace.
@@ -31,8 +31,9 @@ picture when viewed from the centre; tower edges fall in the middle of the pictu
 shapes come from the cuts, not from the LEDs**; the LEDs light the faces from behind. People
 look from all angles, so every face is lit. All 4 faces of a tower show the same pixels.
 The animation is a rolled 2D map: x = tower, y = height ([firmware/](firmware/README.md)).
-The pictures themselves (a blessing woman, an eye, a bird with a third eye, a mushroom; owner,
-2026-10-22) are generated and checked for cuttability in [art/](art/README.md).
+The artist is drawing the pictures (owner, 2026-10-23); until they arrive the layout tool shows
+a demo smiley. Four generated pictures (owner's brief, 2026-10-22) in [art/](art/README.md) were
+made for the previous layout and are superseded, kept unchanged.
 
 **Two statues** (owner, 2026-10-18: "we are doing 2 statues"). Reduced from the four-statue
 design Midburn originally approved, 3 weeks before the event, for less work.
@@ -116,8 +117,8 @@ failure — mitigated by a pre-flashed spare ESP32 in a socket ([controller/](co
    enclosure repo's `100W` box with XT60 outputs, and the strip voltage-drop measurement.
 4. ~~Tower order and heights~~ — final (artist, 2026-10-21): 1100, 1400, 1700, 2000, 1700,
    1400, 1100 mm ([strips_and_power/tower_layout.md](strips_and_power/tower_layout.md)).
-5. ~~Distance between the statues~~ — 17.4 m apex to apex in the final layout
-   ([strips_and_power/statue_geometry.md](strips_and_power/statue_geometry.md)), so the 10 m
+5. ~~Distance between the statues~~ — 17.4 m apex to apex in the final layout (artist,
+   2026-10-23; unchanged from 2026-10-21) ([strips_and_power/statue_geometry.md](strips_and_power/statue_geometry.md)), so the 10 m
    CAT5e cables do not reach; 20 m assumed, purchase to confirm
    ([data_link/cabling.md](data_link/cabling.md)).
 
@@ -128,7 +129,7 @@ failure — mitigated by a pre-flashed spare ESP32 in a socket ([controller/](co
 - [`strips_and_power/`](strips_and_power/README.md) — towers, strips and power: tower layout, tower-base splitter, power distribution, current budget, timing.
 - [`firmware/`](firmware/README.md) — WLED on the controller: configuration, logical LED order, presets, animation authoring.
 - [`field_docs/`](field_docs/README.md) — the human guide (`README.md`, `guide/`) and the generated wiring diagrams.
-- [`art/`](art/README.md) — the four pictures cut into the faces (one per viewpoint, not final), their generator and the cuttability rules.
+- [`art/`](art/README.md) — four generated face pictures, superseded (made for the previous layout; the artist is drawing the art), their generator and the cuttability rules.
 
 ## Files
 

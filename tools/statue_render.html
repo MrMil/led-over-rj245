@@ -112,7 +112,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
 <button id="btnUnfold" hidden aria-label="Show the settings panel">Settings ▸</button>
 <div class="panel" id="panel">
   <h1>Statue tower sightlines <button id="btnFold" class="small" title="Fold the panel to the side" aria-label="Hide the settings panel">◂ Hide</button></h1>
-  <div class="note">Two statues of 7 towers, corner to the centre of the circle, a bench at the centre. The defaults are the artist's final layout (21 Oct 2026): her heights and her six spacings, placed on the solver's rails so neighbouring silhouettes touch from the bench. "Reset to the solved layout" places them so that, seen from the bench, neighbouring silhouettes exactly touch. Each of the four viewpoints below owns 14 faces; its picture is projected from that eye onto them and cut into the wood, lit by the LEDs behind. Lengths in mm.</div>
+  <div class="note">Two statues of 7 towers, corner to the centre of the circle, a bench at the centre. The defaults are the artist's final layout (23 Oct 2026): her heights and her six spacings, placed on the solver's rails so neighbouring silhouettes touch from the bench. "Reset to the solved layout" places them so that, seen from the bench, neighbouring silhouettes exactly touch. Each of the four viewpoints below owns 14 faces; its picture is projected from that eye onto them and cut into the wood, lit by the LEDs behind. Lengths in mm.</div>
 
   <h2>Towers</h2>
   <div id="towerParams"></div>
@@ -201,24 +201,24 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   // ---------- State: lengths in mm, as the owner and artist think. URL params override defaults. ----------
   const q = new URLSearchParams(location.search);
   const num = (k, d) => (q.has(k) && !isNaN(parseFloat(q.get(k)))) ? parseFloat(q.get(k)) : d;
-  // Project defaults: the artist's final layout of 2026-10-21 (layout/statue-layout.json in the repository).
+  // Project defaults: the artist's final layout of 2026-10-23 (layout/statue-layout.json in the repository).
   const DEFAULT_H = [1100, 1400, 1700, 2000, 1700, 1400, 1100];
-  const DEFAULT_PAIRS = [1120, 1590, 2200, 1340, 1760, 1102], DEFAULT_MANUAL = true;
-  const DEFAULT_FREE = { s1: [[-1.207, -3.96], [-0.882, -5.031], [-0.496, -6.574], [0.0, -8.717], [0.526, -7.485], [0.908, -5.767], [1.275, -4.727]], s2: [[1.176, 3.806], [0.882, 5.031], [0.496, 6.574], [0.0, 8.717], [-0.526, 7.485], [-0.908, 5.767], [-1.244, 4.604]] };   // metres, [x, z] with z = −north
+  const DEFAULT_PAIRS = [1200, 1700, 1300, 2200, 1500, 1000], DEFAULT_MANUAL = true;
+  const DEFAULT_FREE = { s1: [[-1.097, -4.683], [-0.849, -5.857], [-0.516, -7.524], [0.0, -8.717], [0.476, -6.569], [0.809, -5.107], [1.071, -4.142]], s2: [[1.097, 4.683], [0.849, 5.857], [0.516, 7.524], [0.0, 8.717], [-0.476, 6.569], [-0.809, 5.107], [-1.071, 4.142]] };   // metres, [x, z] with z = −north; her 2026-10-23 file has no free positions, so these are its solved ones
   const newStatue = () => ({ h: [...DEFAULT_H], pairs: [...DEFAULT_PAIRS], manual: DEFAULT_MANUAL });
   const state = {
-    side: num('side', 400),
+    side: num('side', 400),            // width of the short pieces = the inside of the box; the long pieces are side + 2 × thick (owner, 2026-10-23)
     st: [newStatue(), newStatue()],    // per-statue heights, pair spacings and the "set by hand" flag; st[1] used only when decoupled
     decoupled: q.get('decoupled') === '1',
-    free: q.get('free') === '1' ? { s1: DEFAULT_FREE.s1.map(p => [...p]), s2: DEFAULT_FREE.s2.map(p => [...p]) } : null,   // owner, 2026-10-21: her six distances ride the solver's rails (touching from the bench); ?free=1 shows her raw positions
-    smin: num('smin', 1000), smax: num('smax', 3000), sopt: num('sopt', 3000),     // owner, 2026-10-21
+    free: q.get('free') === '1' ? { s1: DEFAULT_FREE.s1.map(p => [...p]), s2: DEFAULT_FREE.s2.map(p => [...p]) } : null,   // owner, 2026-10-21: her six distances ride the solver's rails (touching from the bench); ?free=1 starts from them as free positions
+    smin: num('smin', 1000), smax: num('smax', 2310), sopt: num('sopt', 2310),     // artist's file, 2026-10-23
     diam: num('d', 18000),
-    clear: num('clear', 2350),          // smallest radius the viewer must have free at the centre
-    bench: num('bench', 3000),         // circular bench at the centre, mm; the audience sits on its edge facing out. 3000 is the working value until the artist gives the size (owner, 2026-10-21)
+    clear: num('clear', 2150),          // smallest radius the viewer must have free at the centre
+    bench: num('bench', 3800),         // circular bench at the centre, mm; the audience sits on its edge facing out. 3800 from the artist's file of 2026-10-23 (3000 was the working value before)
     mode: q.get('mode') === 'straight' ? 'straight' : 'touch',
     arm: num('arm', 25),
     eye: num('eye', 1200),               // owner, 2026-10-21: the audience sits
-    hfov: num('fov', 100),
+    hfov: num('fov', 120),
     labels: q.get('labels') !== '0',
     unlit: num('unlit', 150),          // dark base at the foot of every face, mm, no LEDs
     lpm: num('lpm', 60),               // LEDs per metre
@@ -226,15 +226,15 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     psuA: num('psua', 18),             // current ceiling per supply
     reel: num('reel', 5000),           // reel length, mm
     border: num('border', 20),         // wood kept around every face, mm, measured on the wood
-    thick: num('thick', 6),            // plywood thickness, mm: the diffuser sits this far behind the cut face
+    thick: num('thick', 6),            // plywood thickness, mm: the box is side + 2 × thick outside, and the diffuser sits this far behind the cut face
     same2: true,                       // statue 2's viewpoints mirror statue 1's: same picture, insets, eye, distance, field of view
     night: q.get('night') === '1',
     anim: 'rainbow', speed: 0.15, bright: 1.0,   // 0.15 cycles/s: one full rainbow pass every ~7 s, plainly moving
     povs: {                            // per viewpoint: back ones have their own eye/fov/distance; bench ones use the viewer eye and field of view
       bench1: { fit: 'full', insets: { l: 0, r: 0, t: 0, b: 0 }, image: null },
       bench2: { fit: 'full', insets: { l: 0, r: 0, t: 0, b: 0 }, image: null },
-      back1: { fit: 'full', dist: 3000, eye: 1600, fov: 100, insets: { l: 0, r: 0, t: 0, b: 0 }, image: null },
-      back2: { fit: 'full', dist: 3000, eye: 1600, fov: 100, insets: { l: 0, r: 0, t: 0, b: 0 }, image: null },
+      back1: { fit: 'full', dist: 3200, eye: 1460, fov: 90, insets: { l: 0, r: 0, t: 0, b: 0 }, image: null },
+      back2: { fit: 'full', dist: 3200, eye: 1460, fov: 90, insets: { l: 0, r: 0, t: 0, b: 0 }, image: null },
     },
   };
   state.st[0].h = state.st[0].h.map((v, i) => num('h' + (i + 1), v));
@@ -255,7 +255,10 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   const isCustom = () => !!state.free || state.st[0].manual || (state.decoupled && state.st[1].manual);
 
   // ---------- Geometry (metres inside) ----------
-  const W = () => state.side / 1000;
+  // A tower is two short pieces (side wide) between two long ones (side + 2 × thick) that cover their edges (owner, 2026-10-23),
+  // so the box is W() square outside and S() inside. Everything the eye sees (silhouettes, the solver) uses the outside.
+  const W = () => (state.side + 2 * state.thick) / 1000;
+  const S = () => state.side / 1000;
   const HALF = () => W() * Math.SQRT1_2;           // half-diagonal: half the silhouette width seen from the centre
   const R = () => state.diam / 2000;               // the apex tower's far corner sits on this radius
   const hw = r => Math.atan(HALF() / r);           // angular half-width of a tower at distance r
@@ -456,20 +459,8 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     return c;
   }
   const demoPicture = () => { const c = demoSmiley(); return Object.assign(maskFromRaster(c), { name: 'demo smiley', type: 'raster', source: c.toDataURL('image/png') }); };
-  state.povs.bench1.image = demoPicture();                      // the smiley until the default pictures arrive (see loadDefaultPictures)
+  state.povs.bench1.image = demoPicture();                      // the smiley is the default picture (owner, 2026-10-23: the artist is drawing new art)
   state.povs.back1.image = demoPicture();
-  // The four generated pictures (art/<viewpoint>.png, tools/face_art.py) are the defaults (owner, 2026-10-22: "make all 4 the
-  // default in the 3d demo"); they are a working state, not final. Fetched next to the page, so they need the repository
-  // (GitHub Pages or a local server); as a bare file the smiley stays. Statue 2 gets its own, so the mirror box unticks.
-  function loadDefaultPictures() {
-    const keys = POV_KEYS.slice();
-    return Promise.all(keys.map(key => new Promise(res => {
-      const img = new Image(); const src = `../art/${key}.png`;
-      img.onload = () => { const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; c.getContext('2d').drawImage(img, 0, 0);
-        state.povs[key].image = Object.assign(maskFromRaster(img), { name: `${key} (art/${key}.png)`, type: 'raster', source: c.toDataURL('image/png') }); res(true); };
-      img.onerror = () => res(false); img.src = src;
-    }))).then(ok => { if (ok.every(x => x)) { state.same2 = false; const cb = document.getElementById('same2'); if (cb) cb.checked = false; if (typeof showSame2 === 'function') showSame2(); POV_KEYS.forEach(k => { if (typeof showPicture === 'function') showPicture(k); }); build(); } return ok.every(x => x); });
-  }
 
   // The picture's box in the viewpoint's tangent plane, shrunk by the insets. 'full' (owner's default): the whole silhouette of the
   // 14 faces from this eye, tip towers' feet included, so the picture is designed for all towers at once. 'band' / 'band7': only the
@@ -490,7 +481,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   }
   // The cut mask of a face: cut (1) or wood (0) per cell of `res` mm, row 0 at the bottom. The unlit base and the border are wood.
   function faceMask(f, res, box) {
-    const w = W(), h = f.tower.h, cols = Math.max(2, Math.round(w * 1000 / res)), rows = Math.max(2, Math.round(h * 1000 / res));
+    const w = f.pw, h = f.tower.h, cols = Math.max(2, Math.round(w * 1000 / res)), rows = Math.max(2, Math.round(h * 1000 / res));
     const m = new Uint8Array(cols * rows);
     const img = state.povs[eff(f.povKey)].image;
     if (!img) return { cols, rows, data: m, res };
@@ -556,7 +547,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     return loops.map(l => chaikin(dp(l.map(([x, y]) => [x * res, y * res]), 0.45 * res))).filter(l => l.length >= 3);
   }
   function faceDxf(f, mask) {
-    const w = W() * 1000, h = f.tower.h * 1000, Lx = [];
+    const w = f.pw * 1000, h = f.tower.h * 1000, Lx = [];
     const push = (...a) => Lx.push(...a);
     push('0', 'SECTION', '2', 'HEADER', '9', '$ACADVER', '1', 'AC1009', '9', '$EXTMIN', '10', '0', '20', '0', '30', '0', '9', '$EXTMAX', '10', w.toFixed(3), '20', h.toFixed(3), '30', '0', '0', 'ENDSEC');
     push('0', 'SECTION', '2', 'TABLES', '0', 'TABLE', '2', 'LAYER', '70', '2', '0', 'LAYER', '2', 'OUTLINE', '70', '0', '62', '7', '6', 'CONTINUOUS', '0', 'LAYER', '2', 'CUT', '70', '0', '62', '1', '6', 'CONTINUOUS', '0', 'ENDTAB', '0', 'ENDSEC');
@@ -576,7 +567,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       if (!boxes[f.povKey]) boxes[f.povKey] = povBox(f.povKey, current, faceList);
       const m = faceMask(f, 1, boxes[f.povKey]); const a = analyse(m);
       zip.file(`statue${f.tower.statue}/${f.tower.name}/${faceFile(f)}`, faceDxf(f, m));
-      manifest.push({ file: faceFile(f), statue: f.tower.statue, tower: f.tower.name, face: f.letter, viewpoint: f.povKey, width_mm: state.side, height_mm: Math.round(f.tower.h * 1000), wood_islands: a.islands, pieces: a.pieces });
+      manifest.push({ file: faceFile(f), statue: f.tower.statue, tower: f.tower.name, face: f.letter, viewpoint: f.povKey, width_mm: Math.round(f.pw * 1000), height_mm: Math.round(f.tower.h * 1000), wood_islands: a.islands, pieces: a.pieces });
     }
     zip.file('manifest.json', JSON.stringify({ generated: new Date().toISOString(), border_mm: state.border, thickness_mm: state.thick, faces: manifest }, null, 2));
     const blob = await zip.generateAsync({ type: 'blob' });
@@ -661,8 +652,8 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     g.putImageData(d, 0, 0); return c;
   })();
   const woodCache = new Map();
-  function woodFor(h) {                           // texture for a face of height h (m), 128 px per side width
-    const rows = Math.max(8, Math.round(128 * h / W())); const key = rows;
+  function woodFor(h, pw) {                       // texture for a plate of height h and width pw (m), 128 px across its width
+    const rows = Math.max(8, Math.round(128 * h / pw)); const key = rows;
     if (woodCache.has(key)) return woodCache.get(key);
     const c = document.createElement('canvas'); c.width = 128; c.height = rows; const g = c.getContext('2d');
     for (let y = 0; y < rows; y += 512) g.drawImage(woodTile, 0, y);
@@ -746,8 +737,9 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     dimLabel.position.set(-(R() + 0.9) * 0.707, 0.35, (R() + 0.9) * 0.707);   // bottom-left of the circle, clear of both apex labels
 
     const L = layout(); current = L;
-    const w = W(), thick = state.thick / 1000, pitch = 1 / state.lpm, base = state.unlit / 1000;
+    const w = W(), sIn = S(), thick = state.thick / 1000, pitch = 1 / state.lpm, base = state.unlit / 1000;
     ledTextures = []; faceList = [];
+    const grainMat = new THREE.MeshStandardMaterial({ color: 0xc69a66, roughness: 0.95, side: THREE.DoubleSide });   // the long pieces' edges beside a short piece
     const edgeMat = new THREE.LineBasicMaterial({ color: 0x2a1a0e });
     const hullMat = new THREE.MeshBasicMaterial({ color: 0x1e120a, side: THREE.BackSide });
     const pickMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false });
@@ -767,10 +759,9 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
         const inner = normal.dot(toCentre) > 0.01;
         const right = new THREE.Vector3(Math.cos(f.ry), 0, -Math.sin(f.ry));
         const centre = new THREE.Vector3(f.c[0], 0, f.c[2]);
-        const worldAt = (u, y) => g.localToWorld(centre.clone().addScaledVector(right, (u - 0.5) * w).setY(y));
-        const corners = [worldAt(0, 0), worldAt(1, 0), worldAt(1, t.h), worldAt(0, t.h)];
-        const origin = worldAt(0, 0), rw = worldAt(1, 0).sub(origin);
-        faceList.push({ tower: t, fi, ry: f.ry, inner, centre, corners, origin, rw, worldAt, group: g, tex, n, povKey: (inner ? 'bench' : 'back') + t.statue });
+        const at = (u, y, width) => g.localToWorld(centre.clone().addScaledVector(right, (u - 0.5) * width).setY(y));
+        const corners = [at(0, 0, w), at(1, 0, w), at(1, t.h, w), at(0, t.h, w)];   // the whole outside face: the silhouette
+        faceList.push({ tower: t, fi, ry: f.ry, inner, centre, right, corners, at, worldAt: (u, y) => at(u, y, w), group: g, tex, n, povKey: (inner ? 'bench' : 'back') + t.statue });
       });
       const cap = new THREE.Mesh(new THREE.PlaneGeometry(w, w), new THREE.MeshStandardMaterial({ color: 0xa87a4a, roughness: 0.95 }));
       cap.rotation.x = -Math.PI / 2; cap.position.y = t.h; cap.castShadow = true; g.add(cap);
@@ -790,8 +781,21 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     const boxes = {};
     POV_KEYS.forEach(key => { boxes[key] = povBox(key, L, faceList); const pose = boxes[key].pose; const mine = faceList.filter(f => f.povKey === key);
       L.towers.filter(t => t.statue === povStatueOf(key) + 1).forEach(t => { const two = mine.filter(f => f.tower === t).sort((a, b) => projectPt(pose, a.worldAt(0.5, 0.5))[0] - projectPt(pose, b.worldAt(0.5, 0.5))[0]); two.forEach((f, i) => { f.side = i === 0 ? 'left' : 'right'; f.letter = (key.startsWith('bench') ? 'AB' : 'CD')[i]; }); }); });
+    // Long pieces (owner, 2026-10-23): the inner face nearer the centre line (the line through both apexes) and the face opposite
+    // it; on the line itself (the apex) the inner face on the left from the bench, A. The plate then spans only its own piece.
+    L.towers.forEach(t => {
+      const mine = faceList.filter(f => f.tower === t), inn = mine.filter(f => f.inner).sort((a, b) => a.letter < b.letter ? -1 : 1);
+      const a = (t.statue - 1) * Math.PI, dx = Math.sin(a), dz = -Math.cos(a);
+      const off = f => { const c = f.at(0.5, 0, w); return Math.abs(c.x * dz - c.z * dx); };
+      const near = inn.length === 2 && Math.abs(off(inn[0]) - off(inn[1])) > 0.001 ? (off(inn[0]) < off(inn[1]) ? inn[0] : inn[1]) : inn[0];
+      mine.forEach(f => {
+        f.long = !!near && (f.fi === near.fi || f.fi === (near.fi + 2) % 4);
+        f.pw = f.long ? w : sIn;
+        f.worldAt = (u, y) => f.at(u, y, f.pw); f.origin = f.worldAt(0, 0); f.rw = f.worldAt(1, 0).sub(f.origin);
+      });
+    });
     const islandReport = [];
-    const maskKey = f => { const e = state.povs[eff(f.povKey)]; return JSON.stringify([f.povKey, e.fit, e.dist, e.eye, e.insets, e.image ? [e.image.name, e.image.w, e.image.h] : null, state.border, state.unlit, state.side, state.bench, state.eye, f.tower.x, f.tower.z, f.tower.h]); };
+    const maskKey = f => { const e = state.povs[eff(f.povKey)]; return JSON.stringify([f.povKey, e.fit, e.dist, e.eye, e.insets, e.image ? [e.image.name, e.image.w, e.image.h] : null, state.border, state.unlit, state.side, state.thick, f.pw, state.bench, state.eye, f.tower.x, f.tower.z, f.tower.h]); };
     faceList.forEach(f => {
       const t = f.tower, g = f.group, ck = t.idx + ':' + f.fi, key = maskKey(f); let hit = maskCache.get(ck);
       if (!hit || hit.key !== key) { const mm = faceMask(f, 2, boxes[f.povKey]); hit = { key, mask: mm, analysis: analyse(mm) }; maskCache.set(ck, hit); }
@@ -800,10 +804,11 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       if (f.analysis.pieces > 1) islandReport.push(`Statue ${t.statue}, tower ${t.name}, face ${f.letter} falls into ${f.analysis.pieces} separate pieces`);
       const m = f.mask, d = new Uint8Array(m.cols * m.rows * 4); for (let k = 0; k < m.data.length; k++) { const v = m.data[k] ? 0 : 255; d[k * 4] = d[k * 4 + 1] = d[k * 4 + 2] = v; d[k * 4 + 3] = 255; }
       const alpha = new THREE.DataTexture(d, m.cols, m.rows, THREE.RGBAFormat); alpha.needsUpdate = true;   // alphaMap reads green: cut → hole
-      const plate = new THREE.Mesh(new THREE.PlaneGeometry(w, t.h), new THREE.MeshStandardMaterial({ map: woodFor(t.h), alphaMap: alpha, alphaTest: 0.5, roughness: 0.9, metalness: 0, side: THREE.DoubleSide }));
+      const plate = new THREE.Mesh(new THREE.PlaneGeometry(f.pw, t.h), new THREE.MeshStandardMaterial({ map: woodFor(t.h, f.pw), alphaMap: alpha, alphaTest: 0.5, roughness: 0.9, metalness: 0, side: THREE.DoubleSide }));
       plate.position.copy(f.centre).setY(t.h / 2); plate.rotation.y = f.ry; plate.castShadow = true; plate.receiveShadow = true; g.add(plate);
-      const diff = new THREE.Mesh(new THREE.PlaneGeometry(w - 2 * thick, t.h), new THREE.ShaderMaterial({ uniforms: { leds: { value: f.tex }, nLeds: { value: f.n }, pitch: { value: pitch }, base: { value: base }, height: { value: t.h }, gain: { value: state.bright } }, vertexShader: diffuserShader.vertexShader, fragmentShader: diffuserShader.fragmentShader, side: THREE.DoubleSide }));
-      diff.position.copy(f.centre).multiplyScalar(1 - 2 * thick / w).setY(t.h / 2); diff.rotation.y = f.ry; g.add(diff);   // one plate thickness behind the cut face
+      if (!f.long) [-1, 1].forEach(k => { const e = new THREE.Mesh(new THREE.PlaneGeometry(thick, t.h), grainMat); e.position.copy(f.centre).addScaledVector(f.right, k * (sIn + thick) / 2).setY(t.h / 2); e.rotation.y = f.ry; g.add(e); });
+      const diff = new THREE.Mesh(new THREE.PlaneGeometry(sIn, t.h), new THREE.ShaderMaterial({ uniforms: { leds: { value: f.tex }, nLeds: { value: f.n }, pitch: { value: pitch }, base: { value: base }, height: { value: t.h }, gain: { value: state.bright } }, vertexShader: diffuserShader.vertexShader, fragmentShader: diffuserShader.fragmentShader, side: THREE.DoubleSide }));
+      diff.position.copy(f.centre).multiplyScalar(sIn / w).setY(t.h / 2); diff.rotation.y = f.ry; g.add(diff);   // on the inside of the wood, one thickness behind the cut face
     });
     $('islands').innerHTML = islandReport.length ? islandReport.map(x => `<div class="warn">${x}</div>`).join('') : '<span class="ok">No wood islands; every face is one piece.</span>';
     POV_KEYS.forEach((key, k) => { const pose = povPose(key, L); persons[k].position.set(pose.pos.x, 0, pose.pos.z); });
@@ -859,11 +864,14 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       : lv.map((arr, s) => `${state.decoupled ? `Statue ${s + 1}: ` : ''}${NAMES.map((n, i) => `${n} ${arr[i]}`).join(' · ')} mm`).join('<br>') + ' (T4 kept, for the current layout, side, circle and eye height).';
     levelPending = lv;
 
+    // Her spacings are the default and still solver-placed, so they are not called "set by hand" (owner, 2026-10-23).
+    const artists = [0, 1].every(k => (k === 1 && !state.decoupled) || cfg(k).pairs.every((v, i) => Math.abs(v - DEFAULT_PAIRS[i]) < 0.5));
     $('manualBadge').hidden = !(state.st[0].manual || (state.decoupled && state.st[1].manual)) || !!state.free;
+    $('manualBadge').textContent = artists ? "artist's spacings" : 'set by hand';
     $('freeBadge').hidden = !state.free;
     const res = $('result');
     if (state.free || !c) {
-      const how = state.free ? 'Tower positions placed by hand (as in the layout file, not solved)' : 'Individual spacings set by hand';
+      const how = state.free ? 'Tower positions placed by hand (as in the layout file, not solved)' : artists ? "The artist's spacings (23 Oct 2026), towers placed by the solver so neighbouring silhouettes touch" : 'Individual spacings set by hand, towers placed by the solver';
       res.innerHTML = L.fits
         ? `${how}. They fit: inside the circle, with ${mm(L.clear)} mm free at the centre.`
         : `<span class="warn">${how}. They do not fit: ${L.farMax > R() + 0.0005 ? 'a tower crosses the circle; ' : ''}${L.clear < state.clear / 1000 - 1e-9 ? `only ${mm(L.clear)} mm free at the centre (wanted ${state.clear}); ` : ''}${L.benchGap < 0 ? `a tower stands ${mm(-L.benchGap)} mm into the Ø ${state.bench} bench; ` : ''}${L.solved ? '' : 'an arm reaches the centre.'}</span>`;
@@ -1157,7 +1165,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
 
   // Solver settings: anything the solved layout depends on. Changing one while spacings or positions were set by
   // hand asks first; "keep mine" puts the setting back as it was.
-  const SOLVER_KEYS = ['smin', 'smax', 'sopt', 'diam', 'clear', 'bench', 'side', 'arm', 'mode'];
+  const SOLVER_KEYS = ['smin', 'smax', 'sopt', 'diam', 'clear', 'bench', 'side', 'thick', 'arm', 'mode'];
   let snap = null;
   const solverSetter = (key, fn) => v => { if (!askOpen && isCustom() && !snap) snap = Object.fromEntries(SOLVER_KEYS.map(k => [k, state[k]])); fn(v); };
   const solverAfter = () => {
@@ -1174,7 +1182,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     if (key === 'sopt') { if (v < state.smin) setParam('smin', v); if (v > state.smax) setParam('smax', v); }
   };
 
-  paramRow($('towerParams'), 'side', 'Tower side length', 200, 1000, 10, 'mm', () => state.side, solverSetter('side', v => state.side = v), solverAfter);
+  paramRow($('towerParams'), 'side', 'Short piece width (inside of the box; long pieces add 2 × wood thickness)', 200, 1000, 10, 'mm', () => state.side, solverSetter('side', v => state.side = v), solverAfter);
   NAMES.forEach((n, i) => paramRow($('towerParams'), 'h' + (i + 1), `${n} height${i === 3 ? ' (apex)' : (i === 0 || i === 6) ? ' (tip)' : ''}`, 300, 3000, 10, 'mm', () => state.st[0].h[i], v => state.st[0].h[i] = v, rebuild));
   NAMES.forEach((n, i) => paramRow($('statue2Params'), 'h2_' + (i + 1), `Statue 2 ${n} height`, 300, 3000, 10, 'mm', () => state.st[1].h[i], v => state.st[1].h[i] = v, rebuild));
   ['smin', 'smax', 'sopt'].forEach((k, i) => paramRow($('spacingParams'), k, ['Minimum', 'Maximum', 'Optimum'][i], 300, 3000, 10, 'mm', () => state[k], solverSetter(k, rangeFix(k)), solverAfter));
@@ -1215,7 +1223,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   paramRow($('armParams'), 'arm', 'Arm angle from the radial line', 0, 80, 1, '°', () => state.arm, solverSetter('arm', v => state.arm = v), solverAfter);
   const recut = () => { build(); };
   paramRow($('cutParams'), 'border', 'Tower face border (wood kept around every face)', 0, 100, 1, 'mm', () => state.border, v => state.border = v, recut);
-  paramRow($('cutParams'), 'thick', 'Wood thickness', 3, 25, 0.5, 'mm', () => state.thick, v => state.thick = v, recut);
+  paramRow($('cutParams'), 'thick', 'Wood thickness (also widens the box)', 3, 25, 0.5, 'mm', () => state.thick, solverSetter('thick', v => state.thick = v), solverAfter);
   const POV_LABEL = { bench1: 'Bench · statue 1', bench2: 'Bench · statue 2', back1: 'Back · statue 1', back2: 'Back · statue 2' };
   function showPicture(key) {
     const el = document.querySelector(`.pov[data-key="${key}"]`), p = state.povs[key], img = el.querySelector('.thumb');
@@ -1364,7 +1372,8 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
           name: t.name, height_mm: Math.round(t.h * 1000), lit_mm: Math.round(pw.lit[i] * 1000), leds_per_face: pw.leds[i],
           r_mm: mm(t.r), azimuth_deg: r1(wrap(t.th) * DEG), x_mm: mm(t.x), y_mm: mm(-t.z),
           d_eye_mm: mm(dPov(t, s)), azimuth_from_eye_deg: r1(azPov(t, s) * DEG),
-          corner_towards_centre: true, box_yaw_deg: r1(((wrap(t.th) * DEG) + 45 + 360) % 360),
+          corner_towards_centre: true, box_yaw_deg: r1(((wrap(t.th) * DEG) + 45 + 360) % 360), outside_mm: mm(W()),
+          plate_widths_mm: Object.fromEntries(faceList.filter(f => f.tower.statue === s + 1 && f.tower.name === t.name).sort((a, b) => a.letter < b.letter ? -1 : 1).map(f => [f.letter, mm(f.pw)])),
           spacing_to_next_mm: i < 6 ? mm(Math.hypot(T[i + 1].x - t.x, T[i + 1].z - t.z)) : null,
           full_white_A: r1(pw.amps[i]),
         })),
@@ -1499,9 +1508,8 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   if (storedParams) { try { applyObject({ format: JSON_FORMAT, params: storedParams }); resetCentre(); } catch (e) { /* ignore a stale or foreign store */ } }
   // ?load=<url>: open a saved layout JSON by link (the handoff file with its pictures), so headless renders and shared links
   // show the real file; like every URL parameter it is never written to the store.
-  const storedPictures = !!(storedParams && storedParams.projection && (storedParams.projection.viewpoints || []).some(v => v.picture));
   const loaded = q.get('load') ? fetch(q.get('load')).then(r => r.json()).then(o => applyObject(o)).then(() => { resetCentre(); jsonMsg(`Loaded ${q.get('load')}.`); }).catch(e => jsonMsg('Could not load ' + q.get('load') + ': ' + e.message))
-    : (storedPictures ? Promise.resolve() : loadDefaultPictures());   // the store's own pictures win; otherwise the four defaults
+    : Promise.resolve();
   loaded.then(() => {
     if (q.get('dump') === '1') { document.body.textContent = ''; const pre = document.createElement('pre'); pre.id = 'dump'; pre.textContent = window.statueExport(); document.body.appendChild(pre); return; }
     render();

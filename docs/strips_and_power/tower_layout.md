@@ -22,7 +22,10 @@ week): 2 × 2000, 4 × 1700, 4 × 1400, 4 × 1100 mm, in this order along the V.
 **Changed 2026-10-21:** previously 950, 1250, 1600, 2000, 1600, 1250, 950 (2026-10-18), and
 before that 800, 1150, 1550, 2000, 1150, 800, 500 mm, read off the owner's model photo.
 
-Towers are 40 × 40 cm with a structural post in the middle. Each face has one strip, mounted
+Towers are 412 × 412 mm outside, 400 × 400 inside: two opposite sides are 400 mm pieces, the
+other two 412 mm pieces that cover their edges, so the 6 mm wood thickness is accounted for
+(owner, 2026-10-23; which faces are long: [statue_geometry.md](statue_geometry.md#the-box-two-short-and-two-long-pieces-owner-2026-10-23)).
+A structural post stands in the middle. Each face has one strip, mounted
 on the post facing out, about 15 cm behind a diffuser and the CNC-cut face. **Each tower is
 one channel; its 4 strips get the same data in parallel** through the tower-base splitter
 ([tower_base.md](tower_base.md)). Strips run bottom to top. Per statue: 561 rendered pixels,

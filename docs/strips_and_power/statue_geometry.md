@@ -2,20 +2,20 @@
 
 Path: [docs](../README.md) › [strips_and_power](README.md) › **statue_geometry**
 Parent: [README.md](README.md)
-**Code:** `tools/statue_render.html` (layout solver, four viewpoints, picture projection and cut masks, LED render, DXF export, LED/supply calculator, JSON export/load, `?load=`), `layout/statue-layout.json` (the handoff file, with the pictures from [../art/README.md](../art/README.md)), `renders/*.png`, `index.html`, `.nojekyll`
+**Code:** `tools/statue_render.html` (layout solver, four viewpoints, picture projection and cut masks, LED render, DXF export, LED/supply calculator, JSON export/load, `?load=`), `layout/statue-layout.json` (the handoff file: the artist's final layout, with the demo smiley), `renders/*.png`, `index.html`, `.nojekyll`
 **Covers:** where the 14 towers stand inside the 8 m circle, what a viewer at the centre sees, and
 the 3D check that the owner and the artist use to judge the tower heights. Not the wiring between
 towers ([trenches.md](trenches.md)).
 
 ## What it does
 
-The owner's constraints (owner, 2026-10-19): every tower is a 400 × 400 mm box; one corner of each
+The owner's constraints (owner, 2026-10-19): every tower is a 400 × 400 mm box (412 × 412 outside since 2026-10-23, below); one corner of each
 tower points at the centre of the circle; towers are 1–2 m apart, 1.5 m preferred; seen from the
 centre, the silhouettes of neighbouring towers touch, so the cut pattern reads as one picture (a
 smiley per statue); the whole piece fits a circle of exactly 8 m diameter.
 
 `tools/statue_render.html` is a self-contained Three.js page (open it as a file, or the published
-artifact). Its inputs, each a slider plus a text box in mm (owner, 2026-10-19): tower side length,
+artifact). Its inputs, each a slider plus a text box in mm (owner, 2026-10-19): tower side length (the short pieces' width since 2026-10-23),
 the seven tower heights, minimum / maximum / optimum spacing, circle diameter, plus the free radius
 the viewer keeps at the centre, eye height and field of view. It solves the arm of a statue from
 the apex outwards: the apex tower's far corner sits on the circle, and each next tower is placed at
@@ -25,7 +25,7 @@ radius), otherwise the largest spacing that fits, clamped to the minimum; the pa
 **Compute heights for a level top line** sets T1–T3 and T5–T7 so every top sits on one line from
 the eye, keeping T4; this is the artist's actual goal (owner, 2026-10-19). The page then projects
 the smiley from the eye point onto the faces that look at the centre, renders the eye view
-(horizontal field of view 100°, eye 1.6 m), a drone view with a 1.75 m figure at the centre and a
+(horizontal field of view and eye height as set; defaults under Final layout), a drone view with a 1.75 m figure at the centre and a
 top-down plan (orthographic, 1 m grid, a "1 m" bar at the bottom right), and prints per tower:
 distance, azimuth, angular gap to the neighbour, top elevation and the angle its lit part
 subtends. Headless Chrome produced `renders/*.png` from URL parameters (`view=centre|drone|top`, `pov=2` for the statue 2 eye, `bench`,
@@ -120,17 +120,67 @@ it). `index.html` at the repo root only redirects to `tools/statue_render.html`,
 stops Jekyll from processing the site, since nothing here is a Jekyll site and it would only add
 build time and surprises. The same file is also published as a private claude.ai artifact.
 
-## Final layout (artist, 2026-10-21)
+## Final layout (artist, 2026-10-23)
 
-`layout/statue-layout.json` is the artist's export of 2026-10-21 and the project default in
-the tool (owner: the build must be finished within a week, so these are the sizes). Heights
-1100 / 1400 / 1700 / 2000 mm; a bench at the centre (below); towers placed by hand (free positions, so the solver is bypassed
-until "Reset to the solved layout" or `?solved=1`); circle Ø 18 m, apexes 17.4 m apart
-(8.7 m from the centre), tips 4.1 m from the centre, 2.35 m kept free; eye 1200 mm (a seated
-audience); spacing range 1000–3000 mm with hand-set pairs 1120 / 1590 / 2200 / 1340 / 1760 /
-1102 mm. Statue 2 mirrors statue 1. Consequences recorded elsewhere: LED counts and currents
-([led_power_budget.md](led_power_budget.md)), trench segments ([trenches.md](trenches.md)),
-the CAT5e length ([../data_link/cabling.md](../data_link/cabling.md)).
+The artist's export of 2026-10-23 is the final layout, and the page's built-in defaults are its
+settings (owner, 2026-10-23: "the final layout … put the new statue layout as the default");
+`layout/statue-layout.json` is the page's export of those defaults (see the 412 mm box below). Heights 1100 / 1400 / 1700 / 2000 mm (unchanged); a Ø 3800 mm
+bench at the centre (below), so the eye points stand 1.9 m from the centre; her six spacings
+as hand-set pairs 1200 / 1700 / 1300 / 2200 / 1500 / 1000 mm on the solver's rails (no free
+positions in the file); circle Ø 18 m, apexes 17.4 m apart (8.7 m from the centre, unchanged),
+tips T1 4.8 m and T7 4.3 m from the centre, nearest tower corner 2.1 m beyond the bench edge;
+spacing range 1000–2310 mm, optimum 2310, 2.15 m kept free; eye 1200 mm (a seated audience),
+bench field of view 120°; back viewpoint 3.2 m behind the apex, eye 1460 mm, field of view 90°.
+Statue 2 mirrors statue 1, pictures included; the pictures in the file are the demo smiley
+(below). The page's `back2` defaults equal `back1`'s, where her file carries stale 3000 / 1600 /
+100 for `back2`; while statue 2 mirrors they are never used, and unticking copies `back1` over
+them, so they cannot show (agent, 2026-10-23). Consequences recorded elsewhere: trench segments
+([trenches.md](trenches.md)); LED counts, currents and the CAT5e length did not change, since
+heights and apexes did not ([led_power_budget.md](led_power_budget.md),
+[../data_link/cabling.md](../data_link/cabling.md)). The four generated pictures were made for
+the previous layout and are superseded ([../art/README.md](../art/README.md)).
+**Since the box became 412 mm outside (same day, below), the towers are re-solved and no longer
+sit exactly where her file put them** (owner chose this over keeping her positions): the apexes
+move 8 mm in, the tips up to 35 mm sideways, the spacings stay hers. `layout/statue-layout.json`
+was then regenerated from the page with `?dump=1`, so it is the page's export, not her raw file;
+her raw file is in git history.
+**The default reads "artist's spacings", not "set by hand"** (owner, 2026-10-23: "it should be
+tool-solved"). Her six spacings are hand-set pairs in the file format, but the solver still places
+every tower so neighbouring silhouettes touch; only the spacings are hers. The badge says "set by
+hand" again as soon as a spacing differs from hers. A fully solved layout (uniform spacing from
+min / max / optimum) was offered and declined: with her range it puts 2133 mm everywhere and pulls
+the tips in to 2.4 m from the centre, not her layout.
+**Changed 2026-10-23:** previously the artist's export of 2026-10-21: pairs 1120 / 1590 / 2200 /
+1340 / 1760 / 1102 mm, bench 3000 mm (a working value), spacing range 1000–3000, 2.35 m kept
+free, bench field of view 100°, back viewpoint 3 m / 1600 mm / 100°, tips 4.1 m from the
+centre. Changed because the artist sent the final layout.
+
+### The box: two short and two long pieces (owner, 2026-10-23)
+
+A tower is built from two 400 mm pieces on opposite sides and two 412 mm pieces on the other two,
+which cover the short pieces' edges, so the 6 mm wood thickness is accounted for: 412 × 412 mm
+outside, 400 × 400 inside. The page models it: "Short piece width" (`side`, 400) and "Wood
+thickness" (`thick`, 6) give the outside `side + 2 × thick`.
+- **Everything seen from outside uses the outside size**: the silhouettes the solver makes touch,
+  the circle, the free radius and the bench clearance. So the wood thickness is a solver input now,
+  and changing it re-solves like changing the side. Old files load with `side_mm` 400 read as the
+  short pieces, which makes their towers 412 outside; that is the intent, the boxes were never 400
+  outside (owner).
+- **Which faces are long** (owner): the inner face nearer the centre line (the line through both
+  apexes) and, necessarily, the face opposite it; on the apex, which sits on the line, the inner
+  face on the left as seen from the bench (A). So T1–T3 have long B and D, T4–T7 long A and C, in
+  both statues. From behind, the long outer face is therefore the one farther from the centre line.
+  Reason for the rule: not recorded.
+- **Each plate spans only its own piece**: picture, mask, island check and DXF of a long face are
+  412 mm wide, of a short face 400 mm, centred on the face; the 6 mm strips either side of a short
+  face are the long pieces' end grain, drawn as plain wood. The DXF manifest's `width_mm` and the
+  export's per-tower `plate_widths_mm` (by face letter) and `outside_mm` say which is which. The
+  picture box is still taken from the whole outside of the faces, because that is the silhouette.
+- **The diffuser sits on the inside of the wood**, 200 mm from the tower centre, 400 mm wide (the
+  inside of the box), one thickness behind every cut face.
+**Changed 2026-10-23:** previously the box was `side` (400) outside with four equal faces of zero
+thickness, and the diffuser stood one thickness behind each face, `side − 2 × thick` wide. Changed
+because the real build uses 400 and 412 pieces.
 
 ### Pictures, cuts and the LED render (owner, 2026-10-21: one page, not two)
 
@@ -138,13 +188,13 @@ The projection maker was built as a second page on 2026-10-21 and folded into th
 day (owner: "I want just one page, the LEDs in the layout decider, the actual cut when moving the
 statues"). Four viewpoints each own 14 faces: the bench seat facing a statue owns its inner faces
 (the two that look at the centre), a back viewpoint on the apex axis behind the apex tower (owner's
-choice over the centre or the circle edge; default 3 m, eye 1600 mm, field of view 100°) owns the
+choice over the centre or the circle edge; default 3.2 m, eye 1460 mm, field of view 90° from the final layout) owns the
 outer faces. A picture per viewpoint, raster (white is wood, the rest is cut and lit; a pixel is
 wood above 90 % luminance, transparency counts as white) or DXF (inside the closed shapes is cut;
 polylines, lines, circles, arcs and splines, open chains joined by endpoint), is stretched to the
 silhouette of the 14 faces as seen from that eye, shrinkable from left / right / top / bottom
 (owner), and projected onto the faces. Moving a tower re-projects its cuts; masks are cached per
-face so a slider only recomputes what it touches. The bench faces opened with a demo smiley; since 2026-10-22 the page opens with the four generated pictures ([../art/README.md](../art/README.md), not final) when it can fetch them, the smiley otherwise.
+face so a slider only recomputes what it touches. The page opens with the demo smiley on both viewpoints of statue 1, mirrored onto statue 2 (owner, 2026-10-23: "leave the smiley faces for now": the artist is drawing different art). **Changed 2026-10-23:** from 2026-10-22 the page opened with the four generated pictures when it could fetch them; they were made for the previous layout and are superseded ([../art/README.md](../art/README.md)).
 
 - **A picture fits the whole silhouette of its 14 faces from the viewpoint, the tip towers' feet
   included** (owner, 2026-10-21: "the whole point of this tool is to help us create an image that
@@ -157,8 +207,9 @@ face so a slider only recomputes what it touches. The bench faces opened with a 
   projected smiley was unreadable before.
 - **Statue 2's viewpoints mirror statue 1's by default** (owner: "if I upload a file to one view it
   should look identical on the other view"): same picture, insets, eye, distance and field of view;
-  untick to give statue 2 its own, starting from copies. The handoff file now carries four different
-  pictures, so it loads with the box unticked ([../art/README.md](../art/README.md)).
+  untick to give statue 2 its own, starting from copies. The handoff file mirrors, as the
+  artist exported it (2026-10-23); from 2026-10-22 it carried four different pictures and loaded
+  with the box unticked ([../art/README.md](../art/README.md)).
 - **The unlit base and the face border (default 20 mm, measured on the wood) are always wood**
   (agent): no LED sits behind the base.
 - **Wood islands are reported per face, never fixed** (owner): a wood region not connected to the
@@ -201,16 +252,20 @@ face so a slider only recomputes what it touches. The bench faces opened with a 
   under 2 mm per pixel. Reason for the old cap: unknown, presumably memory; 4096 × 2691 loads in
   well under a second.
 - **Her distances ride the solver's rails** (owner, 2026-10-21): the default layout takes the six
-  spacings of her hand-placed file (1120 / 1590 / 2200 / 1340 / 1760 / 1102 mm) as hand-set pairs
-  and places the towers with the touching solver from the bench, because she placed them to look
-  like a solved statue; `?free=1` shows her raw positions.
+  spacings of her file (1200 / 1700 / 1300 / 2200 / 1500 / 1000 mm since 2026-10-23) as hand-set
+  pairs and places the towers with the touching solver from the bench, because she placed them to
+  look like a solved statue. Her 2026-10-23 file is itself on the rails (no free positions), so
+  `?free=1` starts free dragging from its solved positions; it used to show the raw positions of
+  her 2026-10-21 file, which no longer exists as a layout (agent, 2026-10-23).
 
 ### The bench at the centre (owner, 2026-10-21)
 
 A circular bench stands at the centre; the audience sits on its edge facing out, which is why
-the eye height is 1200 mm. The artist placed the towers before mentioning it. **Its diameter
-is not known yet**: 3000 mm is the working value in both tools until the owner enters the real
-size (owner, 2026-10-21: the bench stays in the view). A loaded file without a bench field keeps
+the eye height is 1200 mm. The artist placed the towers before mentioning it. **Its diameter is
+3800 mm**, as set in the artist's final file (2026-10-23); whether that is the built bench's
+measured size or her estimate is not recorded. **Changed 2026-10-23:** previously 3000 mm as a
+working value until the real size was known (owner, 2026-10-21: the bench stays in the view);
+changed because her final file sets it. A loaded file without a bench field keeps
 the current bench rather than removing it, for the same reason. (Briefly on 2026-10-21 the default
 was 0, a misreading of the owner; reverted the same day.) Consequences in the tool:
 - **One eye point per statue, on the bench edge, on the apex axis** (owner): the eye view has a

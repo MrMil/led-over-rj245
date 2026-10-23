@@ -4,7 +4,7 @@
 
 ## Measure / confirm
 
-- [x] **Layout and heights** — final from the artist, 2026-10-21: `layout/statue-layout.json`
+- [x] **Layout and heights** — final from the artist, 2026-10-23: `layout/statue-layout.json`
   (heights 1100/1400/1700/2000, positions, segment lengths in
   [trenches](docs/strips_and_power/trenches.md)).
 - [ ] **CAT5e length:** the apexes are 17.4 m apart, so the 10 m cables do not reach. Buy or

@@ -48,10 +48,13 @@ each apex from the camp's supply, ~20 m away, in its own trench (owner).
 ## Gotchas
 
 - Segment lengths, centre to centre, from the final layout (`layout/statue-layout.json`,
-  2026-10-21; statue 2 mirrors statue 1): T4→T3 2200, T3→T2 1590, T2→T1 1120, T4→T5 1340,
-  T5→T6 1760, T6→T7 1102 mm. The arms are not symmetric. Cable runs along an arm add up:
-  apex → A (T2) 3.8 m, apex → B (T3) 2.2 m, apex → D (T5) 1.3 m, apex → E (T6) 3.1 m, plus
-  slack into each base. The 5 V runs A → T1 and E → T7 are 1.1 m.
+  2026-10-23; statue 2 mirrors statue 1): T4→T3 1300, T3→T2 1700, T2→T1 1200, T4→T5 2200,
+  T5→T6 1500, T6→T7 1000 mm. The arms are not symmetric. Cable runs along an arm add up:
+  apex → A (T2) 3.0 m, apex → B (T3) 1.3 m, apex → D (T5) 2.2 m, apex → E (T6) 3.7 m, plus
+  slack into each base. The 5 V runs are A → T1 1.2 m and E → T7 1.0 m.
+  **Changed 2026-10-23:** previously from the 2026-10-21 layout (T4→T3 2200, T3→T2 1590,
+  T2→T1 1120, T4→T5 1340, T5→T6 1760, T6→T7 1102 mm); changed because the artist sent the final
+  layout.
 
 ## Related
 
