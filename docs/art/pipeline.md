@@ -56,7 +56,7 @@ Parent: [README.md](README.md)
   preview pictures into `layout/statue-layout.json` (not since 2026-10-23: the file is now the
   artist's final layout with the smiley, see [README.md](README.md)) and unticks "statue 2 uses statue 1's
   pictures", since the default mirrors statue 1
-  ([../strips_and_power/statue_geometry.md](../strips_and_power/statue_geometry.md)). The tool then
+  ([../strips_and_power/statue_geometry/pictures.md](../strips_and_power/statue_geometry/pictures.md)). The tool then
   shows the plates in 3D and its island report is a second opinion on the 1 mm preview; the DXF
   files it exports from them are raster traces and are not the cut files.
 - **The towers render is anti-aliased** (agent, 2026-10-22): `art/<name>-towers.png` is drawn at

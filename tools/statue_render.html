@@ -145,6 +145,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     <select id="mode">
       <option value="touch">Solved: silhouettes exactly touch from the centre</option>
       <option value="straight">Straight arm at an angle (spacing = chosen value)</option>
+      <option value="parallel">Solved, all towers at 45° like the apex</option>
     </select></div>
   <div id="armParams"></div>
 
@@ -215,11 +216,11 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     diam: num('d', 18000),
     clear: num('clear', 2150),          // smallest radius the viewer must have free at the centre
     bench: num('bench', 3800),         // circular bench at the centre, mm; the audience sits on its edge facing out. 3800 from the artist's file of 2026-10-23 (3000 was the working value before)
-    mode: q.get('mode') === 'straight' ? 'straight' : 'touch',
+    mode: ['touch', 'straight'].includes(q.get('mode')) ? q.get('mode') : 'parallel',   // the artist's choice, 2026-10-23: every tower at 45° like the apex
     arm: num('arm', 25),
     eye: num('eye', 1200),               // owner, 2026-10-21: the audience sits
     hfov: num('fov', 120),
-    labels: q.get('labels') !== '0',
+    labels: q.get('labels') === '1',   // off by default (owner, 2026-10-23); ?labels=1 shows them
     unlit: num('unlit', 150),          // dark base at the foot of every face, mm, no LEDs
     lpm: num('lpm', 60),               // LEDs per metre
     mA: num('ma', 29.4),               // current per LED at full white, measured on the bought strip
@@ -227,14 +228,14 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     reel: num('reel', 5000),           // reel length, mm
     border: num('border', 20),         // wood kept around every face, mm, measured on the wood
     thick: num('thick', 6),            // plywood thickness, mm: the box is side + 2 × thick outside, and the diffuser sits this far behind the cut face
-    same2: true,                       // statue 2's viewpoints mirror statue 1's: same picture, insets, eye, distance, field of view
+    same2: false,                      // true: statue 2's viewpoints mirror statue 1's. Off by default so the artist can upload statue 2's pictures directly (owner, 2026-10-23)
     night: q.get('night') === '1',
     anim: 'rainbow', speed: 0.15, bright: 1.0,   // 0.15 cycles/s: one full rainbow pass every ~7 s, plainly moving
     povs: {                            // per viewpoint: back ones have their own eye/fov/distance; bench ones use the viewer eye and field of view
       bench1: { fit: 'full', insets: { l: 0, r: 0, t: 0, b: 0 }, image: null },
       bench2: { fit: 'full', insets: { l: 0, r: 0, t: 0, b: 0 }, image: null },
-      back1: { fit: 'full', dist: 3200, eye: 1460, fov: 90, insets: { l: 0, r: 0, t: 0, b: 0 }, image: null },
-      back2: { fit: 'full', dist: 3200, eye: 1460, fov: 90, insets: { l: 0, r: 0, t: 0, b: 0 }, image: null },
+      back1: { fit: 'full', dist: 3000, eye: 1200, fov: 90, insets: { l: 0, r: 0, t: 0, b: 0 }, image: null },
+      back2: { fit: 'full', dist: 3000, eye: 1200, fov: 90, insets: { l: 0, r: 0, t: 0, b: 0 }, image: null },
     },
   };
   state.st[0].h = state.st[0].h.map((v, i) => num('h' + (i + 1), v));
@@ -309,11 +310,48 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     }
     return { r, th, solved };
   }
-  const solver = () => state.mode === 'touch' ? solveTouch : solveStraight;
+  // 'parallel' (owner, 2026-10-23, for the artist): every tower keeps the apex tower's rotation, 45° to the apex axis, so its
+  // diagonals run along and across the axis. Its silhouette then depends on where it stands, so the solver measures the real
+  // corners from the eye instead of the half-diagonal: each tower's left edge meets the previous one's right edge.
+  const parallel = () => state.mode === 'parallel';
+  // Angular extent [min, max] from the eye of a parallel tower at (r, th) in the eye's frame (th from the apex axis).
+  function parExtent(r, th) {
+    const d = HALF(), cx = r * Math.sin(th), cy = r * Math.cos(th);   // cy: along the axis, away from the eye
+    const a = [[cx + d, cy], [cx - d, cy], [cx, cy + d], [cx, cy - d]].map(([x, y]) => Math.atan2(x, y));
+    return [Math.min(...a), Math.max(...a)];
+  }
+  function solveParallel(chords) {
+    const r = [R() - HALF() - benchR()], th = [0];
+    let solved = true;
+    for (let k = 0; k < 3; k++) {
+      const rk = r[k], tk = th[k], edge = parExtent(rk, tk)[1], s = chords[k];
+      const place = rn => { let lo = edge, hi = edge + Math.PI / 2;   // the angle where this tower's left edge meets the last one's right edge
+        for (let i = 0; i < 50; i++) { const m = (lo + hi) / 2; if (parExtent(rn, m)[0] < edge) lo = m; else hi = m; } return (lo + hi) / 2; };
+      const f = rn => { const tn = place(rn); return Math.hypot(rn * Math.sin(tn) - rk * Math.sin(tk), rn * Math.cos(tn) - rk * Math.cos(tk)) - s; };
+      let lo = HALF() + 0.05, hi = rk;
+      if (f(lo) < 0) { solved = false; r.push(lo); th.push(place(lo)); continue; }
+      for (let i = 0; i < 50; i++) { const m = (lo + hi) / 2; if (f(m) > 0) lo = m; else hi = m; }
+      const rn = (lo + hi) / 2;
+      r.push(rn); th.push(place(rn));
+    }
+    return { r, th, solved };
+  }
+  const solver = () => state.mode === 'touch' ? solveTouch : state.mode === 'parallel' ? solveParallel : solveStraight;
   const uniform = s => solver()([s, s, s]);
-  // arm (r, th) is in the eye's frame; validity is judged from the circle's centre
-  const armCentreR = arm => arm.r.map((r, k) => Math.hypot(r * Math.sin(arm.th[k]), benchR() + r * Math.cos(arm.th[k])));
-  const valid = arm => { const rc = armCentreR(arm); return arm.solved && Math.min(...rc) - HALF() >= Math.max(state.clear / 1000, benchR()) - 1e-9 && Math.max(...rc) + HALF() <= R() + 1e-9; };
+  // Rotation of a tower's box: one corner at the centre, or (parallel) the apex tower's rotation for the whole statue.
+  const yawFor = (x, z, s) => parallel() ? s * Math.PI - Math.PI / 4 : Math.atan2(-x, -z) - Math.PI / 4;
+  // A box's corners in plan; nearest and farthest point from the circle's centre (exact for any rotation).
+  function boxCorners(x, z, yaw) {
+    const a = W() / 2, c = Math.cos(yaw), sn = Math.sin(yaw);
+    return [[a, a], [a, -a], [-a, -a], [-a, a]].map(([u, v]) => [x + u * c + v * sn, z - u * sn + v * c]);
+  }
+  const segDist = ([ax, az], [bx, bz]) => { const dx = bx - ax, dz = bz - az, t = Math.max(0, Math.min(1, -(ax * dx + az * dz) / (dx * dx + dz * dz))); return Math.hypot(ax + t * dx, az + t * dz); };
+  const nearFar = (x, z, yaw) => { const P = boxCorners(x, z, yaw); return [Math.min(...P.map((p, k) => segDist(p, P[(k + 1) % 4]))), Math.max(...P.map(([px, pz]) => Math.hypot(px, pz)))]; };
+  // arm (r, th) is in the eye's frame; validity is judged from the circle's centre (statue 1's frame: eye at z = −benchR)
+  const valid = arm => {
+    const nf = arm.r.map((r, k) => { const x = r * Math.sin(arm.th[k]), z = -benchR() - r * Math.cos(arm.th[k]); return nearFar(x, z, yawFor(x, z, 0)); });
+    return arm.solved && Math.min(...nf.map(v => v[0])) >= Math.max(state.clear / 1000, benchR()) - 1e-9 && Math.max(...nf.map(v => v[1])) <= R() + 1e-9;
+  };
 
   // Spacing choice: the optimum if it works, else the largest working spacing below it (every step eats
   // radius, so validity only shrinks as spacing grows), clamped to [min, max].
@@ -358,8 +396,9 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       }
     }
     const solved = towers.every(t => t.solved);
-    const farMax = Math.max(...towers.map(t => t.r + HALF()));
-    const clear = Math.min(...towers.map(t => t.r - HALF()));
+    towers.forEach(t => { t.yaw = yawFor(t.x, t.z, t.statue - 1); [t.near, t.far] = nearFar(t.x, t.z, t.yaw); });
+    const farMax = Math.max(...towers.map(t => t.far));
+    const clear = Math.min(...towers.map(t => t.near));
     const benchGap = clear - benchR();                       // nearest tower corner beyond the bench edge (negative: overlap)
     const fits = solved && farMax <= R() + 1e-9 && clear >= state.clear / 1000 - 1e-9 && benchGap >= -1e-9;
     if (typeof showPairs === 'function') showPairs(towers);
@@ -461,6 +500,8 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   const demoPicture = () => { const c = demoSmiley(); return Object.assign(maskFromRaster(c), { name: 'demo smiley', type: 'raster', source: c.toDataURL('image/png') }); };
   state.povs.bench1.image = demoPicture();                      // the smiley is the default picture (owner, 2026-10-23: the artist is drawing new art)
   state.povs.back1.image = demoPicture();
+  state.povs.bench2.image = demoPicture();
+  state.povs.back2.image = demoPicture();
 
   // The picture's box in the viewpoint's tangent plane, shrunk by the insets. 'full' (owner's default): the whole silhouette of the
   // 14 faces from this eye, tip towers' feet included, so the picture is designed for all towers at once. 'band' / 'band7': only the
@@ -724,7 +765,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   const disposeGroup = g => g.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) { const m = o.material; ['emissiveMap', 'alphaMap'].forEach(k => m[k] && m[k].dispose()); /* wood maps are shared and cached */ if (m.uniforms && m.uniforms.leds) m.uniforms.leds.value.dispose(); m.dispose(); } });
 
   let current = null, levelPending = null;
-  function placeGroup(g, x, z) { g.position.set(x, 0, z); g.rotation.y = Math.atan2(-x, -z) - Math.PI / 4; }   // one corner points at the centre
+  function placeGroup(g, x, z, s) { g.position.set(x, 0, z); g.rotation.y = yawFor(x, z, s); }   // one corner at the centre, or turned like the apex
   function placeLabel(lab, x, z) { lab.userData.pos.set(x, 0, z); lab.userData.out.set(x, 0, z).normalize(); }
 
   function build() {
@@ -748,7 +789,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     L.towers.forEach(t => {
       const g = new THREE.Group();
       g.userData.idx = t.idx;
-      placeGroup(g, t.x, t.z);
+      placeGroup(g, t.x, t.z, t.statue - 1);
       g.updateMatrixWorld(true);
       const toCentre = new THREE.Vector3(-t.x, 0, -t.z).normalize();
       const n = Math.floor((t.h - base) * state.lpm + 1e-9);
@@ -795,7 +836,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       });
     });
     const islandReport = [];
-    const maskKey = f => { const e = state.povs[eff(f.povKey)]; return JSON.stringify([f.povKey, e.fit, e.dist, e.eye, e.insets, e.image ? [e.image.name, e.image.w, e.image.h] : null, state.border, state.unlit, state.side, state.thick, f.pw, state.bench, state.eye, f.tower.x, f.tower.z, f.tower.h]); };
+    const maskKey = f => { const e = state.povs[eff(f.povKey)]; return JSON.stringify([f.povKey, e.fit, e.dist, e.eye, e.insets, e.image ? [e.image.name, e.image.w, e.image.h] : null, state.border, state.unlit, state.side, state.thick, f.pw, state.bench, state.eye, f.tower.x, f.tower.z, f.tower.yaw, f.tower.h]); };
     faceList.forEach(f => {
       const t = f.tower, g = f.group, ck = t.idx + ':' + f.fi, key = maskKey(f); let hit = maskCache.get(ck);
       if (!hit || hit.key !== key) { const mm = faceMask(f, 2, boxes[f.povKey]); hit = { key, mask: mm, analysis: analyse(mm) }; maskCache.set(ck, hit); }
@@ -830,6 +871,13 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
 
   // ---------- Readout ----------
   const mm = m => Math.round(m * 1000);
+  // A tower's angular extent from its statue's eye, relative to the apex axis: the half-diagonal for corner-to-centre towers
+  // (as the solver assumes), the real corners for parallel ones.
+  const extent = (t, s) => {
+    if (!parallel()) { const a = azPov(t, s), h = hw(dPov(t, s)); return [a - h, a + h]; }
+    const p = povOf(s), A = boxCorners(t.x, t.z, t.yaw).map(([x, z]) => wrap(Math.atan2(x - p.x, -(z - p.z)) - s * Math.PI));
+    return [Math.min(...A), Math.max(...A)];
+  };
   function statueTable(L, s) {
     const eye = state.eye / 1000, T = statueTowers(L, s);
     const rows = T.map((t, i) => {
@@ -837,13 +885,13 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       const top = Math.atan((t.h - eye) / rfP(t, s)) * DEG;
       let gap = '', cls = '';
       if (i < 6) {
-        const n = T[i + 1], gv = (Math.abs(wrap(azPov(n, s) - azPov(t, s))) - hw(dPov(t, s)) - hw(dPov(n, s))) * DEG;
+        const n = T[i + 1], gv = (extent(n, s)[0] - extent(t, s)[1]) * DEG;
         gap = (gv >= 0 ? '+' : '') + gv.toFixed(1);
         cls = Math.abs(gv) < 0.3 ? 'ok' : (gv < 0 ? 'bad' : '');
       }
       return `<tr><td>${t.name} · ${mm(t.h)}</td><td>${mm(t.r)}</td><td>${mm(dPov(t, s))}</td><td>${(azPov(t, s) * DEG).toFixed(1)}</td><td class="${cls}">${gap}</td><td>${top.toFixed(1)}</td><td>${appH.toFixed(1)}</td></tr>`;
     }).join('');
-    const span = Math.max(...T.map(t => Math.abs(azPov(t, s)) + hw(dPov(t, s)))) * DEG;
+    const span = Math.max(...T.map(t => Math.max(...extent(t, s).map(Math.abs)))) * DEG;
     const spacings = [0, 1, 2, 3, 4, 5].map(i => Math.hypot(T[i].x - T[i + 1].x, T[i].z - T[i + 1].z));
     return `<table><thead><tr><th>Statue ${s + 1}</th><th>r</th><th>d</th><th>az °</th><th>gap °</th><th>top °</th><th>lit °</th></tr></thead><tbody>${rows}</tbody></table>
       <p class="note">Spans ±${span.toFixed(0)}° of the view from its eye point. Spacing T1–T2 … T6–T7: ${spacings.map(mm).join(' / ')} mm.</p>`;
@@ -970,7 +1018,17 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   const look = new THREE.OrbitControls(camCentre, renderer.domElement);          // left: look around; the camera itself walks (below)
   look.enablePan = false; look.enableZoom = false; look.rotateSpeed = -0.4;
   let droneScale = 1;
-  const droneHome = () => { const k = Math.max(1, R() / 4); camDrone.position.set(5.2 * k, 6.2 * k, 7.6 * k); controls.target.set(0, 0.5, 0); controls.update(); };
+  // Drone home: from the usual corner, as close as the circle (and the tallest tower standing on it) fits the frame (owner,
+  // 2026-10-23: zoomed in to the circle; the back viewpoints outside it may fall out of view).
+  const droneHome = () => {
+    camDrone.aspect = viewEl.clientWidth / Math.max(1, viewEl.clientHeight); camDrone.updateProjectionMatrix();
+    const dir = new THREE.Vector3(5.2, 6.2, 7.6).normalize(), target = new THREE.Vector3(0, 0.3, 0), top = Math.max(...state.st.flatMap(c => c.h)) / 1000;
+    const pts = []; for (let i = 0; i < 96; i++) { const a = i / 96 * 2 * Math.PI; [0, top].forEach(y => pts.push(new THREE.Vector3(R() * Math.cos(a), y, R() * Math.sin(a)))); }
+    const fits = d => { camDrone.position.copy(target).addScaledVector(dir, d); camDrone.lookAt(target); camDrone.updateMatrixWorld(); return pts.every(p => { const v = p.clone().project(camDrone); return Math.abs(v.x) <= 0.96 && Math.abs(v.y) <= 0.94 && v.z < 1; }); };
+    let lo = 1, hi = 300; for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if (fits(m)) hi = m; else lo = m; }
+    camDrone.position.copy(target).addScaledVector(dir, hi); controls.target.copy(target); controls.update();
+    droneScale = Math.max(1, R() / 4);   // applyView rescales from here when the circle changes (it used to scale the home position a second time)
+  };
   droneHome();
 
   function applyView() {
@@ -1083,7 +1141,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   }
   function moveTower(idx, x, z) {
     const s = idx < 7 ? 0 : 1, i = idx % 7;
-    const setVis = (ix, px, pz) => { const g = towerGroups[ix]; if (g) placeGroup(g, px, pz); const l = labels[ix]; if (l) placeLabel(l, px, pz); };
+    const setVis = (ix, px, pz) => { const g = towerGroups[ix]; if (g) placeGroup(g, px, pz, ix < 7 ? 0 : 1); const l = labels[ix]; if (l) placeLabel(l, px, pz); };
     if (!state.decoupled) {                                   // coupled: statue 2 is statue 1 rotated by 180°
       if (s === 1) { x = -x; z = -z; }
       state.free.s1[i] = [x, z]; setVis(i, x, z); setVis(7 + i, -x, -z);
@@ -1284,7 +1342,9 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   paramRow($('viewerParams'), 'eye', 'Eye height', 400, 2000, 10, 'mm', () => state.eye, v => state.eye = v, () => { applyView(); build(); });
   paramRow($('viewerParams'), 'hfov', 'Horizontal field of view', 60, 140, 5, '°', () => state.hfov, v => state.hfov = v, applyView);
   $('mode').value = state.mode; $('armParams').hidden = state.mode !== 'straight';
-  $('mode').addEventListener('change', () => { solverSetter('mode', v => { state.mode = v; $('armParams').hidden = v !== 'straight'; })($('mode').value); solverAfter(); });
+  // The method only changes how towers sit on the spacings, so switching keeps hand-set spacings and positions (agent,
+  // 2026-10-23: the artist wants her spacings with every tower turned like the apex; the reset question blocked that).
+  $('mode').addEventListener('change', () => { state.mode = $('mode').value; $('armParams').hidden = state.mode !== 'straight'; applyView(); build(); });
   $('labels').checked = state.labels;
   $('labels').addEventListener('change', () => { state.labels = $('labels').checked; labels.forEach(l => l.visible = state.labels); });
   $('btnLevel').addEventListener('click', () => {
@@ -1372,13 +1432,13 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
           name: t.name, height_mm: Math.round(t.h * 1000), lit_mm: Math.round(pw.lit[i] * 1000), leds_per_face: pw.leds[i],
           r_mm: mm(t.r), azimuth_deg: r1(wrap(t.th) * DEG), x_mm: mm(t.x), y_mm: mm(-t.z),
           d_eye_mm: mm(dPov(t, s)), azimuth_from_eye_deg: r1(azPov(t, s) * DEG),
-          corner_towards_centre: true, box_yaw_deg: r1(((wrap(t.th) * DEG) + 45 + 360) % 360), outside_mm: mm(W()),
+          corner_towards_centre: !parallel(), box_yaw_deg: r1((((parallel() ? s * 180 : wrap(t.th) * DEG)) + 45 + 360) % 360), outside_mm: mm(W()),
           plate_widths_mm: Object.fromEntries(faceList.filter(f => f.tower.statue === s + 1 && f.tower.name === t.name).sort((a, b) => a.letter < b.letter ? -1 : 1).map(f => [f.letter, mm(f.pw)])),
           spacing_to_next_mm: i < 6 ? mm(Math.hypot(T[i + 1].x - t.x, T[i + 1].z - t.z)) : null,
           full_white_A: r1(pw.amps[i]),
         })),
         eye_point: { x_mm: mm(povOf(s).x), y_mm: mm(-povOf(s).z), eye_mm: state.eye },
-        half_span_deg: r1(Math.max(...T.map(t => Math.abs(azPov(t, s)) + hw(dPov(t, s)))) * DEG),
+        half_span_deg: r1(Math.max(...T.map(t => Math.max(...extent(t, s).map(Math.abs)))) * DEG),
         level_top_heights_mm: levelHeights(L, s),
       };
     });
@@ -1422,7 +1482,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       ? { s1: F.statue1.map(([x, y]) => [x / 1000, -y / 1000]), s2: F.statue2.map(([x, y]) => [x / 1000, -y / 1000]) } : null;
     setIf('diam', P.circle_diameter_mm); setIf('clear', P.free_radius_mm);
     if (typeof P.bench_diameter_mm === 'number') setParam('bench', P.bench_diameter_mm);   // a file without a bench keeps the current bench (owner, 2026-10-21: the bench stays in the view)
-    if (P.arm) { if (P.arm.method === 'touch' || P.arm.method === 'straight') { state.mode = P.arm.method; $('mode').value = state.mode; $('armParams').hidden = state.mode !== 'straight'; } setIf('arm', P.arm.angle_deg); }
+    if (P.arm) { if (['touch', 'straight', 'parallel'].includes(P.arm.method)) { state.mode = P.arm.method; $('mode').value = state.mode; $('armParams').hidden = state.mode !== 'straight'; } setIf('arm', P.arm.angle_deg); }
     if (P.viewer) { setIf('eye', P.viewer.eye_mm); setIf('hfov', P.viewer.fov_deg); }
     if (P.leds) { setIf('unlit', P.leds.unlit_base_mm); setIf('lpm', P.leds.per_m); setIf('mA', P.leds.mA_per_led); setIf('psuA', P.leds.psu_max_A); setIf('reel', P.leds.reel_mm); }
     $('decoupled').checked = state.decoupled; showDecoupled();

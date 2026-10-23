@@ -118,7 +118,7 @@ failure — mitigated by a pre-flashed spare ESP32 in a socket ([controller/](co
 4. ~~Tower order and heights~~ — final (artist, 2026-10-21): 1100, 1400, 1700, 2000, 1700,
    1400, 1100 mm ([strips_and_power/tower_layout.md](strips_and_power/tower_layout.md)).
 5. ~~Distance between the statues~~ — 17.4 m apex to apex in the final layout (artist,
-   2026-10-23; unchanged from 2026-10-21) ([strips_and_power/statue_geometry.md](strips_and_power/statue_geometry.md)), so the 10 m
+   2026-10-23; unchanged from 2026-10-21) ([strips_and_power/statue_geometry/final_layout.md](strips_and_power/statue_geometry/final_layout.md)), so the 10 m
    CAT5e cables do not reach; 20 m assumed, purchase to confirm
    ([data_link/cabling.md](data_link/cabling.md)).
 

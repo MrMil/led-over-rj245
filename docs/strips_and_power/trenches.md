@@ -21,7 +21,7 @@ Per statue, one trench along each arm of the V: T1 – T2 – T3 – T4 (apex) �
 The two arms are mirror images.
 
 Between the statues: apex of statue 1 → apex of statue 2, 3 × CAT5e, 17.4 m apart in the
-final layout ([statue_geometry.md](statue_geometry.md)); the 10 m cables do not reach,
+final layout ([statue_geometry/final_layout.md](statue_geometry/final_layout.md)); the 10 m cables do not reach,
 see [../data_link/cabling.md](../data_link/cabling.md). Mains reaches
 each apex from the camp's supply, ~20 m away, in its own trench (owner).
 
@@ -40,7 +40,7 @@ each apex from the camp's supply, ~20 m away, in its own trench (owner).
   run from a supply reaches only towers next to it along the arm trench, and a supply can never
   be shared by towers on the two arms: the fewest supplies is counted over runs of neighbours
   in trench order, not over free pairings (`tools/statue_render.html`,
-  [statue_geometry.md](statue_geometry.md)). Running such a cable the long way round through the
+  [statue_geometry/handoff.md](statue_geometry/handoff.md)). Running such a cable the long way round through the
   apex would cross nothing, but 7 m of 5 V at 9 A is not an option either.
 - **Nothing above ground** (owner, 2026-10-09; police safety check). Cables surface inside
   the tower bases.

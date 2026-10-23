@@ -6,7 +6,7 @@ Parent: [../README.md](../README.md)
 **Covers:** the four pictures cut into the tower faces (one per viewpoint), how they are generated
 as vector cut files so that a CNC can cut them out of 6 mm plywood, and how their previews get into
 the handoff file. Not the projection in the tool itself
-([../strips_and_power/statue_geometry.md](../strips_and_power/statue_geometry.md)).
+([../strips_and_power/statue_geometry/pictures.md](../strips_and_power/statue_geometry/pictures.md)).
 **Code:** `tools/face_art.py` (the generator), `art/viewpoints.json` (where every face lands in
 each picture, extracted from the tool), `art/dxf/S<statue>-T<n>-<face>.dxf` (the cut files, one per
 plate, each with an `.svg` twin to inspect in a browser), `art/<viewpoint>.png` (the pictures as the tool's preview), `art/<viewpoint>-preview.png`
@@ -15,7 +15,7 @@ plate, each with an `.svg` twin to inspect in a browser), `art/<viewpoint>.png` 
 
 **Status (owner, 2026-10-23): superseded, kept as they are.** The pictures, `art/viewpoints.json`
 and the cut files in `art/dxf/` were made for the layout of 2026-10-21. The final layout of
-2026-10-23 ([../strips_and_power/statue_geometry.md](../strips_and_power/statue_geometry.md))
+2026-10-23 ([../strips_and_power/statue_geometry/final_layout.md](../strips_and_power/statue_geometry/final_layout.md))
 moved every tower but the apexes, so they no longer fit the faces and must not be cut. They are
 left unchanged and not regenerated, because the artist is drawing different art (owner,
 2026-10-23: "do not change the art"). The tool shows the demo smiley again
@@ -73,5 +73,5 @@ darkened: that is what to look at when judging a picture.
 
 ## Related
 
-- [../strips_and_power/statue_geometry.md](../strips_and_power/statue_geometry.md) — the tool that projects these pictures onto the faces and exports the DXF.
+- [../strips_and_power/statue_geometry/pictures.md](../strips_and_power/statue_geometry/pictures.md) — the tool that projects these pictures onto the faces and exports the DXF.
 - [../strips_and_power/tower_layout.md](../strips_and_power/tower_layout.md) — the towers the pictures are cut into.

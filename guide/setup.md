@@ -19,6 +19,8 @@ other**; T4 is the apex.
 Where each tower stands, in mm from the centre of the circle, is in
 [`layout/statue-layout.json`](../layout/statue-layout.json) (open it in the
 [layout tool](https://mrmil.github.io/led-over-rj245/) for a top-down plan with a 1 m grid).
+**Every tower faces the same way as its statue's apex tower (T4):** one corner points straight
+along the line between the two apexes, towards the other statue.
 
 ![System overview](img/overview.svg)
 
