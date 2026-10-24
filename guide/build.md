@@ -57,17 +57,12 @@ both ends. Ferrules on every stranded wire.
   at the controller must reach pin N at box 2, and no pin may touch another.
 - Label both ends of each CAT5e cable (1, 2, 3) and each tower cable (S1-T1 … S2-T7).
 
-## 5. Flash WLED
+## 5. WLED is already on the ESP32s
 
-The controller needs the installation's own WLED build: the standard release flickers with
-14 outputs. How to get the build file and flash it is not written yet; ask the installation
-lead.
+The controller ESP32 and its spare arrive with the installation's own WLED on them. **Do not
+flash them**, not even from install.wled.me: the standard release flickers with 14 outputs.
 
-To practise the settings below on a spare board, the standard release works:
-
-1. [install.wled.me](https://install.wled.me) from Chrome or Edge, USB to the ESP32, latest
-   16.x release (16.0.1 or later).
-2. Join **WLED-AP** (password `wled1234`), open `http://4.3.2.1`.
+Join **WLED-AP** (password `wled1234`), open `http://4.3.2.1`.
 
 ## 6. Configure WLED
 
@@ -141,7 +136,7 @@ This repository may be public.
 Restores outputs, show and WiFi onto a mis-configured or replaced controller. Needs
 `wled/cfg.json` and `wled/presets.json` already downloaded to the phone.
 
-1. Join the controller's WiFi (or **WLED-AP** / `wled1234` on a freshly flashed ESP32) and
+1. Join the controller's WiFi (or **WLED-AP** / `wled1234` on an ESP32 not set up yet) and
    open `http://4.3.2.1`.
 2. **Config → Security & Updates → Restore configuration**: choose `cfg.json`. The
    controller restarts.
@@ -150,7 +145,7 @@ Restores outputs, show and WiFi onto a mis-configured or replaced controller. Ne
 4. **Config → Security & Updates → Restore presets**: choose `presets.json`.
 5. Run preset 1 to check.
 
-## Prepare a spare ESP32
+## Keep the spare ESP32 ready
 
-Flash it (step 5), restore both backups onto it, set the AP password, and label it
+It arrives with WLED on it. Restore both backups onto it, set the AP password, and label it
 "SPARE, show loaded, <date>". Re-do it whenever the show changes.

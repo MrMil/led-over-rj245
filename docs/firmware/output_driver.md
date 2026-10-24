@@ -61,10 +61,11 @@ by the owner 2026-10-24, choosing a custom WLED build).
 **Rejected (for now).** *Dropping WLED for FastLED + a web UI* — the owner's earlier fallback,
 rejected as too much work; it stays the last resort.
 
-- **The custom WLED source is a local clone at `../WLED`** (owner, 2026-10-24), WLED tag
-  v16.0.1 on branch `led-over-rj245`, committed locally (`2fd53d6`). It can be pushed to a
-  MrMil/WLED fork later; no GitHub repository was created for it. **Unknown:** how the build
-  will reach the spare ESP32 and the field until it is pushed somewhere.
+- **The custom WLED source is the fork [MrMil/WLED](https://github.com/MrMil/WLED/tree/led-over-rj245)**
+  (owner, 2026-10-24/25), branch `led-over-rj245` on WLED tag v16.0.1, checked out at
+  `../WLED`. The build reaches the field on the ESP32s themselves: the controller and its spare
+  are flashed here before they are sent (owner, 2026-10-25), so no firmware file is published.
+  **Changed 2026-10-25:** from 2026-10-24 a local clone only.
 
 ### Candidate drivers
 

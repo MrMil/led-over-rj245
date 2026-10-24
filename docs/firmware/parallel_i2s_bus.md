@@ -2,7 +2,7 @@
 
 Path: [docs](../README.md) › [firmware](README.md) › **parallel_i2s_bus**
 Parent: [README.md](README.md)
-**Code:** `../WLED`, branch `led-over-rj245` (commit `2fd53d6` on WLED 16.0.1): `wled00/bus_hpwit.h`, `wled00/bus_hpwit.cpp`, the `I_32_HP_NEO_3` cases in `wled00/bus_wrapper.h`, env `esp32dev_rj245` in `platformio.ini`
+**Code:** [MrMil/WLED](https://github.com/MrMil/WLED/tree/led-over-rj245), branch `led-over-rj245`, checked out at `../WLED` (commit `2fd53d6` on WLED 16.0.1): `wled00/bus_hpwit.h`, `wled00/bus_hpwit.cpp`, the `I_32_HP_NEO_3` cases in `wled00/bus_wrapper.h`, env `esp32dev_rj245` in `platformio.ini`
 **Covers:** the WLED output driver chosen in [output_driver.md](output_driver.md): all 14 tower
 outputs sent as one parallel I2S stream by hpwit's
 [I2SClocklessLedDriver](https://github.com/hpwit/I2SClocklessLedDriver), inside a custom WLED build.
@@ -61,8 +61,12 @@ All agent, 2026-10-24, unless marked otherwise.
 
 ## Gotchas
 
-- **The source is only on this machine:** branch `led-over-rj245` in `../WLED`, not pushed
-  anywhere. How the build reaches the field and the spare ESP32 is not settled.
+- **The fork's branch has no WLED history** (pushed 2026-10-25 from a shallow clone): it starts
+  at v16.0.1 as a root commit, so GitHub does not relate it to WLED's `main`, and a pull
+  request back to WLED would need the history fetched first. `upstream` in `../WLED` is
+  WLED's repository, fetching only the v16.0.1 tag.
+- **No firmware file is published.** The controller and the spare ESP32 leave already flashed
+  (owner, 2026-10-25), so the crew never flashes; a new board means a build here.
 - The LED settings page still labels outputs RMT or I2S. The label is ignored.
 - At most 16 outputs; the 17th fails to create.
 - The driver's interrupt is not in IRAM, so it is masked while flash is written (saving

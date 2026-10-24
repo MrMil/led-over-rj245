@@ -5,7 +5,7 @@ Parent: [../README.md](../README.md)
 
 **Covers:** the software on the controller ESP32 — WLED, configured (not compiled) for this
 installation — and how the show is built and changed.
-**Code:** `guide/build.md` (flash + configure), `guide/operating.md` (field use); backups will live in `wled/` (not yet created); the custom build's source is in `../WLED`, branch `led-over-rj245` ([parallel_i2s_bus.md](parallel_i2s_bus.md)); bench setup in `bench/`
+**Code:** `guide/build.md` (flash + configure), `guide/operating.md` (field use); backups will live in `wled/` (not yet created); the custom build's source is [MrMil/WLED](https://github.com/MrMil/WLED/tree/led-over-rj245), branch `led-over-rj245` (checked out at `../WLED`) ([parallel_i2s_bus.md](parallel_i2s_bus.md)); bench setup in `bench/`
 
 ## Design
 
