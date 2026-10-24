@@ -56,6 +56,11 @@ face so a slider only recomputes what it touches. The page opens with the demo s
   LED i is the same colour on every tower at the same height, and a shorter tower simply ends
   earlier, so the picture stays consistent across the V. The call also carries the tower's offset
   into the controller's one logical strip, for porting 1D WLED effects. The speed slider is the one time base; a future show reads it from `ctx.params`.
+  **Since 2026-10-25 the same select also lists every WLED effect of the controller's firmware**
+  ("WLED · Solid" first), run by the firmware's own code compiled to WebAssembly (`tools/wled_wasm/`)
+  once per frame over the whole segment and scattered to the towers, with WLED's own controls on the
+  Animations tab; why and how in
+  [../../firmware/effects_in_browser.md](../../firmware/effects_in_browser.md).
 - **DXF export is R12 POLYLINE/VERTEX, mm, layers OUTLINE and CUT** (agent: the dialect every laser
   program reads), traced from a 1 mm mask, simplified and smoothed once; one file per face, zipped
   per viewpoint, tower, statue or everything, with a manifest of sizes and island counts. For the
@@ -87,3 +92,4 @@ face so a slider only recomputes what it touches. The page opens with the demo s
 
 - [README.md](README.md) — the tool.
 - [../../art/README.md](../../art/README.md) — the generated pictures (superseded).
+- [../../firmware/effects_in_browser.md](../../firmware/effects_in_browser.md) — the WLED effects that run in this LED render.

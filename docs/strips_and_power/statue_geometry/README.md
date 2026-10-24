@@ -2,7 +2,7 @@
 
 Path: [docs](../../README.md) › [strips_and_power](../README.md) › **statue_geometry**
 Parent: [../README.md](../README.md)
-**Code:** `tools/statue_render.html` (layout solver, four viewpoints, picture projection and cut masks, LED render, DXF export, LED/supply calculator, JSON export/load, `?load=`), `layout/statue-layout.json` (the handoff file: the artist's final layout, with the demo smiley), `renders/*.png`, `index.html`, `.nojekyll`, `.claude/launch.json`
+**Code:** `tools/statue_render.html` (layout solver, four viewpoints, picture projection and cut masks, LED render, DXF export, LED/supply calculator, JSON export/load, `?load=`), `tools/wled_wasm/wled_fx.js` (the controller's WLED effects compiled to WebAssembly for the LED render, [../../firmware/effects_in_browser.md](../../firmware/effects_in_browser.md)), `layout/statue-layout.json` (the handoff file: the artist's final layout, with the demo smiley), `renders/*.png`, `index.html`, `.nojekyll`, `.claude/launch.json`
 **Covers:** where the 14 towers stand inside the 18 m circle, what a viewer at the bench sees, and
 the 3D check that the owner and the artist use to judge the tower heights. Not the wiring between
 towers ([trenches.md](../trenches.md)).
@@ -15,8 +15,8 @@ instead, [controls.md](controls.md)); towers are 1–2 m apart, 1.5 m preferred;
 centre, the silhouettes of neighbouring towers touch, so the cut pattern reads as one picture (a
 smiley per statue); the whole piece fits a circle of exactly 8 m diameter.
 
-`tools/statue_render.html` is a self-contained Three.js page (open it as a file, or the published
-artifact). Its inputs, each a slider plus a text box in mm (owner, 2026-10-19): tower side length (the short pieces' width since 2026-10-23),
+`tools/statue_render.html` is a Three.js page with one sibling script, `tools/wled_wasm/wled_fx.js` (open it
+as a file, or the published artifact). Its inputs, each a slider plus a text box in mm (owner, 2026-10-19): tower side length (the short pieces' width since 2026-10-23),
 the seven tower heights, minimum / maximum / optimum spacing, circle diameter, plus the free radius
 the viewer keeps at the centre, eye height and field of view. It solves the arm of a statue from
 the apex outwards: the apex tower's far corner sits on the circle, and each next tower is placed at
@@ -77,7 +77,11 @@ subtends. Headless Chrome produced `renders/*.png` from URL parameters (`view=ce
   height set; the export records which eye height it was computed for.
 - **The settings panel folds to a tab at the left edge** (owner, 2026-10-19) so the render can be
   seen whole; the folded state is kept in `localStorage` only, a per-browser convenience that the
-  page works without.
+  page works without. **Since 2026-10-25 the panel has two tabs, Settings and Animations, and the
+  folded edge shows one button per tab** (owner, 2026-10-25: the animations must be reachable
+  with the settings hidden). The LED show controls moved from the settings to the Animations tab;
+  the chosen tab is kept beside the folded state, and `?tab=anim` opens it from a link, never
+  saved like every URL parameter.
 - **The top-down camera sits at 25 m, under the fog start** (agent, 2026-10-19): at 60 m the
   scene fog greyed the plan out.
 - **The 4 m radius is the apex tower's far corner, not its centre** (agent, 2026-10-19). "The

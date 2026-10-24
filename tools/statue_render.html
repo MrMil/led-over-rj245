@@ -27,14 +27,24 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); f
 .panel h1 { font-size: 15px; letter-spacing: 0.01em; display: flex; align-items: center; justify-content: space-between; gap: 8px;
   position: sticky; top: -12px; margin: -12px -14px 8px; padding: 12px 14px 8px; background: var(--panel); z-index: 1; }  /* the Hide button stays in view while the panel scrolls */
 .panel.folded { display: none; }
-#btnUnfold { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); left: 0; border-radius: 0 8px 8px 0; border-left: none; padding: 10px 10px; writing-mode: vertical-rl; }
-#btnUnfold[hidden] { display: none; }
+/* folded: one vertical tab per panel tab at the left edge, so Animations can be opened without the settings */
+#unfold { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); left: 0; display: flex; flex-direction: column; gap: 6px; }
+#unfold button { border-radius: 0 8px 8px 0; border-left: none; padding: 10px 10px; writing-mode: vertical-rl; }
+#unfold[hidden] { display: none; }
+.tabs { display: flex; gap: 0; margin: 0 -14px 10px; border-bottom: 1px solid var(--line); }
+.tabs button { flex: 1; border: none; border-bottom: 2px solid transparent; border-radius: 0; background: none; color: var(--muted); padding: 7px 8px; }
+.tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tabs button:hover { border-bottom-color: var(--line); }
+.swatch { display: grid; grid-template-columns: 1fr 96px; gap: 4px 8px; align-items: center; margin: 3px 0; }
+.swatch input[type=color] { width: 66px; height: 26px; padding: 0 2px; background: #241f19; border: 1px solid var(--line); border-radius: 6px; justify-self: end; }
+.wled { font-size: 11px; color: var(--muted); }
 .panel h2 { font-size: 11px; margin: 12px 0 6px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .param { display: grid; grid-template-columns: 1fr 96px; gap: 4px 8px; align-items: center; margin: 3px 0; }
 .param label { color: var(--fg); }
 .param .num { display: flex; align-items: center; gap: 4px; justify-content: flex-end; }
 .param input[type=number] { width: 66px; background: #241f19; color: var(--accent); border: 1px solid var(--line); border-radius: 6px; padding: 3px 5px; font: inherit; font-variant-numeric: tabular-nums; text-align: right; }
 .param input:disabled { opacity: 0.55; }
+.param[hidden] { display: none; }
 .param .unit { color: var(--muted); font-size: 11px; min-width: 2ch; }
 .param input[type=range] { grid-column: 1 / -1; width: 100%; margin: 0 0 2px; accent-color: var(--accent); }
 .param select { grid-column: 1 / -1; background: #241f19; color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; font: inherit; }
@@ -76,7 +86,7 @@ textarea { width: 100%; box-sizing: border-box; margin-top: 6px; background: #24
 #pad button { padding: 0; font-size: 18px; line-height: 1; border-radius: 10px; background: rgba(43, 36, 29, 0.9); user-select: none; -webkit-user-select: none; touch-action: none; }
 #pad button[hidden] { visibility: hidden; display: block; }
 #hint { position: fixed; left: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); max-width: min(420px, calc(100vw - 180px)); font-size: 11px; color: var(--muted); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
-body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #btnUnfold { display: none; }
+body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #unfold { display: none; }
 @media (max-width: 600px) { .panel { font-size: 12px; } .views { top: auto; bottom: calc(160px + env(safe-area-inset-bottom, 0px)); } #hint { display: none; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -109,9 +119,30 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   <div class="bar"><span>Right-click or long-press the image to save it if no download started.</span><button id="shotClose">Close</button></div>
 </div>
 
-<button id="btnUnfold" hidden aria-label="Show the settings panel">Settings ▸</button>
+<div id="unfold" hidden>
+  <button id="btnUnfold" data-tab="settings" aria-label="Show the settings panel">Settings ▸</button>
+  <button id="btnUnfoldAnim" data-tab="anim" aria-label="Show the animations panel">Animations ▸</button>
+</div>
 <div class="panel" id="panel">
-  <h1>Statue tower sightlines <button id="btnFold" class="small" title="Fold the panel to the side" aria-label="Hide the settings panel">◂ Hide</button></h1>
+  <h1>Statue tower sightlines <button id="btnFold" class="small" title="Fold the panel to the side" aria-label="Hide the panel">◂ Hide</button></h1>
+  <div class="tabs" role="tablist">
+    <button role="tab" data-tab="settings" aria-selected="true" aria-controls="tabSettings">Settings</button>
+    <button role="tab" data-tab="anim" aria-selected="false" aria-controls="tabAnim">Animations</button>
+  </div>
+  <div id="tabAnim" role="tabpanel" hidden>
+    <div class="note">The LEDs behind every face run the chosen show. WLED entries run the controller firmware's own effect code, compiled to WebAssembly (<code>tools/wled_wasm/</code>), on the same logical strip the controller drives or on the rolled matrix, with WLED's own controls; the JSON below is the segment state the controller's <code>/json/state</code> takes.</div>
+    <h2>LED show</h2>
+    <div class="param"><label for="anim">Animation</label><span></span><select id="anim"></select></div>
+    <div id="showParams"></div>
+    <div id="wledParams" hidden>
+      <h2>WLED effect</h2>
+      <div id="wledControls"></div>
+      <h2>WLED state</h2>
+      <textarea id="wledJson" rows="3" spellcheck="false" readonly></textarea>
+      <div class="bar"><button id="btnWledCopy" class="small">Copy</button><button id="btnWledDefaults" class="small">Effect defaults</button></div>
+    </div>
+  </div>
+  <div id="tabSettings" role="tabpanel">
   <div class="note">Two statues of 7 towers, corner to the centre of the circle, a bench at the centre. The defaults are the artist's final layout (23 Oct 2026): her heights and her six spacings, placed on the solver's rails so neighbouring silhouettes touch from the bench. "Reset to the solved layout" places them so that, seen from the bench, neighbouring silhouettes exactly touch. Each of the four viewpoints below owns 14 faces; its picture is projected from that eye onto them and cut into the wood, lit by the LEDs behind. Lengths in mm.</div>
 
   <h2>Towers</h2>
@@ -161,9 +192,6 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   <div id="povs"></div>
   <h2>Islands and pieces</h2>
   <div id="islands" class="note">Not computed yet.</div>
-  <h2>LED show</h2>
-  <div class="param"><label for="anim">Animation</label><span></span><select id="anim"></select></div>
-  <div id="showParams"></div>
   <h2>Export DXF for the laser cutter</h2>
   <div class="note">One DXF per face, mm, R12: layer OUTLINE is the plate, layer CUT the holes. Files are named statue-tower-face; faces A and B look at the bench (A on the left as seen from it), C and D look outwards (C on the left as seen from behind).</div>
   <div class="bar"><label for="expPov">Viewpoint</label><select id="expPov"></select><button id="btnExpPov" class="small">Export viewpoint (14 faces)</button></div>
@@ -185,11 +213,13 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
 
   <h2>Readout</h2>
   <div id="readout"></div>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="wled_wasm/wled_fx.js"></script>
 <script>
 (function () {
   'use strict';
@@ -231,6 +261,10 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     same2: false,                      // true: statue 2's viewpoints mirror statue 1's. Off by default so the artist can upload statue 2's pictures directly (owner, 2026-10-23)
     night: q.get('night') === '1',
     anim: 'rainbow', speed: 0.15, bright: 1.0,   // 0.15 cycles/s: one full rainbow pass every ~7 s, plainly moving
+    // WLED state for the ported effects: the keys of the controller's /json/state (bri = master brightness; seg = the one
+    // segment: fx effect id, sx/ix/c1/c2/c3 sliders, o1–o3 checkboxes, col the three colours, pal the palette id). Defaults
+    // are WLED's own (orange, 128, 128). Kept in this shape so the sim's state can be sent to the controller as it is.
+    wled: { bri: 255, layout: 'auto', seg: { fx: 0, sx: 128, ix: 128, c1: 128, c2: 128, c3: 16, o1: false, o2: false, o3: false, col: [[255, 160, 0], [0, 0, 0], [0, 0, 0]], pal: 0, si: 0 } },   // layout: auto = matrix for 2D-only effects, strip otherwise
     povs: {                            // per viewpoint: back ones have their own eye/fov/distance; bench ones use the viewer eye and field of view
       bench1: { fit: 'full', insets: { l: 0, r: 0, t: 0, b: 0 }, image: null },
       bench2: { fit: 'full', insets: { l: 0, r: 0, t: 0, b: 0 }, image: null },
@@ -730,11 +764,90 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     white: { label: 'All white (worst case, for brightness)', frame(ctx) { ctx.out.fill(255); } },
     off: { label: 'Off (daylight look)', frame(ctx) { ctx.out.fill(0); } },
   };
+  // WLED's effects, compiled from the controller's firmware to WebAssembly (tools/wled_wasm/, docs/firmware/effects_in_browser.md).
+  // The module loads asynchronously; each effect becomes a registry entry keyed wled:<id> with WLED's own id. animate() renders
+  // one WLED frame over the whole segment and scatters it to the towers, because an effect sees one segment, not one tower at a
+  // time. The segment is the controller's logical strip (S1-T1 … S2-T7, bottom to top) or the rolled 14 × tallest matrix
+  // (docs/firmware/README.md); WLED's matrix has y = 0 at the top, so LED i of tower x is pixel (x, H − 1 − i).
+  const SEG_KEYS = { sx: 0, ix: 1, c1: 2, c2: 3, c3: 4, o1: 5, o2: 6, o3: 7, pal: 8, si: 9 };   // sim_set() keys, sim_main.cpp
+  const WLED = {
+    ready: false, M: null, EFFECTS: new Map(), PALETTES: [], _lens: [], _matrix: false, _w: 0, _h: 0, _mode: -1, _applied: null,
+    matrixFor(e) { const l = state.wled.layout; return l === 'matrix' || (l !== 'strip' && !!e && e.meta.flags.includes('2') && !e.meta.flags.includes('1')); },
+    layout(lens, matrix) {
+      if (this._lens.length && matrix === this._matrix && lens.length === this._lens.length && lens.every((n, i) => n === this._lens[i])) return;
+      this._lens = lens.slice(); this._matrix = matrix;
+      this._w = matrix ? lens.length : lens.reduce((a, b) => a + b, 0); this._h = matrix ? Math.max(1, ...lens) : 1;
+      this.M._sim_init(this._w, this._h); this._mode = -1; this._applied = null;
+    },
+    apply(seg) {                                           // push what changed since the last frame, as /json/state would
+      const M = this.M, a = this._applied || {}, now = {};
+      if (seg.fx !== this._mode) { M._sim_set_mode(seg.fx, 0); this._mode = seg.fx; }
+      Object.entries(SEG_KEYS).forEach(([k, key]) => { const v = +seg[k] || 0; now[k] = v; if (a[k] !== v) M._sim_set(key, v); });
+      seg.col.forEach((c, i) => { const v = (c[0] << 16 | c[1] << 8 | c[2]) >>> 0; now['col' + i] = v; if (a['col' + i] !== v) M._sim_set_color(i, c[0], c[1], c[2], 0); });
+      this._applied = now;
+    },
+    frame(nowMs) { const p = this.M._sim_frame(nowMs >>> 0) >>> 2; return this.M.HEAPU32.subarray(p, p + this._w * this._h); },   // HEAPU32 re-read each frame: the heap may have grown
+    copyTower(k, px, out, bri) {
+      const n = this._lens[k], s = bri + 1, w = this._w, h = this._h; let o = 0; for (let j = 0; j < k; j++) o += this._lens[j];
+      for (let i = 0; i < n; i++) { const c = this._matrix ? px[k + (h - 1 - i) * w] : px[o + i]; out[i * 4] = ((c >>> 16 & 255) * s) >> 8; out[i * 4 + 1] = ((c >>> 8 & 255) * s) >> 8; out[i * 4 + 2] = ((c & 255) * s) >> 8; out[i * 4 + 3] = 255; }
+    },
+    // The firmware's Segment::setMode(fx, loadDefaults = true): sliders to 128/128/128/128/16, checkboxes off, then the effect's own
+    // defaults from its metadata string; read back so the page shows what the controller would.
+    loadDefaults(fx) {
+      if (!this._lens.length) this.layout(ledTextures.map(l => l.n), this.matrixFor(this.EFFECTS.get(fx)));
+      const M = this.M; M._sim_set_mode(fx, 1); this._mode = fx; this._applied = null;
+      return Object.fromEntries(Object.entries(SEG_KEYS).filter(([k]) => k !== 'si').map(([k, key]) => [k, k.startsWith('o') ? !!M._sim_get(key) : M._sim_get(key)]));
+    },
+  };
+  // "Name@Slider labels;Color labels;Palette;Flags;Defaults" (https://kno.wled.ge/interfaces/json-api/#effect-metadata), read with the
+  // rules of WLED's own UI (setEffectParameters in wled00/data/index.js): with nothing after '@', speed and intensity, all three
+  // colours and the palette are shown.
+  function parseMeta(meta) {
+    const at = meta.indexOf('@');
+    const name = at < 0 ? meta : meta.slice(0, at), data = at < 0 ? '' : meta.slice(at + 1);
+    const controlDefined = data.length > 0;
+    const parts = data === '' ? [] : data.split(';');
+    const sl = (parts.length === 0 || parts[0] === '') ? [] : parts[0].split(',');
+    const co = (parts.length < 2 || parts[1] === '') ? [] : parts[1].split(',');
+    const pa = (parts.length < 3 || parts[2] === '') ? [] : parts[2].split(',');
+    const flags = parts.length < 4 ? '' : parts[3];
+    const SLIDER_KEYS = ['sx', 'ix', 'c1', 'c2', 'c3'], SLIDER_NAMES = ['Effect speed', 'Effect intensity', 'Custom 1', 'Custom 2', 'Custom 3'];
+    const sliders = SLIDER_KEYS.map((key, i) => {
+      if (!((!controlDefined && i < 2) || (sl.length > i && sl[i] !== ''))) return null;
+      let label = SLIDER_NAMES[i]; if (sl.length > i && sl[i] !== '!') label = sl[i];
+      return { key, label, max: key === 'c3' ? 31 : 255 };
+    }).filter(Boolean);
+    const checks = sl.length > 5 ? ['o1', 'o2', 'o3'].map((key, i) => (5 + i < sl.length && sl[5 + i] !== '') ? { key, label: sl[5 + i] === '!' ? `Option ${i + 1}` : sl[5 + i] } : null).filter(Boolean) : [];
+    const colors = [0, 1, 2].map(i => {
+      if (co.length > i && co[i] !== '') return { slot: i, label: co[i] === '!' ? ['Fx', 'Bg', 'Cs'][i] : co[i] };
+      if (!controlDefined) return { slot: i, label: String(i + 1) };
+      return null;
+    }).filter(Boolean);
+    let palette = null;
+    if (!controlDefined || (pa.length > 0 && pa[0] !== '' && isNaN(pa[0]))) { let label = 'Color palette'; let p0 = pa[0] || ''; const eq = p0.indexOf('='); if (eq > 0) p0 = p0.slice(0, eq); if (p0 && p0 !== '!') label = p0; palette = { label }; }
+    return { name, sliders, checks, colors, palette, flags };
+  }
+  if (typeof WledFx === 'function') WledFx().then(M => {
+    WLED.M = M; WLED.PALETTES = JSON.parse(M.UTF8ToString(M._sim_palette_names()));
+    const list = [];
+    for (let id = 0; id < M._sim_mode_count(); id++) { const str = M.UTF8ToString(M._sim_mode_data(id)); if (!str || str === 'RSVD') continue; list.push({ id, meta: parseMeta(str), metaString: str }); }
+    list.sort((a, b) => (a.id === 0 ? -1 : b.id === 0 ? 1 : a.meta.name.localeCompare(b.meta.name)));   // Solid first, then by name, as WLED's list
+    list.forEach(e => { WLED.EFFECTS.set(e.id, e); ANIMATIONS['wled:' + e.id] = { label: `WLED · ${e.meta.name}`, wled: e.id, frame() {} }; });
+    WLED.ready = true; fillAnimSelect(); $('anim').value = state.anim; showWled();
+  }).catch(e => console.error('WLED effects failed to load', e));
   window.statueAnimations = ANIMATIONS;
   function hsv(h, sat, v) { const i = Math.floor(h * 6), f = h * 6 - i, p = v * (1 - sat), qq = v * (1 - f * sat), tt = v * (1 - (1 - f) * sat); const [r, g, b] = [[v, tt, p], [qq, v, p], [p, v, tt], [p, qq, v], [tt, p, v], [v, p, qq]][i % 6]; return [r * 255, g * 255, b * 255]; }
   let ledTextures = [];
   function animate(t) {
     const anim = ANIMATIONS[state.anim] || ANIMATIONS.rainbow;
+    if (anim.wled !== undefined) {                           // one WLED frame over the whole segment, then per-tower copies
+      if (!WLED.ready) return;
+      WLED.layout(ledTextures.map(l => l.n), WLED.matrixFor(WLED.EFFECTS.get(anim.wled)));
+      WLED.apply(Object.assign({}, state.wled.seg, { fx: anim.wled }));
+      const px = WLED.frame(t * 1000);
+      ledTextures.forEach((l, k) => { if (l.n >= 1) { WLED.copyTower(k, px, l.tex.image.data, state.wled.bri); l.tex.needsUpdate = true; } });
+      return;
+    }
     const nMax = Math.max(1, ...ledTextures.map(l => l.n)), total = ledTextures.reduce((a, l) => a + l.n, 0);
     let offset = 0;
     ledTextures.forEach(({ tex, n, tower }) => { if (n >= 1) { anim.frame({ t, tower, n, nMax, offset, total, out: tex.image.data, params: state }); tex.needsUpdate = true; } offset += n; });
@@ -1330,9 +1443,36 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   });
   const fillAnimSelect = () => { const cur = $('anim').value || state.anim; $('anim').innerHTML = ''; Object.entries(ANIMATIONS).forEach(([k, a]) => { const o = document.createElement('option'); o.value = k; o.textContent = a.label; $('anim').appendChild(o); }); $('anim').value = ANIMATIONS[cur] ? cur : state.anim; };
   fillAnimSelect(); $('anim').addEventListener('focus', fillAnimSelect);
-  $('anim').value = state.anim; $('anim').addEventListener('change', () => { state.anim = $('anim').value; saveSettings(); });
+  $('anim').value = state.anim; $('anim').addEventListener('change', () => { state.anim = $('anim').value; const e = wledSelected(); if (e) wledLoadDefaults(e); showWled(); saveSettings(); });
   paramRow($('showParams'), 'speed', 'Animation speed', 0, 0.5, 0.01, 'cyc/s', () => state.speed, v => state.speed = v, () => saveSettings());
   paramRow($('showParams'), 'bright', 'Diffuser brightness', 0.2, 3, 0.1, '×', () => state.bright, v => state.bright = v, () => { towersGroup.traverse(o => { if (o.material && o.material.uniforms && o.material.uniforms.gain) o.material.uniforms.gain.value = state.bright; }); saveSettings(); });
+
+  // ---------- WLED controls: generated from the effect's metadata string, as WLED's own UI does (parseMeta above) ----------
+  function wledSelected() { const a = ANIMATIONS[state.anim]; return (a && a.wled !== undefined && WLED.ready) ? WLED.EFFECTS.get(a.wled) : null; }
+  function wledJsonText() { const e = wledSelected(); return JSON.stringify({ on: true, bri: state.wled.bri, seg: [Object.assign({ id: 0 }, state.wled.seg, { fx: e ? e.id : state.wled.seg.fx })] }); }
+  function wledLoadDefaults(e) { Object.assign(state.wled.seg, WLED.loadDefaults(e.id)); }   // the firmware applies them; the page reads them back
+  const hex = rgb => '#' + rgb.map(v => (v | 0).toString(16).padStart(2, '0')).join('');
+  const unhex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  function showWled() {
+    const e = wledSelected(), seg = state.wled.seg, host = $('wledControls');
+    $('wledParams').hidden = !e; $('p_speed').closest('.param').hidden = !!e;   // the page shows' time base means nothing to a WLED effect
+    if (!e) return;
+    host.innerHTML = '';
+    const changed = () => { $('wledJson').value = wledJsonText(); saveSettings(); };
+    paramRow(host, 'wled_bri', 'Master brightness', 0, 255, 1, '', () => state.wled.bri, v => state.wled.bri = v, changed);
+    e.meta.sliders.forEach(s => paramRow(host, 'wled_' + s.key, s.label, 0, s.max, 1, '', () => seg[s.key], v => seg[s.key] = v, changed));
+    e.meta.checks.forEach(c => { const d = document.createElement('div'); d.className = 'check'; d.innerHTML = `<input type="checkbox" id="w_${c.key}"><label for="w_${c.key}">${c.label}</label>`; host.appendChild(d); const i = d.querySelector('input'); i.checked = !!seg[c.key]; i.addEventListener('change', () => { seg[c.key] = i.checked; changed(); }); });
+    e.meta.colors.forEach(c => { const d = document.createElement('div'); d.className = 'swatch'; d.innerHTML = `<label for="w_col${c.slot}">Colour ${c.label}</label><input type="color" id="w_col${c.slot}">`; host.appendChild(d); const i = d.querySelector('input'); i.value = hex(seg.col[c.slot]); i.addEventListener('input', () => { seg.col[c.slot] = unhex(i.value); changed(); }); });
+    const sel = (id, label, opts, get, set) => { const d = document.createElement('div'); d.className = 'param'; d.innerHTML = `<label for="${id}">${label}</label><span></span><select id="${id}"></select>`; host.appendChild(d); const s = d.querySelector('select'); opts.forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; s.appendChild(o); }); s.value = get(); s.addEventListener('change', () => { set(s.value); changed(); }); };
+    if (e.meta.palette) sel('w_pal', e.meta.palette.label, WLED.PALETTES.map((n, i) => [i, n]), () => seg.pal, v => seg.pal = +v);
+    if (/[vf]/.test(e.meta.flags)) sel('w_si', 'Sound simulation', [[0, 'BeatSin'], [1, 'WeWillRockYou'], [2, '10/13'], [3, '14/3']], () => seg.si, v => seg.si = +v);   // WLED's "Sound sim" for audio effects
+    sel('w_layout', 'Segment', [['auto', `Automatic: ${WLED.matrixFor(e) ? 'matrix' : 'strip'}${state.wled.layout === 'auto' && e.meta.flags.includes('2') && !e.meta.flags.includes('1') ? ' (2D-only effect)' : ''}`], ['strip', 'One strip, S1-T1 … S2-T7 (as the controller runs)'], ['matrix', '14 × tallest matrix, one column per tower (a ledmap)']], () => state.wled.layout, v => { state.wled.layout = v; showWled(); });
+    const n = document.createElement('div'); n.className = 'wled'; n.textContent = `Effect ${e.id} · "${e.metaString}"`; host.appendChild(n);
+    $('wledJson').value = wledJsonText();
+  }
+  $('btnWledDefaults').addEventListener('click', () => { const e = wledSelected(); if (e) { wledLoadDefaults(e); showWled(); saveSettings(); } });
+  $('btnWledCopy').addEventListener('click', () => { try { navigator.clipboard.writeText($('wledJson').value); } catch (e) { $('wledJson').select(); } });
+  showWled();
   POV_KEYS.forEach(key => { const o = document.createElement('option'); o.value = key; o.textContent = POV_LABEL[key]; $('expPov').appendChild(o); });
   const fillTowerSelect = () => { $('expTower').innerHTML = ''; (current ? current.towers : []).forEach(t => { const o = document.createElement('option'); o.value = t.idx; o.textContent = `Statue ${t.statue} · ${t.name}`; $('expTower').appendChild(o); }); };
   $('btnExpPov').addEventListener('click', () => exportFaces(faceList.filter(f => f.povKey === $('expPov').value), `dxf-${$('expPov').value}.zip`));
@@ -1385,6 +1525,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       leds: { unlit_base_mm: state.unlit, per_m: state.lpm, mA_per_led: state.mA, psu_max_A: state.psuA, reel_mm: state.reel },
       projection: {
         border_mm: state.border, thickness_mm: state.thick, statue2_mirrors_statue1: state.same2, animation: state.anim, speed: state.speed, brightness: state.bright, night: state.night,
+        wled: JSON.parse(JSON.stringify(state.wled)),      // the WLED state as /json/state takes it (bri + one segment)
         viewpoints: POV_KEYS.map(key => { const p = state.povs[key]; return { key, fit: p.fit, distance_mm: p.dist, eye_mm: p.eye, fov_deg: p.fov, insets: Object.assign({}, p.insets), picture: p.image ? { name: p.image.name, type: p.image.type, source: p.image.source } : null }; }),
       },
     };
@@ -1395,7 +1536,14 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     const num = (v, d) => typeof v === 'number' && !isNaN(v) ? v : d;
     state.border = num(PR.border_mm, state.border); state.thick = num(PR.thickness_mm, state.thick); state.speed = num(PR.speed, state.speed); state.bright = num(PR.brightness, state.bright);
     if (typeof PR.statue2_mirrors_statue1 === 'boolean') state.same2 = PR.statue2_mirrors_statue1; if (typeof PR.night === 'boolean') state.night = PR.night;
-    if (PR.animation && ANIMATIONS[PR.animation]) state.anim = PR.animation;
+    if (PR.animation && (ANIMATIONS[PR.animation] || /^wled:\d+$/.test(PR.animation))) state.anim = PR.animation;   // WLED entries may still be loading
+    if (PR.wled && typeof PR.wled === 'object') {           // merge key by key: a file from before a key existed keeps the default
+      state.wled.bri = num(PR.wled.bri, state.wled.bri); const S = PR.wled.seg || {}, seg = state.wled.seg;
+      ['fx', 'sx', 'ix', 'c1', 'c2', 'c3', 'pal', 'si'].forEach(k => seg[k] = num(S[k], seg[k]));
+      if (['auto', 'strip', 'matrix'].includes(PR.wled.layout)) state.wled.layout = PR.wled.layout;
+      ['o1', 'o2', 'o3'].forEach(k => { if (typeof S[k] === 'boolean') seg[k] = S[k]; });
+      if (Array.isArray(S.col)) S.col.slice(0, 3).forEach((c, i) => { if (Array.isArray(c) && c.length >= 3) seg.col[i] = c.slice(0, 3).map(v => Math.min(255, Math.max(0, num(v, 0)))); });
+    }
     const pending = [];
     (PR.viewpoints || []).forEach(v => {
       const p = state.povs[v.key]; if (!p) return;
@@ -1413,7 +1561,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   // Last settings live in this browser only. URL state parameters win (headless renders and shared links stay
   // deterministic) and are never saved; view flags alone still restore the store.
   const STORE_KEY = 'statueSettings';
-  const urlHasParams = [...q.keys()].some(k => !['view', 'shot', 'dump', 'labels'].includes(k));
+  const urlHasParams = [...q.keys()].some(k => !['view', 'shot', 'dump', 'labels', 'tab'].includes(k));
   let storedParams = null;
   try { if (!urlHasParams) storedParams = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); } catch (e) { storedParams = null; }
   function saveSettings() {
@@ -1488,7 +1636,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     $('decoupled').checked = state.decoupled; showDecoupled();
     [1, 2, 3, 4, 5, 6, 7].forEach(i => inputs['h2_' + i]()); [1, 2, 3, 4, 5, 6].forEach(i => { inputs['p' + i](); inputs['p2_' + i](); });
     askOpen = null; snap = null; $('confirmBox').hidden = true;
-    const after = () => { Object.values(inputs).forEach(f => f()); if (typeof showSame2 === 'function') { showSame2(); POV_KEYS.forEach(showPicture); $('anim').value = state.anim; applyNight(); } applyView(); build(); };
+    const after = () => { Object.values(inputs).forEach(f => f()); if (typeof showSame2 === 'function') { showSame2(); POV_KEYS.forEach(showPicture); $('anim').value = state.anim; showWled(); applyNight(); } applyView(); build(); };
     if (P.projection) { const done = applyProjection(P.projection).then(after); if (P.projection.viewpoints && P.projection.viewpoints.some(v => v.picture && v.picture.type === 'raster')) { applyView(); build(); return done; } }   // raster pictures arrive a moment later
     after(); return Promise.resolve();
   }
@@ -1515,7 +1663,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     rd.readAsText(f); $('fileIn').value = '';
   });
   $('btnDefaults').addEventListener('click', () => {
-    try { localStorage.removeItem(STORE_KEY); localStorage.removeItem('panelFolded'); } catch (e) { /* storage unavailable */ }
+    try { localStorage.removeItem(STORE_KEY); localStorage.removeItem('panelFolded'); localStorage.removeItem('panelTab'); } catch (e) { /* storage unavailable */ }
     location.reload();
   });
   $('btnApplyJson').addEventListener('click', () => { try { applyObject(JSON.parse($('jsonBox').value)); jsonMsg('Applied.'); } catch (e) { jsonMsg('Could not apply: ' + e.message); } });
@@ -1554,10 +1702,15 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   });
 
   // Fold the panel to the side so the render is unobstructed; remembered per browser (a convenience only).
-  const setFolded = f => { $('panel').classList.toggle('folded', f); $('btnUnfold').hidden = !f; try { localStorage.setItem('panelFolded', f ? '1' : '0'); } catch (e) { /* storage unavailable */ } };
+  // Two tabs, Settings and Animations, so the show can be chosen without the settings (owner, 2026-10-25); folded, each tab
+  // has its own edge button. The chosen tab is remembered per browser like the fold; ?tab=anim opens it from a link.
+  const setTab = tab => { const a = tab === 'anim'; $('tabAnim').hidden = !a; $('tabSettings').hidden = a; document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === tab)); $('panel').scrollTop = 0; try { localStorage.setItem('panelTab', tab); } catch (e) { /* storage unavailable */ } };
+  document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
+  const setFolded = f => { $('panel').classList.toggle('folded', f); $('unfold').hidden = !f; try { localStorage.setItem('panelFolded', f ? '1' : '0'); } catch (e) { /* storage unavailable */ } };
   $('btnFold').addEventListener('click', () => setFolded(true));
-  $('btnUnfold').addEventListener('click', () => setFolded(false));
-  try { if (localStorage.getItem('panelFolded') === '1') setFolded(true); } catch (e) { /* storage unavailable */ }
+  document.querySelectorAll('#unfold button').forEach(b => b.addEventListener('click', () => { setTab(b.dataset.tab); setFolded(false); }));
+  try { if (localStorage.getItem('panelFolded') === '1') setFolded(true); if (localStorage.getItem('panelTab') === 'anim') setTab('anim'); } catch (e) { /* storage unavailable */ }
+  if (q.get('tab') === 'anim') setTab('anim');
   $('shotClose').addEventListener('click', () => { $('shotOverlay').hidden = true; $('shotImg').src = ''; });
 
   window.statueDebug = { get faces() { return faceList; }, get current() { return current; }, povPose, povBox, projectPt, faceMask, analyse, contours, state };   // for tests and scripts

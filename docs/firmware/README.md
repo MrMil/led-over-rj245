@@ -85,7 +85,9 @@ Preferences, plus at most one position number per tower as a usermod setting.
   programs in the field.
 **Constrains.** A custom WLED build (PlatformIO) instead of the stock binary; it now exists
 for the output driver ([parallel_i2s_bus.md](parallel_i2s_bus.md)), and the effects go in the
-same build.
+same build. Effects are previewed in the browser from the same source
+([effects_in_browser.md](effects_in_browser.md)): write them in the fork's `FX.cpp`, register them in
+`setupEffectData()`, and rebuild the module.
 
 **Pre-rendered playback** (discussed 2026-10-10, not planned). Frames rendered offline (e.g.
 xLights FSEQ) and played from a microSD card would remove render cost entirely. It costs live
@@ -144,6 +146,7 @@ has exactly 8 RMT channels; `FASTLED_ESP32_I2S` gives headroom.
 
 - [`output_driver.md`](output_driver.md) — sending to 14 outputs at once: evidence against stock WLED, candidate drivers, the bench test and its results.
 - [`parallel_i2s_bus.md`](parallel_i2s_bus.md) — the chosen driver: one parallel I2S stream for all outputs, as a bus in the custom WLED build.
+- [`effects_in_browser.md`](effects_in_browser.md) — the firmware's effect code compiled to WebAssembly and run in the layout tool's 3D LED render, to develop animations before they reach the controller.
 
 ### Not yet documented
 
@@ -151,11 +154,12 @@ has exactly 8 RMT channels; `FASTLED_ESP32_I2S` gives headroom.
 - **Optional `ledmap.json`** — built for the bench only, by `bench/wled_bench.py` ([output_driver.md](output_driver.md)) — one column per tower, bottom-aligned, so WLED's built-in 2D effects can be used.
 - **Tower-position settings** — not built — see *Animations in C++ ahead of time* above.
 - **Firmware current ceiling** — not built — see *The current cap cannot be changed from the UI*.
-- **Custom effects** — not built — the installation's own animations, written in C++ as WLED effects.
+- **Custom effects** — not built — the installation's own animations, written in C++ as WLED effects in the fork; the browser preview ([effects_in_browser.md](effects_in_browser.md)) shows them without hardware.
 
 ## Related
 
 - [output_driver.md](output_driver.md) — why stock WLED's drivers were replaced.
 - [parallel_i2s_bus.md](parallel_i2s_bus.md) — the bus that drives the 14 outputs.
+- [effects_in_browser.md](effects_in_browser.md) — where animations are developed and previewed.
 - [../controller/gpio_assignment.md](../controller/gpio_assignment.md) — the pins behind the 14 outputs.
 - [../field_docs/README.md](../field_docs/README.md) — the operating guide written for this configuration.
