@@ -100,16 +100,18 @@ otherwise does not exist.
   ESP32s. **Revisit this first if the installation ever grows in distance.**
 **Constrains.** One output per tower means 14 outputs, beyond the ESP32's 8 RMT channels:
 WLED 16's RMT + I2S mix was meant to carry it, but both drivers failed with 4 outputs on the
-owner's other project (2026-10-17); a replacement output driver and its bench test are in
+owner's other project (2026-10-17); a custom WLED build now sends all 14 as one parallel I2S
+stream ([firmware/parallel_i2s_bus.md](firmware/parallel_i2s_bus.md)), bench-tested in
 [firmware/output_driver.md](firmware/output_driver.md). Frame rate is bounded by render throughput
 ([firmware/](firmware/README.md)). The controller is a single point of
 failure — mitigated by a pre-flashed spare ESP32 in a socket ([controller/](controller/README.md)).
 
 ### Open questions
 
-1. **14 outputs on one ESP32**: stock WLED likely fails (RMT flicker that follows the
-   channel, I2S colour shift; owner, 2026-10-17). Bench test and candidate drivers in
-   [firmware/output_driver.md](firmware/output_driver.md).
+1. ~~14 outputs on one ESP32~~ — answered 2026-10-24: stock WLED fails (RMT flicker that
+   follows the channel, I2S colour shift; owner, 2026-10-17); a custom WLED build with one
+   parallel I2S stream passed the bench test, all 14 pins clean under phone load
+   ([firmware/output_driver.md](firmware/output_driver.md)).
 2. ~~PSU size per statue~~ — decided 2026-10-10: 5 × S-100-5 per statue; strand-to-PSU
    grouping proposed in [strips_and_power/led_power_budget.md](strips_and_power/led_power_budget.md).
 3. ~~Tower power wiring~~ — decided 2026-10-10: see

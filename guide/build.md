@@ -59,8 +59,11 @@ both ends. Ferrules on every stranded wire.
 
 ## 5. Flash WLED
 
-The installation's own effects will need a custom WLED build. Until it exists, flash the
-standard release as below.
+The controller needs the installation's own WLED build: the standard release flickers with
+14 outputs. How to get the build file and flash it is not written yet; ask the installation
+lead.
+
+To practise the settings below on a spare board, the standard release works:
 
 1. [install.wled.me](https://install.wled.me) from Chrome or Edge, USB to the ESP32, latest
    16.x release (16.0.1 or later).
@@ -80,8 +83,9 @@ standard release as below.
 
 ### LED Preferences
 
-Fourteen outputs, **in this order**: statue 1 T1 → T7, then statue 2 T1 → T7. WLED puts the
-first 8 on its RMT driver and the rest on I2S; all must be type WS281x.
+Fourteen outputs, **in this order**: statue 1 T1 → T7, then statue 2 T1 → T7, all type
+WS281x. The installation's build sends all 14 together; ignore the RMT/I2S label on each
+output.
 
 | # | GPIO | Channel | LED count (one face) |
 |---|---|---|---|

@@ -5,7 +5,7 @@ Parent: [../README.md](../README.md)
 
 **Covers:** the software on the controller ESP32 — WLED, configured (not compiled) for this
 installation — and how the show is built and changed.
-**Code:** `guide/build.md` (flash + configure), `guide/operating.md` (field use); backups will live in `wled/` (not yet created)
+**Code:** `guide/build.md` (flash + configure), `guide/operating.md` (field use); backups will live in `wled/` (not yet created); the custom build's source is in `../WLED`, branch `led-over-rj245` ([parallel_i2s_bus.md](parallel_i2s_bus.md)); bench setup in `bench/`
 
 ## Design
 
@@ -18,14 +18,14 @@ installation — and how the show is built and changed.
 - **WLED 16.x, 16.0.1 or later** (agent, 2026-10-09). Current release line as of 2026-10
   ([release notes](https://github.com/wled/WLED/releases/tag/v16.0.1)); 16.0.1 fixes a
   ledmap parser overrun, and 0.15.4 fixed a preset-file corruption bug.
-- **14 outputs, one per tower: 8 on RMT + 6 on I2S** (owner/agent, 2026-10-10). WLED 16
-  supports up to 8 RMT + 8 parallel I2S outputs on classic ESP32. All I2S buses must be the
-  same LED type (all WS2812B), and I2S uses DMA memory proportional to the largest bus.
-  Source: `wled00/const.h` on WLED main, WLED issue #5266. **In doubt (2026-10-17):** the
-  owner saw both drivers fail with 4 outputs on another project (RMT flashes, I2S shifts
-  colours), and the 12-output fallback uses the same drivers. Alternatives and the bench test
-  are in [output_driver.md](output_driver.md).
-  **Changed 2026-10-10:** previously 8 outputs, all RMT.
+- **14 outputs, one per tower, all in one parallel I2S stream in a custom WLED build**
+  (owner, 2026-10-24). Stock WLED's RMT and I2S drivers both failed with 4 outputs on the
+  owner's other project (RMT flashes, I2S shifts colours), and the 12-output fallback uses the
+  same drivers ([output_driver.md](output_driver.md)). The replacement bus is in
+  [parallel_i2s_bus.md](parallel_i2s_bus.md); it passed the bench test: all 14 pins clean
+  with a phone loading the AP (2026-10-24).
+  **Changed 2026-10-24:** from 2026-10-10, 8 outputs on RMT + 6 on I2S (owner/agent), WLED 16's
+  own mix for classic ESP32. **Changed 2026-10-10:** previously 8 outputs, all RMT.
 - **Each output's LED count is one face** (agent, 2026-10-10). All 4 faces of a tower get the
   same data in parallel ([../strips_and_power/tower_layout.md](../strips_and_power/tower_layout.md)),
   so WLED renders 561 pixels per statue, 1122 total: around 60–80 fps of render capacity.
@@ -73,13 +73,19 @@ Preferences, plus at most one position number per tower as a usermod setting.
   following figures; with vertical strips on rectangular towers, position follows from tower
   and LED index.
 - *An azimuth/elevation panorama with WLED's `ledmap.json`:* 255 cells per side and per-cell
-  render cost. A `ledmap.json` with one column per tower can still be generated so WLED's
+  render cost.
+- *A `ledmap.json` with columns spaced by each tower's position seen from the centre*
+  (owner, 2026-10-24): the empty columns between towers would swallow part of every stock 2D
+  effect. The map keeps one column per tower, side by side; real positions are for the
+  custom effects. A `ledmap.json` with one column per tower can still be generated so WLED's
   built-in 2D effects work.
 - *Calibration through effect sliders:* only 8-bit resolution, stored per preset rather than
   once for the installation.
 - *Field programming tools (MoonLight, Pixelblaze, ARTI-FX):* not needed once nobody
   programs in the field.
-**Constrains.** A custom WLED build (PlatformIO) instead of the stock binary.
+**Constrains.** A custom WLED build (PlatformIO) instead of the stock binary; it now exists
+for the output driver ([parallel_i2s_bus.md](parallel_i2s_bus.md)), and the effects go in the
+same build.
 
 **Pre-rendered playback** (discussed 2026-10-10, not planned). Frames rendered offline (e.g.
 xLights FSEQ) and played from a microSD card would remove render cost entirely. It costs live
@@ -136,18 +142,20 @@ has exactly 8 RMT channels; `FASTLED_ESP32_I2S` gives headroom.
 
 ### Pages
 
-- [`output_driver.md`](output_driver.md) — sending to 14 outputs at once: evidence against stock WLED, candidate drivers, the bench test.
+- [`output_driver.md`](output_driver.md) — sending to 14 outputs at once: evidence against stock WLED, candidate drivers, the bench test and its results.
+- [`parallel_i2s_bus.md`](parallel_i2s_bus.md) — the chosen driver: one parallel I2S stream for all outputs, as a bus in the custom WLED build.
 
 ### Not yet documented
 
 - **WLED configuration backup** — `wled/cfg.json`, `wled/presets.json` (to be created) — the restorable state of the controller; the AP password must be blanked before commit.
-- **Optional `ledmap.json`** — not built — one column per tower, so WLED's built-in 2D effects can be used.
+- **Optional `ledmap.json`** — built for the bench only, by `bench/wled_bench.py` ([output_driver.md](output_driver.md)) — one column per tower, bottom-aligned, so WLED's built-in 2D effects can be used.
 - **Tower-position settings** — not built — see *Animations in C++ ahead of time* above.
 - **Firmware current ceiling** — not built — see *The current cap cannot be changed from the UI*.
 - **Custom effects** — not built — the installation's own animations, written in C++ as WLED effects.
 
 ## Related
 
-- [output_driver.md](output_driver.md) — why the 14-output configuration above is in doubt.
+- [output_driver.md](output_driver.md) — why stock WLED's drivers were replaced.
+- [parallel_i2s_bus.md](parallel_i2s_bus.md) — the bus that drives the 14 outputs.
 - [../controller/gpio_assignment.md](../controller/gpio_assignment.md) — the pins behind the 14 outputs.
 - [../field_docs/README.md](../field_docs/README.md) — the operating guide written for this configuration.

@@ -10,7 +10,13 @@ Parent: [README.md](README.md)
 **Measured on the bought strip: 29.4 mA per LED at full white, 0.5 mA idle** (owner,
 2026-10-18). Method: a 5 m reel (300 LEDs) on a lab supply at 5.0 V, driven from MicroPython
 `neopixel` with `(255, 255, 255)` (no global brightness). All off: 0.14–0.15 A. First 60 LEDs
-white: 1.87–1.89 A. (1.88 − 0.145) / 60 + 0.145 / 300 = 29.4 mA. Typical animated content is
+white: 1.87–1.89 A. (1.88 − 0.145) / 60 + 0.145 / 300 = 29.4 mA. The first 111 LEDs of a
+coiled 5 m reel (one T4 face, 1.85 m), fed from one end, drew 2.68 A at full white from WLED
+(owner, 2026-10-24): about 23.3 mA per lit LED after the other 189 LEDs' idle current, 21 %
+less. The reel's far end read 3 V; past LED 111 only idle current flows, so LED 111 sat near
+3 V. The voltage at the reel's input end was not measured, so how much of the drop is in the
+strip and how much in the bench leads is unknown. The 29.4 mA figure is kept, so long strands
+are overestimated. Typical animated content is
 ~30 % of full white, plus idle. Per statue at 60/m, 2244 LEDs (final heights, 2026-10-21):
 
 | Tower | LEDs per face | Strand (one face), full white | LEDs (4 faces) | Tower, full white | Tower, typical |

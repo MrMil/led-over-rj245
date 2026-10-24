@@ -29,6 +29,8 @@ towers, and the logic power for all of it.
   board the owner bought; it breaks out all 15 usable output pins
   ([gpio_assignment.md](gpio_assignment.md)), and a WROOM-32 has no PSRAM. Its socket is two
   1 × 15 female headers (Assmann A-BL254-EG-Z15D); a 38-pin board would need 1 × 19 instead.
+  **Checked 2026-10-24** on one board: ESP32-D0WD-V3 (rev 3.1), 4 MB flash, no PSRAM; it
+  shipped with Espressif's AT firmware.
 - **ESP32 board layout: ESP32 over one mounting hole, 74AHCT125 #2 on 1 × 7 female headers
   over the other** (owner, 2026-10-11). The DIKAVS board is breadboard-style: every DIP-width
   part straddles the centre channel, and both M3 mounting holes are in that channel. The ESP32
@@ -47,6 +49,9 @@ towers, and the logic power for all of it.
 
 - The dev board's USB port is for flashing/debug. Powering from USB while the PSU is also
   connected relies on the board's VBUS diode; do not back-feed the PSU from USB for long.
+- **Opening the HW-394's USB serial port resets the ESP32**, even with DTR and RTS held off
+  (seen 2026-10-24 on macOS). Reading its serial output restarts it, and a test running on
+  the board starts over.
 - Generator power is dirty: WLED must resume the show on reboot by itself (boot preset, see
   [../firmware/README.md](../firmware/README.md)).
 
