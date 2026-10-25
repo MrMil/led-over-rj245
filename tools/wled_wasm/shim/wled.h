@@ -38,13 +38,23 @@ extern uint8_t paletteBlend, blendingStyle, randomPaletteChangeTime, currentLedm
 extern time_t localTime, sunrise, sunset;
 extern unsigned loops;
 
-// Busses: the simulator has none; FX.h asks only whether they can show.
+// Busses: a table of outputs (start, length) set by the page from the tower LED counts (sim_set_bus in sim_main.cpp), so an
+// effect that lights one output, as the tower-only wiring checks do, finds the same tower here as on the controller.
 struct BusConfig { uint8_t type = 0; uint16_t count = 0; uint16_t start = 0; };
 extern std::vector<BusConfig> busConfigs;
+class Bus {
+ public:
+  Bus(uint16_t start, uint16_t len) : _start(start), _len(len) {}
+  uint16_t getStart() const { return _start; }
+  uint16_t getLength() const { return _len; }
+ private:
+  uint16_t _start, _len;
+};
 class BusManager {
  public:
   static bool canAllShow() { return true; }
-  static unsigned getNumBusses() { return 0; }
+  static unsigned getNumBusses();
+  static Bus *getBus(size_t i);
   static uint16_t getTotalLength(bool = false);
   static void setBrightness(uint8_t) {}
   static void setSegmentCCT(int, bool = false) {}

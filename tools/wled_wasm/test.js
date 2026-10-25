@@ -19,6 +19,7 @@ WledFx().then(M => {
       const flags = (meta.split('@')[1] || '').split(';')[3] || '';
       if (layout === 'strip' && flags && flags.includes('2') && !flags.includes('1')) continue;   // 2D-only effect
       M._sim_init(w, h);
+      M._sim_set_bus(LENS.length, 0); LENS.forEach((n, i) => M._sim_set_bus(i, n));
       M._sim_set_mode(id, 1);
       M._sim_set_color(0, 255, 160, 0, 0); M._sim_set_color(1, 0, 0, 80, 0); M._sim_set_color(2, 0, 120, 0, 0);
       let lit = 0, t0 = Date.now();
@@ -26,7 +27,7 @@ WledFx().then(M => {
         for (let f = 0; f < FRAMES; f++) {
           const p = M._sim_frame(1000 + f * 23) >>> 2;
           const px = M.HEAPU32.subarray(p, p + w * h);
-          for (let i = 0; i < px.length; i += 7) if (px[i] & 0xFFFFFF) { lit++; break; }
+          for (let i = 0; i < px.length; i += 5) if (px[i] & 0xFFFFFF) { lit++; break; }   // stride coprime with the 14 columns, or a one-column effect is missed
         }
       } catch (e) { bad.push(`${layout} ${id} ${meta.split('@')[0]}: ${e.message || e}`); continue; }
       ran++;

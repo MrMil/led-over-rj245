@@ -22,6 +22,10 @@ HardwareSerial Serial;
 WledFS WLED_FS;
 WS2812FX strip;
 uint16_t BusManager::getTotalLength(bool) { return Segment::maxWidth * Segment::maxHeight; }
+// The outputs, one per tower, as the page sets them (sim_set_bus): what BusManager::getBus() answers to an effect.
+static std::vector<Bus> g_busses;
+unsigned BusManager::getNumBusses() { return g_busses.size(); }
+Bus *BusManager::getBus(size_t i) { return i < g_busses.size() ? &g_busses[i] : nullptr; }
 
 // ---- the simulated clock and a seeded random source, so a run repeats ----
 static uint32_t g_now = 0;
@@ -126,6 +130,16 @@ EMSCRIPTEN_KEEPALIVE void sim_init(int width, int height) {
 }
 EMSCRIPTEN_KEEPALIVE const uint32_t *sim_frame(uint32_t now_ms) { g_now = now_ms; strip.service(); return seg0().getPixels(); }
 EMSCRIPTEN_KEEPALIVE const uint32_t *sim_pixels() { return seg0().getPixels(); }
+// The outputs: sim_set_bus(i, len) sets output i's LED count; starts follow in order, as the controller's outputs do.
+// sim_set_bus(n, 0) with n at or past the end truncates the table to n outputs (so sim_set_bus(0, 0) clears it).
+EMSCRIPTEN_KEEPALIVE void sim_set_bus(int i, int len) {
+  if (i < 0) return;
+  if (len <= 0 && (size_t)i >= g_busses.size()) return;
+  if (len <= 0) { g_busses.resize(i, Bus(0, 0)); }
+  else { if ((size_t)i >= g_busses.size()) g_busses.resize(i + 1, Bus(0, 0)); g_busses[i] = Bus(0, len); }
+  uint16_t start = 0;
+  for (auto &b : g_busses) { b = Bus(start, b.getLength()); start += b.getLength(); }
+}
 EMSCRIPTEN_KEEPALIVE int sim_width() { return seg0().virtualWidth(); }
 EMSCRIPTEN_KEEPALIVE int sim_height() { return seg0().virtualHeight(); }
 EMSCRIPTEN_KEEPALIVE int sim_mode_count() { return strip.getModeCount(); }

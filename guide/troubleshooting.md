@@ -10,7 +10,7 @@ cables, CAT5e cables, the two jacks' channels) and see whether the fault moves.
 1. Controller PSU LED on? If not: [box is dead](#a-box-is-dead).
 2. Controller WiFi visible? If not, power-cycle the controller.
 3. In WLED: power on, brightness above zero.
-4. Preset 1 lights everything → the show playlist was stopped; start it from Presets.
+4. Any single look from Presets lights everything → the show playlist was stopped; start preset 18.
 
 ## All of statue 2 dark, statue 1 fine
 

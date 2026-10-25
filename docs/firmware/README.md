@@ -5,7 +5,7 @@ Parent: [../README.md](../README.md)
 
 **Covers:** the software on the controller ESP32 — WLED, configured (not compiled) for this
 installation — and how the show is built and changed.
-**Code:** `guide/build.md` (flash + configure), `guide/operating.md` (field use); `wled/presets.json` (the show, the controller's preset backup; `wled/cfg.json` not yet created); the custom build's source is [MrMil/WLED](https://github.com/MrMil/WLED/tree/led-over-rj245), branch `led-over-rj245` (checked out at `../WLED`) ([parallel_i2s_bus.md](parallel_i2s_bus.md)); bench setup in `bench/`
+**Code:** `guide/build.md` (flash + configure), `guide/operating.md` (field use); `wled/` (the controller's files, [controller_files.md](controller_files.md)); the custom build's source is [MrMil/WLED](https://github.com/MrMil/WLED/tree/led-over-rj245), branch `led-over-rj245` (checked out at `../WLED`) ([parallel_i2s_bus.md](parallel_i2s_bus.md)); bench setup in `bench/`
 
 ## Design
 
@@ -38,19 +38,20 @@ installation — and how the show is built and changed.
 - **The AP password is never written on the hardware or committed to this repository**
   (owner, 2026-10-09). Many people at Midburn carry WLED on their phones and would join and
   change the show; the repo is meant to be public. The installation lead hands it to the crew
-  privately. The SSID avoids the word "WLED" for the same reason (agent, 2026-10-09): the
-  WLED app and passers-by looking for WLED networks would otherwise spot it.
+  privately. The SSID is "Layers-WLED" (owner, 2026-10-26; [controller_files.md](controller_files.md)).
+  **Changed 2026-10-26:** it was to avoid the word "WLED" (agent, 2026-10-09: the WLED app
+  and passers-by looking for WLED networks would spot it); the owner chose the name.
   **Changed 2026-10-09:** briefly "on the controller box label"; the owner rejected labelling
   the hardware.
-- **Preset numbering: 1–9 tests, 10–99 workshop looks, 100+ field looks; the show playlist is
-  the boot preset** (agent, 2026-10-09). Tests at fixed numbers let the troubleshooting guide
-  refer to "preset 1"; separate ranges stop field edits overwriting workshop work; the boot
-  preset makes the show resume unattended after generator dropouts (owner requirement:
-  "a reboot should rejoin the show cleanly").
-- **Test presets: 1 = solid colour per tower (T1 red … T7 magenta, both statues), 2 = a single
-  light running the whole strip** (agent, 2026-10-10). Preset 1 checks every channel, every
-  face and the colour order (T1 must be red under GRB). Preset 2 checks tower order and
-  cable-to-jack mapping.
+- **Preset numbering: 10–99 workshop looks, 100+ field looks; the show playlist is the boot
+  preset** (agent, 2026-10-09). Separate ranges stop field edits overwriting workshop work;
+  the boot preset makes the show resume unattended after generator dropouts (owner
+  requirement: "a reboot should rejoin the show cleanly").
+  **Changed 2026-10-26:** 1–9 were reserved for test presets (agent, 2026-10-10: preset 1 a
+  solid colour per tower, preset 2 a single light running the strip, so the troubleshooting
+  guide could say "run preset 1"). Dropped by the owner (2026-10-26); they were never built,
+  and the crew checks wiring with the per-tower effects in [custom_effects.md](custom_effects.md)
+  instead (owner, 2026-10-26).
 - **The show is `wled/presets.json`, and it is what gets flashed when the owner asks to burn
   the final WLED, unless the owner asks for something else** (owner, 2026-10-26). The file is
   the owner's playlist as exported from the Animations tab
@@ -58,10 +59,9 @@ installation — and how the show is built and changed.
   Rainbow, Colored Bursts, Palette, Soap, Hiphotic, Octopus, 60 s each; Fire and Waterfall
   with 2 s and 3 s fades because both start empty and fill from the base) and the playlist as
   preset 18, which is the boot preset. The owner updates it by exporting again and asking for
-  a commit; the file in `wled/` is the record, the controller is a copy of it. **Gap:** the
-  test presets 1 and 2 are not in the file, and *Restore presets* replaces every preset on
-  the controller, so they must be added to the file (or recreated on the controller) before
-  the field build; `guide/build.md` lists what they contain.
+  a commit; the file in `wled/` is the record, the controller is a copy of it. *Restore
+  presets* replaces every preset on the controller, so the file must hold everything the
+  controller should have.
 
 ### Animations in C++ ahead of time; only parameters and calibration in the field
 
@@ -98,7 +98,7 @@ Preferences, plus at most one position number per tower as a usermod setting.
 for the output driver ([parallel_i2s_bus.md](parallel_i2s_bus.md)), and the effects go in the
 same build. Effects are previewed in the browser from the same source
 ([effects_in_browser.md](effects_in_browser.md)): write them in the fork's `FX.cpp`, register them in
-`setupEffectData()`, and rebuild the module.
+`setupEffectData()`, and rebuild the module. The ones written so far: [custom_effects.md](custom_effects.md).
 
 **Pre-rendered playback** (discussed 2026-10-10, not planned). Frames rendered offline (e.g.
 xLights FSEQ) and played from a microSD card would remove render cost entirely. It costs live
@@ -158,19 +158,20 @@ has exactly 8 RMT channels; `FASTLED_ESP32_I2S` gives headroom.
 - [`output_driver.md`](output_driver.md) — sending to 14 outputs at once: evidence against stock WLED, candidate drivers, the bench test and its results.
 - [`parallel_i2s_bus.md`](parallel_i2s_bus.md) — the chosen driver: one parallel I2S stream for all outputs, as a bus in the custom WLED build.
 - [`effects_in_browser.md`](effects_in_browser.md) — the firmware's effect code compiled to WebAssembly and run in the layout tool's 3D LED render, to develop animations before they reach the controller.
+- [`custom_effects.md`](custom_effects.md) — the installation's own effects in the fork: the 14 tower-only wiring checks.
+- [`controller_files.md`](controller_files.md) — `wled/`: the config, 2D map and presets on the controller, and how a controller is flashed over USB.
 
 ### Not yet documented
 
-- **WLED configuration backup** — `wled/cfg.json` (to be created; the AP password must be blanked before commit) — the restorable LED and WiFi configuration of the controller; `wled/presets.json` exists, see *The show* above.
-- **Optional `ledmap.json`** — built for the bench only, by `bench/wled_bench.py` ([output_driver.md](output_driver.md)) — one column per tower, bottom-aligned, so WLED's built-in 2D effects can be used.
 - **Tower-position settings** — not built — see *Animations in C++ ahead of time* above.
 - **Firmware current ceiling** — not built — see *The current cap cannot be changed from the UI*.
-- **Custom effects** — not built — the installation's own animations, written in C++ as WLED effects in the fork; the browser preview ([effects_in_browser.md](effects_in_browser.md)) shows them without hardware.
 
 ## Related
 
 - [output_driver.md](output_driver.md) — why stock WLED's drivers were replaced.
 - [parallel_i2s_bus.md](parallel_i2s_bus.md) — the bus that drives the 14 outputs.
 - [effects_in_browser.md](effects_in_browser.md) — where animations are developed and previewed.
+- [custom_effects.md](custom_effects.md) — the effects written for this installation.
+- [controller_files.md](controller_files.md) — what is on the controller and how it gets there.
 - [../controller/gpio_assignment.md](../controller/gpio_assignment.md) — the pins behind the 14 outputs.
 - [../field_docs/README.md](../field_docs/README.md) — the operating guide written for this configuration.

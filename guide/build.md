@@ -138,7 +138,7 @@ output.
 
 - LED count = **one face**: lit height (tower − 150 mm) × 60/m. All 4 faces get the same data.
   Correct the counts to the strips as fitted.
-- Colour order **GRB** (check: preset 1 must show T1 red).
+- Colour order **GRB** (check: the Rainbow look must not come out with red and green swapped).
 - **Current:** WLED sees one face per output, the real draw is 4×. Set **LED current per LED
   (custom) to 118 mA** (4 × the measured 29.4 mA at full white), so WLED's estimate
   matches reality. Per-output limits: each tower's share of its box's LED
@@ -149,15 +149,13 @@ output.
 
 | Preset | Content |
 |---|---|
-| 1 · Test colours | One segment per output, solid: T1 red, T2 orange, T3 yellow, T4 green, T5 cyan, T6 blue, T7 magenta, both statues |
-| 2 · Test order | A single light running along the whole strip (up each tower in turn) |
 | 10–99 | Workshop looks |
 | 18 · Show | The playlist of looks 10–17, set as the boot preset. The file to restore is `wled/presets.json` in this repository |
 
 ## 7. Bench test
 
 Both boxes, the three 20 m cables, a tower-base board with test strips on each tower output
-in turn. Presets 1 and 2, then the show for an hour. With a scope: RO on one receiver at the end of a 20 m cable should
+in turn. The show for an hour. With a scope: RO on one receiver at the end of a 20 m cable should
 show clean 350/700 ns pulses with no ringing.
 
 ## 8. Back up
@@ -165,8 +163,8 @@ show clean 350/700 ns pulses with no ringing.
 **Config → Security & Updates → Backup presets** and **Backup configuration**. Save them in
 this repository under `wled/` as `presets.json` and `cfg.json`.
 
-**Before committing `cfg.json`**, open it and blank out the AP password if it's in there.
-This repository may be public.
+WLED's backup never contains the AP password, so both files can go in as they are. This
+repository may be public: never add the password to them.
 
 ## Restore a backup
 
@@ -180,7 +178,7 @@ Restores outputs, show and WiFi onto a mis-configured or replaced controller. Ne
 3. Re-join its WiFi (its name may have changed to the installation's), and set the AP
    password again under **WiFi Setup** if the backup had it blanked.
 4. **Config → Security & Updates → Restore presets**: choose `presets.json`.
-5. Run preset 1 to check.
+5. Start the show (preset 18) to check.
 
 ## Keep the spare ESP32 ready
 

@@ -43,7 +43,7 @@ build lifts the real `Segment` methods out of `FX_fcn.cpp` and uses the real `FX
 files and JSON that have nothing to do with how an effect looks. *The hand-written JavaScript shim*: deleted the
 same day; nothing of it remains.
 **Constrains.** The page talks to the module through a fixed contract (`sim_init`, `sim_set_mode`, `sim_set`,
-`sim_set_color`, `sim_frame`, `sim_mode_data`, `sim_palette_names`, …, `sim_main.cpp`). A new effect for the
+`sim_set_color`, `sim_set_bus`, `sim_frame`, `sim_mode_data`, `sim_palette_names`, …, `sim_main.cpp`). A new effect for the
 installation is written in the fork's `FX.cpp`, registered in `setupEffectData()`, and appears in the page after
 `python3 tools/wled_wasm/build.py`; nothing in the page is edited per effect. The built `wled_fx.js` is committed,
 because the page is published as it is (GitHub Pages, a file on the owner's machine, the claude.ai artifact) and
@@ -89,10 +89,13 @@ none of those can build it; rebuild it whenever the fork's effects change.
   `wled00/data/index.js`, replicated in the page; agent, 2026-10-25), so an effect shows exactly the sliders,
   checkboxes, colour slots and palette it shows on a phone. Colour slots use the browser's native colour picker:
   no dependency, and the value is the `[r, g, b]` the controller takes.
-- **Transitions are off, the random source is seeded, there are no busses** (agent, 2026-10-25). The strip's
+- **Transitions are off, the random source is seeded, the busses are a table** (agent, 2026-10-25). The strip's
   transition time is 0, so a change shows on the next frame as a preset does; `hw_random` is a seeded xorshift so
-  a run can be repeated; busses, gamma at the output, segment grouping and mirroring across busses, and the
-  `Copy Segment` effect's second segment do not exist. `WLED_FS` is empty, so only the built-in fonts of
+  a run can be repeated; gamma at the output, segment grouping and mirroring across busses, and the
+  `Copy Segment` effect's second segment do not exist. **Changed 2026-10-26:** busses used to be absent; now the
+  page hands the module one output per tower with its LED count (`sim_set_bus`), starts following in order as on
+  the controller, because the tower-only effects ([custom_effects.md](custom_effects.md)) find their tower through
+  `BusManager::getBus()` and must find the same one here. Nothing else about a bus (type, pin, colour order) exists. `WLED_FS` is empty, so only the built-in fonts of
   Scrolling Text work. The audio effects get the firmware's own `simulateSound()`; there is no microphone.
 - **`test.js` sweeps every effect** (agent, 2026-10-25): both layouts, the installation's LED counts, a few seconds
   of frames each; it fails on a trap and lists effects that stayed dark. Run it after a rebuild. 2026-10-25: 365
@@ -162,5 +165,6 @@ with it (owner, 2026-10-25).
 
 - [README.md](README.md) — animations are written in C++ ahead of time; this page is the preview of that work.
 - [parallel_i2s_bus.md](parallel_i2s_bus.md) — the other half of the custom build, which the sim does not touch.
+- [custom_effects.md](custom_effects.md) — the installation's own effects, previewed and tested here.
 - [../strips_and_power/statue_geometry/pictures.md](../strips_and_power/statue_geometry/pictures.md) — the LED render and the page's own show registry the WLED entries sit beside.
 - [../strips_and_power/statue_geometry/handoff.md](../strips_and_power/statue_geometry/handoff.md) — where the WLED state travels in the JSON file.

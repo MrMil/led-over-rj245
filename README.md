@@ -27,7 +27,7 @@ makes them; see [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md).
 | | |
 |---|---|
 | [Setup](guide/setup.md) | Numbering, connections, order of work, teardown |
-| [Operating](guide/operating.md) | WiFi, test presets, preset numbering, settings not to touch |
+| [Operating](guide/operating.md) | WiFi, preset numbering, checking a tower, settings not to touch |
 | [Troubleshooting](guide/troubleshooting.md) | Symptom → check, spares |
 | [Wiring](guide/wiring.md) | Diagrams and pin tables: apex boxes, power boxes, neighbour bases, power |
 | [Parts](guide/parts.md) | Bill of materials, spares |

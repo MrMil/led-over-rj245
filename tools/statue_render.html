@@ -822,6 +822,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       this._lens = lens.slice(); this._matrix = matrix;
       this._w = matrix ? lens.length : lens.reduce((a, b) => a + b, 0); this._h = matrix ? Math.max(1, ...lens) : 1;
       this.M._sim_init(this._w, this._h); this._mode = -1; this._applied = null;
+      this.M._sim_set_bus(lens.length, 0); lens.forEach((n, i) => this.M._sim_set_bus(i, n));   // the outputs, one per tower, for effects that address a tower (sim_main.cpp)
     },
     apply(seg) {                                           // push what changed since the last frame, as /json/state would
       const M = this.M, a = this._applied || {}, now = {};

@@ -6,29 +6,32 @@ The controller runs [WLED](https://kno.wled.ge) 16.
 
 ## Connect
 
-- WiFi name and password: from the installation lead. They are not on the hardware or in this
-  repository.
+- WiFi name: **Layers-WLED**. Password: from the installation lead. It is not on the hardware
+  or in this repository.
 - `http://4.3.2.1` in a browser, or the WLED app.
 - At most about 4 phones can be connected at once (ESP32 access-point limit).
-
-## Test presets
-
-| Preset | Expected | If not |
-|---|---|---|
-| 1 · Test colours | Each tower one colour: T1 red, T2 orange, T3 yellow, T4 green, T5 cyan, T6 blue, T7 magenta; same in both statues, all 4 faces lit | Two towers swapped: their data cables are swapped. A face dark: see troubleshooting |
-| 2 · Test order | A light runs up each tower in turn: statue 1 T1 → T7, then statue 2 T1 → T7 | Out of order: tower cables or CAT5e jacks swapped |
 
 ## Presets
 
 | Numbers | Content |
 |---|---|
-| 1–9 | Tests. Don't change. |
 | 10–99 | Workshop looks |
 | 100+ | Field looks |
 
 - The show is preset 18, a playlist of looks 10–17, set as the boot preset. It starts by itself on every power-up.
 - After changing presets: **Config → Security & Updates → Backup presets**, and send the file
   to the crew chat.
+
+## Check a tower
+
+In the effect list, pick **Statue 1 tower 1 only** … **Statue 2 tower 7 only**. That tower alone
+blinks red, green, blue, dark, one second each; everything else is off.
+
+- The wrong tower blinks: that tower's data cable is in the wrong jack on the box.
+- Nothing blinks: see [troubleshooting](troubleshooting.md).
+- The colours come in another order than red, green, blue: the colour order in LED Preferences is wrong for that output.
+
+Afterwards start the show again (preset 18).
 
 ## Do not touch
 
