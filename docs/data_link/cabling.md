@@ -17,6 +17,12 @@ straight-through. Three cables run between the controller box and box 2.
   rejection only works if noise couples equally into both; split a pair and differential
   signalling stops protecting the link. That is why channel 2 is on 3/6 (one T568B pair,
   physically split in the connector) and channel 3 on 4/5.
+- **GND on the brown pair of every cable, not just one** (owner, 2026-10-26). One ground
+  conductor would satisfy the MAX485's common-mode window, and 7 channels + 1 ground fit in two
+  cables' 8 pairs. Three cables with ground in each were kept because every cable then carries
+  its own reference (one cable alone works, which matters when fault-finding), the ground path
+  is tripled, the pair would otherwise be unused, and jack 3 keeps two spare pairs. Two cables
+  would save one 20 m lead and nothing else.
 - **Panel-mount coupler in the enclosure wall, short cut patch-cable pigtail inside landing
   on the MAX485 screw terminals** (owner). The trench run is then a factory patch lead: no
   field wiring, and a failed run is a cable swap. The enclosures use a round threaded Cat6A
