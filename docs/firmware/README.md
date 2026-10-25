@@ -5,7 +5,7 @@ Parent: [../README.md](../README.md)
 
 **Covers:** the software on the controller ESP32 — WLED, configured (not compiled) for this
 installation — and how the show is built and changed.
-**Code:** `guide/build.md` (flash + configure), `guide/operating.md` (field use); backups will live in `wled/` (not yet created); the custom build's source is [MrMil/WLED](https://github.com/MrMil/WLED/tree/led-over-rj245), branch `led-over-rj245` (checked out at `../WLED`) ([parallel_i2s_bus.md](parallel_i2s_bus.md)); bench setup in `bench/`
+**Code:** `guide/build.md` (flash + configure), `guide/operating.md` (field use); `wled/presets.json` (the show, the controller's preset backup; `wled/cfg.json` not yet created); the custom build's source is [MrMil/WLED](https://github.com/MrMil/WLED/tree/led-over-rj245), branch `led-over-rj245` (checked out at `../WLED`) ([parallel_i2s_bus.md](parallel_i2s_bus.md)); bench setup in `bench/`
 
 ## Design
 
@@ -51,6 +51,17 @@ installation — and how the show is built and changed.
   light running the whole strip** (agent, 2026-10-10). Preset 1 checks every channel, every
   face and the colour order (T1 must be red under GRB). Preset 2 checks tower order and
   cable-to-jack mapping.
+- **The show is `wled/presets.json`, and it is what gets flashed when the owner asks to burn
+  the final WLED, unless the owner asks for something else** (owner, 2026-10-26). The file is
+  the owner's playlist as exported from the Animations tab
+  ([effects_in_browser.md](effects_in_browser.md)): presets 10–17 (PS Fire, PS Waterfall,
+  Rainbow, Colored Bursts, Palette, Soap, Hiphotic, Octopus, 60 s each; Fire and Waterfall
+  with 2 s and 3 s fades because both start empty and fill from the base) and the playlist as
+  preset 18, which is the boot preset. The owner updates it by exporting again and asking for
+  a commit; the file in `wled/` is the record, the controller is a copy of it. **Gap:** the
+  test presets 1 and 2 are not in the file, and *Restore presets* replaces every preset on
+  the controller, so they must be added to the file (or recreated on the controller) before
+  the field build; `guide/build.md` lists what they contain.
 
 ### Animations in C++ ahead of time; only parameters and calibration in the field
 
@@ -150,7 +161,7 @@ has exactly 8 RMT channels; `FASTLED_ESP32_I2S` gives headroom.
 
 ### Not yet documented
 
-- **WLED configuration backup** — `wled/cfg.json`, `wled/presets.json` (to be created) — the restorable state of the controller; the AP password must be blanked before commit.
+- **WLED configuration backup** — `wled/cfg.json` (to be created; the AP password must be blanked before commit) — the restorable LED and WiFi configuration of the controller; `wled/presets.json` exists, see *The show* above.
 - **Optional `ledmap.json`** — built for the bench only, by `bench/wled_bench.py` ([output_driver.md](output_driver.md)) — one column per tower, bottom-aligned, so WLED's built-in 2D effects can be used.
 - **Tower-position settings** — not built — see *Animations in C++ ahead of time* above.
 - **Firmware current ceiling** — not built — see *The current cap cannot be changed from the UI*.

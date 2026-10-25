@@ -26,7 +26,7 @@ The controller runs [WLED](https://kno.wled.ge) 16.
 | 10–99 | Workshop looks |
 | 100+ | Field looks |
 
-- The show is a playlist, set as the boot preset. It starts by itself on every power-up.
+- The show is preset 18, a playlist of looks 10–17, set as the boot preset. It starts by itself on every power-up.
 - After changing presets: **Config → Security & Updates → Backup presets**, and send the file
   to the crew chat.
 

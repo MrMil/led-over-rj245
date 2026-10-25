@@ -143,7 +143,7 @@ output.
   (custom) to 118 mA** (4 × the measured 29.4 mA at full white), so WLED's estimate
   matches reality. Per-output limits: each tower's share of its box's LED
   budget; the firmware ceiling enforces the maximum.
-- **Defaults → apply preset at boot:** the show playlist (once it exists).
+- **Defaults → apply preset at boot:** **18** (the show playlist in `wled/presets.json`).
 
 ### Presets
 
@@ -152,7 +152,7 @@ output.
 | 1 · Test colours | One segment per output, solid: T1 red, T2 orange, T3 yellow, T4 green, T5 cyan, T6 blue, T7 magenta, both statues |
 | 2 · Test order | A single light running along the whole strip (up each tower in turn) |
 | 10–99 | Workshop looks |
-| the show | A playlist of the workshop looks, set as the boot preset |
+| 18 · Show | The playlist of looks 10–17, set as the boot preset. The file to restore is `wled/presets.json` in this repository |
 
 ## 7. Bench test
 
