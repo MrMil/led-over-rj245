@@ -11,12 +11,12 @@ Per statue, one trench along each arm of the V: T1 – T2 – T3 – T4 (apex) �
 
 | Segment | 230 V | 5 V (3 × 2.5, XT60) | Data (DATA + GND) |
 |---|---|---|---|
-| T4 → T3 | 2 cords: to B, to A | — | apex → B: T3 · apex → A: T2, T1 |
-| T3 → T2 | 1 cord: to A | — | apex → A: T2, T1 |
-| T2 → T1 | — | A → T1 | A → T1 (buffered, 22 AWG pair) |
-| T4 → T5 | 2 cords: to D, to E | — | apex → D: T5 · apex → E: T6, T7 |
-| T5 → T6 | 1 cord: to E | — | apex → E: T6, T7 |
-| T6 → T7 | — | E → T7 | E → T7 (buffered, 22 AWG pair) |
+| T4 → T3 | 2 cords: to the boxes in T3, T2 | — | apex → T3 box: T3 · apex → T2 box: T2, T1 |
+| T3 → T2 | 1 cord: to the T2 box | — | apex → T2 box: T2, T1 |
+| T2 → T1 | — | T2 box → T1 | T2 box → T1 (buffered, 22 AWG pair) |
+| T4 → T5 | 2 cords: to the boxes in T5, T6 | — | apex → T5 box: T5 · apex → T6 box: T6, T7 |
+| T5 → T6 | 1 cord: to the T6 box | — | apex → T6 box: T6, T7 |
+| T6 → T7 | — | T6 box → T7 | T6 box → T7 (buffered, 22 AWG pair) |
 
 The two arms are mirror images.
 
@@ -51,7 +51,7 @@ each apex from the camp's supply, ~20 m away, in its own trench (owner).
   2026-10-23; statue 2 mirrors statue 1): T4→T3 1300, T3→T2 1700, T2→T1 1200, T4→T5 2200,
   T5→T6 1500, T6→T7 1000 mm. The arms are not symmetric. Cable runs along an arm add up:
   apex → A (T2) 3.0 m, apex → B (T3) 1.3 m, apex → D (T5) 2.2 m, apex → E (T6) 3.7 m, plus
-  slack into each base. The 5 V runs are A → T1 1.2 m and E → T7 1.0 m.
+  slack into each base. The 5 V runs are T2 → T1 1.2 m and T6 → T7 1.0 m.
   **Changed 2026-10-23:** previously from the 2026-10-21 layout (T4→T3 2200, T3→T2 1590,
   T2→T1 1120, T4→T5 1340, T5→T6 1760, T6→T7 1102 mm); changed because the artist sent the final
   layout.
@@ -59,5 +59,5 @@ each apex from the camp's supply, ~20 m away, in its own trench (owner).
 ## Related
 
 - [power_distribution.md](power_distribution.md) — the supply grouping these runs implement.
-- [tower_base.md](tower_base.md) — why neighbour data comes back from the supply box.
+- [tower_base.md](tower_base.md) — why neighbour data comes back from the power box.
 - [../data_link/cabling.md](../data_link/cabling.md) — the CAT5e between the statues.

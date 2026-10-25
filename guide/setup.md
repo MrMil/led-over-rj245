@@ -31,27 +31,27 @@ along the line between the two apexes, towards the other statue.
 | Controller jack 1 | Box 2 jack 1 | 20 m CAT5e (apexes are 17.4 m apart) |
 | Controller jack 2 | Box 2 jack 2 | 20 m CAT5e |
 | Controller jack 3 | Box 2 jack 3 | 20 m CAT5e |
-| Apex box, tower data outputs | Supply boxes A (T1, T2), B (T3), D (T5), E (T6, T7); T4 stays inside the apex box | DATA + GND, JST-SM |
-| Apex power strip | Supply boxes A, B, D, E (C14) | C13 cords |
-| Each supply box, 4 × JST-SM out | Its own tower's 4 strands | JST-SM |
-| Each supply box, top-feed XT60 | Up its own tower's post → 4 × XT60 to the strand tops | 3 × 2.5 |
-| Box A, E: XT60 + data out | Tip towers T1 (A), T7 (E) | 3 × 2.5 + 22 AWG pair |
+| Apex box, tower data outputs | Power boxes in T2 (data for T1, T2), T3, T5, T6 (data for T6, T7); T4's stays inside the apex box | DATA + GND, JST-SM |
+| Apex power strip | Power boxes in T2, T3, T5, T6 (C14) | C13 cords |
+| Each power box, 4 × JST-SM out | Its own tower's 4 strands | JST-SM |
+| Each power box, top-feed XT60 | Up its own tower's post → 4 × XT60 to the strand tops | 3 × 2.5 |
+| Power boxes in T2, T6: XT60 + data out | Tip towers T1 (from T2), T7 (from T6) | 3 × 2.5 + 22 AWG pair |
 
 **The CAT5e cables are not Ethernet.** Never connect them to network equipment. PoE puts
 48 V on the pairs and destroys the transceivers at both ends.
 
 ## Power
 
-Five supply boxes per statue, mains from the strip at the apex
+Five power boxes per statue, mains from the strip at the apex
 ([statue-power.svg](img/statue-power.svg)):
 
-| Supply | Sits at | Own tower | Also feeds |
-|---|---|---|---|
-| A | T2 base | T2 | T1 |
-| B | T3 base | T3 | — |
-| C | apex box | T4 | — |
-| D | T5 base | T5 | — |
-| E | T6 base | T6 | T7 |
+| Power box in | Box | Also feeds |
+|---|---|---|
+| T2 | its own `100W` | T1 |
+| T3 | its own `100W` | — |
+| T4 | inside the apex box | — |
+| T5 | its own `100W` | — |
+| T6 | its own `100W` | T7 |
 
 T1 and T7 have no box: their base only splits the incoming power and data to the 4
 strands ([neighbour-base.svg](img/neighbour-base.svg)).
@@ -60,12 +60,12 @@ strands ([neighbour-base.svg](img/neighbour-base.svg)).
 
 | Segment | Contents |
 |---|---|
-| T4 → T3 | 230 V to B and to A · data to B (T3) and to A (T2, T1) |
-| T3 → T2 | 230 V to A · data to A (T2, T1) |
-| T2 → T1 | 5 V A → T1 · data A → T1 |
-| T4 → T5 | 230 V to D and to E · data to D (T5) and to E (T6, T7) |
-| T5 → T6 | 230 V to E · data to E (T6, T7) |
-| T6 → T7 | 5 V E → T7 · data E → T7 |
+| T4 → T3 | 230 V and data to the power boxes in T3 and T2 |
+| T3 → T2 | 230 V and data to the power box in T2 |
+| T2 → T1 | 5 V and data, power box in T2 → T1 |
+| T4 → T5 | 230 V and data to the power boxes in T5 and T6 |
+| T5 → T6 | 230 V and data to the power box in T6 |
+| T6 → T7 | 5 V and data, power box in T6 → T7 |
 | Apex 1 → apex 2 | 3 × CAT5e |
 
 ## Order

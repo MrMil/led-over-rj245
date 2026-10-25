@@ -68,9 +68,9 @@ Follow [wiring.md](wiring.md) and the diagrams there.
 
 **Box 2:** 7 MAX485 receivers, 7 pairs of 560 Ω bias resistors, 7 × 100 Ω.
 
-**Supply boxes (A, B, D, E per statue; C's part sits in the apex box):** 74AHCT125 #1 in a
-socket with a 10 kΩ pull-down on its input and 4 × 100 Ω to the 4 strand JST-SMs. A and E
-also: 74AHCT125 #2 for the tip tower's data (one input with 10 kΩ, one 100 Ω on the output).
+**Power boxes (in T2, T3, T5, T6 per statue; T4's part sits in the apex box):** 74AHCT125 #1
+in a socket with a 10 kΩ pull-down on its input and 4 × 100 Ω to the 4 strand JST-SMs. The
+power boxes in T2 and T6 also: 74AHCT125 #2 for the tip tower's data (one input with 10 kΩ, one 100 Ω on the output).
 
 **Neighbour bases (T1, T7 per statue):** no electronics: 2 WAGO 221-415 and 4 JST-SM.
 
@@ -78,10 +78,10 @@ Check each module's chip marking reads MAX485 (not 483/487/488/489). The control
 74AHCT125s and all 100 Ω resistors are optional, depending on space. Keep a spare receiver
 module and spare 74AHCT125s.
 
-## 3. Power wiring (10 supply boxes)
+## 3. Power wiring (10 power boxes)
 
-Per [supply-box.svg](img/supply-box.svg) and [statue-power.svg](img/statue-power.svg): C14 to
-the PSU, PSU to the 4 strand JST-SMs and (A, E) the XT60 output, and in the apex box a
+Per [power-box.svg](img/power-box.svg) and [statue-power.svg](img/statue-power.svg): C14 to
+the PSU, PSU to the 4 strand JST-SMs and (power boxes in T2, T6) the XT60 output, and in the apex box a
 separate thin pair to the perfboard. Make up the buried 5 V cables (3 × 2.5) with XT60s at
 both ends. Make up 10 top-feed cables (3 × 2.5, one per tower T2–T6): male XT60 at the bottom;
 at the top 2 WAGO 221-415, each with 4 NYAF tails to 4 female XT60s. Ferrules on every stranded wire.

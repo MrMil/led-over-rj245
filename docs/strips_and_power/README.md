@@ -6,15 +6,15 @@ Parent: [../README.md](../README.md)
 **Covers:** the towers and what feeds them: how a tower's 4 strips hang off its channel, the
 tower-base splitter, power from each box to its 7 towers, the current and brightness budget,
 and timing.
-**Code:** `tools/wiring_diagrams.py` (`supply_box()`, `neighbour_base()`, `statue_power()`, `SUPPLIES`, `TOWER_H`), `tools/statue_render.html`, `renders/`, `guide/img/supply-box.svg`, `guide/img/neighbour-base.svg`, `guide/img/statue-power.svg`, `guide/wiring.md`, `guide/build.md`
+**Code:** `tools/wiring_diagrams.py` (`power_box()`, `neighbour_base()`, `statue_power()`, `SUPPLIES`, `TOWER_H`), `tools/statue_render.html`, `renders/`, `guide/img/power-box.svg`, `guide/img/neighbour-base.svg`, `guide/img/statue-power.svg`, `guide/wiring.md`, `guide/build.md`
 
 ## Design
 
 ### Decisions
 
 - **Power is the same at both statues** (agent, 2026-10-10): five supplies per statue fed
-  from the apex. One distribution diagram (`guide/img/statue-power.svg`), one supply-box
-  diagram (`guide/img/supply-box.svg`) and one neighbour-base diagram
+  from the apex. One distribution diagram (`guide/img/statue-power.svg`), one power-box
+  diagram (`guide/img/power-box.svg`) and one neighbour-base diagram
   (`guide/img/neighbour-base.svg`) serve both.
 - **60 LEDs/m — bought** (owner, 2026-10-10). If rendering were too slow, WLED segment
   **Grouping 2** halves effect calculation with every LED still lit. Not needed with one face
@@ -33,7 +33,7 @@ and timing.
 
 - [`tower_layout.md`](tower_layout.md) — 7 towers per statue, 4 faces per tower, same data on all faces, strips on the central post, no dividers.
 - [`statue_geometry/`](statue_geometry/README.md) — where the towers stand in the 18 m circle (the final layout, the 400 / 412 mm box), what the eye at the bench sees, the 3D sightline check (`tools/statue_render.html`, `renders/`).
-- [`tower_base.md`](tower_base.md) — tower data splitting: 74AHCT125 in each supply box for its own tower; neighbour towers' bases are passive.
+- [`tower_base.md`](tower_base.md) — tower data splitting: 74AHCT125 in each power box for its own tower; neighbour towers' bases are passive.
 - [`power_distribution.md`](power_distribution.md) — five supplies per statue, mains from the apex, JST-SM per strand, XT60 runs to the tip towers, cable types.
 - [`trenches.md`](trenches.md) — what runs in each trench segment.
 - [`led_power_budget.md`](led_power_budget.md) — current per tower, PSU sizing, brightness estimates, the current cap.

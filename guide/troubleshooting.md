@@ -37,11 +37,11 @@ that cable.
 2. Re-seat its data cable at both ends.
 3. Swap its data cable with another tower's at the box:
    - fault moves → box side (that output's buffer or receiver);
-   - fault stays → cable or the tower's supply box (its 74AHCT125).
+   - fault stays → cable or the tower's power box (its 74AHCT125).
 
 ## One face of a tower dark, the others fine
 
-That face's strip, its JST-SM, or that gate of the 74AHCT125 in its supply box. On T1 or T7,
+That face's strip, its JST-SM, or that gate of the 74AHCT125 in its power box. On T1 or T7,
 the face's JST-SM at the base's WAGO split.
 
 ## A face dark from some point upwards
@@ -54,10 +54,11 @@ first dark LED.
 Boot preset changed. **Config → LED Preferences → Defaults → apply preset at boot** = the
 show playlist, or [restore the backup](build.md#restore-a-backup).
 
-## Some towers dark, matching one supply
+## Some towers dark, matching one power box
 
-A = T1 + T2 · B = T3 · C = T4 · D = T5 · E = T6 + T7. Check that supply's mains cord at the
-apex strip, then see below. Only T1 (or T7) dark: its XT60 run or data pair from A (E).
+Each power box feeds the tower it sits in; the one in T2 also feeds T1, the one in T6 also
+T7. Check that box's mains cord at the apex strip, then see below. Only T1 (or T7) dark: its
+XT60 run or data pair from the power box in T2 (T6).
 
 ## A box is dead
 

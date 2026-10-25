@@ -7,8 +7,8 @@
 | [System overview](img/overview.svg) | Both statues, boxes, cables |
 | [Controller box](img/controller-wiring.svg) | Statue 1: ESP32, 2 × 74AHCT125, 7 transmitters, 3 jacks, 7 tower outputs |
 | [Box 2](img/box2-wiring.svg) | Statue 2: 3 jacks, 7 receivers, 7 tower outputs |
-| [Statue power](img/statue-power.svg) | Mains from the apex to 5 supply boxes; which box feeds which tower |
-| [Supply box](img/supply-box.svg) | All 10 supply boxes: C14, PSU, own tower's splitter and 4 JST-SM, neighbour outputs |
+| [Statue power](img/statue-power.svg) | Mains from the apex to 5 power boxes; which box feeds which tower |
+| [Power box](img/power-box.svg) | All 10 power boxes: C14, PSU, own tower's splitter and 4 JST-SM, neighbour outputs |
 | [Neighbour base](img/neighbour-base.svg) | T1, T7: passive split of power and data to the 4 strands |
 
 `+5V` / `GND` flags are the perfboard rails. Crossing lines without a dot are not connected.
@@ -115,19 +115,19 @@ jacks; don't rely on colours.
 
 ---
 
-## Supply box (A, B, D, E; C is inside the apex box)
+## Power box (in T2, T3, T5, T6; T4's is inside the apex box)
 
-![Supply box](img/supply-box.svg)
+![Power box](img/power-box.svg)
 
 | Connection | To |
 |---|---|
 | Own tower data in (JST-SM) | DATA → 74AHCT125 #1 pins 2, 5, 9, 12, and 10 kΩ to GND; GND → GND; 5V pin not connected |
 | 74AHCT125 #1 pins 3, 6, 8, 11 | 100 Ω → DATA of JST-SM out 1–4 (one per face) |
 | JST-SM out 5V / GND | PSU +V / −V |
-| Tip-tower data in (A, E only) | DATA → 74AHCT125 #2 gate 1, 10 kΩ to GND |
+| Tip-tower data in (T2, T6 only) | DATA → 74AHCT125 #2 gate 1, 10 kΩ to GND |
 | 74AHCT125 #2 pin 3 | 100 Ω → tip-tower data out (22 AWG pair: DATA + GND) |
 | 74AHCT125 VCC (14) / GND (7), OE (1, 4, 10, 13) | +5V / GND, GND; unused inputs to GND |
-| XT60 out (A, E only) | PSU +V / −V, NYAF 2.5 mm² |
+| XT60 out (T2, T6 only) | PSU +V / −V, NYAF 2.5 mm² |
 | XT60 out · top feed (every box) | PSU +V / −V, NYAF 2.5 mm² |
 
 ---
@@ -145,17 +145,17 @@ jacks; don't rely on colours.
 
 ![Statue power](img/statue-power.svg)
 
-- **Mains:** apex outlet → power strip → a C13 cord to the C14 of boxes A, B, D, E (box C is the
-  apex box). Buried cords: H07RN-F 3 × 1.5. In each box: L → PSU 1, N → 2, PE → 3 (FG).
-- **Strands:** every strand plugs into a JST-SM (5V, DATA, GND), at its own supply box or at
+- **Mains:** apex outlet → power strip → a C13 cord to the C14 of the power boxes in T2, T3, T5, T6
+  (T4's is in the apex box). Buried cords: H07RN-F 3 × 1.5. In each box: L → PSU 1, N → 2, PE → 3 (FG).
+- **Strands:** every strand plugs into a JST-SM (5V, DATA, GND), at its own power box or at
   a neighbour base.
-- **Buried 5 V (A → T1, E → T7):** 3 × 2.5 cable, brown +5 V, blue GND,
+- **Buried 5 V (power box in T2 → T1, power box in T6 → T7):** 3 × 2.5 cable, brown +5 V, blue GND,
   green/yellow unused or GND, XT60 at both ends.
 - **Top feed (T2–T6):** every strand of 75 LEDs or more gets 5 V / GND at its top end too.
   One cable per tower, 3 × 2.5 (brown +5 V, blue GND), from the box's top-feed XT60 up the
   post. At the top: two WAGO 221-415 (+5 V, GND), each with 4 NYAF 2.5 mm² tails to 4 female
   XT60s, one per strand top (male XT60 on the strip). T1 and T7 have none.
-- **Supply C only:** PSU 5 (−V) / 7 (+V) → apex box perfboard rails, 0.5 mm².
+- **Power box in T4 only:** PSU 5 (−V) / 7 (+V) → apex box perfboard rails, 0.5 mm².
 
 ---
 

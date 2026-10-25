@@ -65,7 +65,7 @@ Most of the design is hardware, so "code" paths below are often diagrams
   [data_link/](data_link/README.md) for why the receiver needs it.
 - **Logic-level chips are SN74AHCT125N in Assmann A 14-LC-TT sockets; both ordered** (owner,
   2026-10-11), in the controller ([controller/local_outputs.md](controller/local_outputs.md))
-  and every supply box ([strips_and_power/tower_base.md](strips_and_power/tower_base.md)).
+  and every power box ([strips_and_power/tower_base.md](strips_and_power/tower_base.md)).
   The N suffix is the through-hole DIP that fits the perfboard and socket; NSR is the SO-14
   surface-mount version. Generic BSS138 "bidirectional level converter" modules are not a
   substitute: their 10 kΩ pull-up gives rise times near 1 µs on a cable, too slow for WS2812

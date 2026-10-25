@@ -47,13 +47,13 @@ PSU efficiency): ~575 W worst case, inside the 1.5 kW generator budget (owner, 2
 - **Supply grouping** (see [power_distribution.md](power_distribution.md)), worst case at
   full white, 15 cm base:
 
-  | Supply | Feeds | Worst case |
+  | Power box in | Feeds | Worst case |
   |---|---|---|
-  | A | T1 + T2 (1100 + 1400) | 15.5 A |
-  | B | T3 (1700) | 10.9 A |
-  | C | T4 (2000) | 13.1 A |
-  | D | T5 (1700) | 10.9 A |
-  | E | T6 + T7 (1400 + 1100) | 15.5 A |
+  | T2 | T1 + T2 (1100 + 1400) | 15.5 A |
+  | T3 | T3 (1700) | 10.9 A |
+  | T4 | T4 (2000) | 13.1 A |
+  | T5 | T5 (1700) | 10.9 A |
+  | T6 | T6 + T7 (1400 + 1100) | 15.5 A |
 
   Firmware ceiling **18 A per supply** (90 % of rating). No supply reaches it, even at full
   white. If one ever did, the limiter would scale the whole frame evenly.

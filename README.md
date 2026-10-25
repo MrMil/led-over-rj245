@@ -29,7 +29,7 @@ makes them; see [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md).
 | [Setup](guide/setup.md) | Numbering, connections, order of work, teardown |
 | [Operating](guide/operating.md) | WiFi, test presets, preset numbering, settings not to touch |
 | [Troubleshooting](guide/troubleshooting.md) | Symptom → check, spares |
-| [Wiring](guide/wiring.md) | Diagrams and pin tables: apex boxes, supply boxes, neighbour bases, power |
+| [Wiring](guide/wiring.md) | Diagrams and pin tables: apex boxes, power boxes, neighbour bases, power |
 | [Parts](guide/parts.md) | Bill of materials, spares |
 | [Build](guide/build.md) | Strip cut list, workshop assembly, configuring WLED, backup and restore |
 
@@ -43,9 +43,9 @@ makes them; see [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md).
   as RS-485 on 3 buried CAT5e cables, 3 channels per cable.
 - Each tower has 4 strips, one per face, all showing the same pixels, each on its own
   JST-SM.
-- Each statue has five 5 V supply boxes, fed with mains from its apex: A at T2, B at T3, C
-  in the apex box, D at T5, E at T6. Each box splits its own tower's channel to the 4
-  strands; A and E also feed the tip towers (T1, T7) over XT60. Only data and ground cross
+- Each statue has five 5 V power boxes, fed with mains from its apex: one in each of T2–T6,
+  the one in T4 inside the apex box. Each box splits its own tower's channel to the 4
+  strands; the power boxes in T2 and T6 also feed the tip towers (T1, T7) over XT60. Only data and ground cross
   between the statues.
 - The controller runs its own WiFi access point at `http://4.3.2.1`. The password comes from
   the installation lead.
