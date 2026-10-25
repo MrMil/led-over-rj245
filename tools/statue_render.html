@@ -38,6 +38,7 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); f
 .swatch { display: grid; grid-template-columns: 1fr 96px; gap: 4px 8px; align-items: center; margin: 3px 0; }
 .swatch input[type=color] { width: 66px; height: 26px; padding: 0 2px; background: #241f19; border: 1px solid var(--line); border-radius: 6px; justify-self: end; }
 .wled { font-size: 11px; color: var(--muted); }
+.palbar { grid-column: 1 / -1; height: 14px; border-radius: 6px; border: 1px solid var(--line); margin: -2px 0 4px; }
 .pl { border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; margin: 6px 0; font-size: 12px; }
 .pl.playing { border-color: var(--accent); }
 .pl .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: 2px 0; }
@@ -153,7 +154,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       <div id="wledControls"></div>
       <h2>WLED state</h2>
       <textarea id="wledJson" rows="3" spellcheck="false" readonly></textarea>
-      <div class="bar"><button id="btnWledCopy" class="small">Copy</button><button id="btnWledDefaults" class="small">Effect defaults</button></div>
+      <div class="bar"><button id="btnWledCopy" class="small">Copy</button><button id="btnWledDefaults" class="small">Restore effect defaults</button></div>
     </div>
     <h2>Playlist</h2>
     <div class="note">Set an effect up above, then add it: each entry is a WLED preset with its own duration. The list plays in order here (hard cuts; the controller cross-fades over the transition time). Export writes WLED's <code>presets.json</code>: on the controller, Config → Security &amp; Updates → Restore presets, which replaces every preset there.</div>
@@ -831,11 +832,16 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       const n = this._lens[k], s = bri + 1, w = this._w, h = this._h; let o = 0; for (let j = 0; j < k; j++) o += this._lens[j];
       for (let i = 0; i < n; i++) { const c = this._matrix ? px[k + (h - 1 - i) * w] : px[o + i]; out[i * 4] = ((c >>> 16 & 255) * s) >> 8; out[i * 4 + 1] = ((c >>> 8 & 255) * s) >> 8; out[i * 4 + 2] = ((c & 255) * s) >> 8; out[i * 4 + 3] = 255; }
     },
+    hasPaletteDefault(fx) { const e = this.EFFECTS.get(fx); const d = e ? (e.metaString.split('@')[1] || '').split(';')[4] || '' : ''; return /(^|,)pal=/.test(d); },
+    // The firmware's palette as loaded for the current effect: 16 entries, as a CSS gradient for the swatch under the palette list
+    paletteCss(pal) { const p = this.M._sim_palette(pal), b = this.M.HEAPU8.subarray(p, p + 48); return 'linear-gradient(to right, ' + Array.from({ length: 16 }, (_, i) => `rgb(${b[i * 3]},${b[i * 3 + 1]},${b[i * 3 + 2]}) ${(i / 15 * 100).toFixed(1)}%`).join(', ') + ')'; },
+    defaultPalette(fx) { if (this._mode !== fx) { this.M._sim_set_mode(fx, 0); this._mode = fx; this._applied = null; } return this.M._sim_default_palette(); },
     // The firmware's Segment::setMode(fx, loadDefaults = true): sliders to 128/128/128/128/16, checkboxes off, then the effect's own
     // defaults from its metadata string; read back so the page shows what the controller would.
     loadDefaults(fx) {
       if (!this._lens.length) this.layout(ledTextures.map(l => l.n), this.matrixFor(this.EFFECTS.get(fx)));
       const M = this.M; M._sim_set_mode(fx, 1); this._mode = fx; this._applied = null;
+      if (!this.hasPaletteDefault(fx)) M._sim_set(8, 0);   // no pal= in the string: back to "Default", which resolves to the effect's own (owner, 2026-10-25)
       return Object.fromEntries(Object.entries(SEG_KEYS).filter(([k]) => k !== 'si').map(([k, key]) => [k, k.startsWith('o') ? !!M._sim_get(key) : M._sim_get(key)]));
     },
   };
@@ -1531,7 +1537,12 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     e.meta.checks.forEach(c => { const d = document.createElement('div'); d.className = 'check'; d.innerHTML = `<input type="checkbox" id="w_${c.key}"><label for="w_${c.key}">${c.label}</label>`; host.appendChild(d); const i = d.querySelector('input'); i.checked = !!seg[c.key]; i.addEventListener('change', () => { seg[c.key] = i.checked; changed(); }); });
     e.meta.colors.forEach(c => { const d = document.createElement('div'); d.className = 'swatch'; d.innerHTML = `<label for="w_col${c.slot}">Colour ${c.label}</label><input type="color" id="w_col${c.slot}">`; host.appendChild(d); const i = d.querySelector('input'); i.value = hex(seg.col[c.slot]); i.addEventListener('input', () => { seg.col[c.slot] = unhex(i.value); changed(); }); });
     const sel = (id, label, opts, get, set) => { const d = document.createElement('div'); d.className = 'param'; d.innerHTML = `<label for="${id}">${label}</label><span></span><select id="${id}"></select>`; host.appendChild(d); const s = d.querySelector('select'); opts.forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; s.appendChild(o); }); s.value = get(); s.addEventListener('change', () => { set(s.value); changed(); }); };
-    if (e.meta.palette) sel('w_pal', e.meta.palette.label, WLED.PALETTES.map((n, i) => [i, n]), () => seg.pal, v => seg.pal = +v);
+    if (e.meta.palette) {
+      const def = WLED.defaultPalette(e.id);
+      sel('w_pal', e.meta.palette.label, WLED.PALETTES.map((n, i) => [i, i === 0 ? `Default (${WLED.PALETTES[def] || def})` : n]), () => seg.pal, v => { seg.pal = +v; swatch(); });
+      const bar = document.createElement('div'); bar.className = 'palbar'; bar.title = 'The palette as the controller loads it for this effect'; host.appendChild(bar);
+      var swatch = () => { bar.style.background = WLED.paletteCss(seg.pal); }; swatch();
+    }
     if (/[vf]/.test(e.meta.flags)) sel('w_si', 'Sound simulation', [[0, 'BeatSin'], [1, 'WeWillRockYou'], [2, '10/13'], [3, '14/3']], () => seg.si, v => seg.si = +v);   // WLED's "Sound sim" for audio effects
     sel('w_layout', 'Segment', [['auto', `Automatic: ${WLED.matrixFor(e) ? 'matrix' : 'strip'}${state.wled.layout === 'auto' && e.meta.flags.includes('2') && !e.meta.flags.includes('1') ? ' (2D-only effect)' : ''}`], ['strip', 'One strip, S1-T1 … S2-T7 (as the controller runs)'], ['matrix', '14 × tallest matrix, one column per tower (a ledmap)']], () => state.wled.layout, v => { state.wled.layout = v; showWled(); });
     const n = document.createElement('div'); n.className = 'wled'; n.textContent = `Effect ${e.id} · "${e.metaString}"`; host.appendChild(n);

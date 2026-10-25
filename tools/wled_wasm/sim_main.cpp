@@ -131,6 +131,15 @@ EMSCRIPTEN_KEEPALIVE int sim_height() { return seg0().virtualHeight(); }
 EMSCRIPTEN_KEEPALIVE int sim_mode_count() { return strip.getModeCount(); }
 EMSCRIPTEN_KEEPALIVE const char *sim_mode_data(int id) { return strip.getModeData(id); }
 EMSCRIPTEN_KEEPALIVE const char *sim_palette_names() { return JSON_palette_names; }
+// The 16 entries of palette `pal` as the firmware loads it for the current effect (0 resolves to the effect's own default),
+// as RGB bytes; and which palette id "Default" resolves to for the current effect (Segment::setMode's rule).
+static uint8_t g_pal[16 * 3];
+EMSCRIPTEN_KEEPALIVE const uint8_t *sim_palette(int pal) {
+  CRGBPalette16 p; seg0().loadPalette(p, pal);
+  for (int i = 0; i < 16; i++) { g_pal[i * 3] = p.entries[i].r; g_pal[i * 3 + 1] = p.entries[i].g; g_pal[i * 3 + 2] = p.entries[i].b; }
+  return g_pal;
+}
+EMSCRIPTEN_KEEPALIVE int sim_default_palette() { int sOpt = extractModeDefaults(seg0().mode, "pal"); return sOpt <= 0 ? 6 : sOpt; }
 EMSCRIPTEN_KEEPALIVE void sim_set_mode(int fx, int loadDefaults) { seg0().setMode(fx, loadDefaults != 0); }
 EMSCRIPTEN_KEEPALIVE void sim_set_color(int slot, int r, int g, int b, int w) { seg0().setColor(slot, RGBW32(r, g, b, w)); }
 EMSCRIPTEN_KEEPALIVE uint32_t sim_get_color(int slot) { return seg0().colors[slot < NUM_COLORS ? slot : 0]; }

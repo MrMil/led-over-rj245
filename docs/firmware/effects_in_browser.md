@@ -68,10 +68,16 @@ none of those can build it; rebuild it whenever the fork's effects change.
   [README.md](README.md)), everything else the controller's strip; the "Segment" select overrides. WLED's matrix
   has row 0 at the top, so LED *i* of tower *x* is pixel (*x*, H − 1 − *i*); the firmware drops nothing for short
   towers because the page reads the segment's own buffer and only copies the LEDs that exist.
-- **Effect defaults are applied by the firmware and read back** (agent, 2026-10-25): selecting an effect calls
-  `Segment::setMode(fx, true)` in the module, the same code the controller runs when a preset names an effect, and
-  the page copies the resulting sliders, checkboxes and palette into its state. The earlier page-side
-  reimplementation of the defaults rule is gone with the shim.
+- **Effect defaults are applied by the firmware and read back** (agent, 2026-10-25): selecting an effect, and the
+  "Restore effect defaults" button, call `Segment::setMode(fx, true)` in the module, the same code the controller
+  runs when a preset names an effect, and the page copies the resulting sliders, checkboxes and palette into its
+  state. One addition to the firmware's rule (owner, 2026-10-25: the button must restore the palette too): an
+  effect whose string names no `pal=` default goes back to "Default", which the firmware resolves to the effect's
+  own palette; the controller would keep whatever palette was set. Colours are left alone, as on the controller.
+- **The palette list shows the colours** (owner, 2026-10-25): a gradient swatch under the list, the 16 entries as
+  `Segment::loadPalette()` loads them for the current effect, and the "Default" entry names what it resolves to
+  (`Default (Aurora)`), from the same rule `setMode` uses. Both come from the module (`sim_palette`,
+  `sim_default_palette` in `sim_main.cpp`), not from a copy of the tables.
 - **The sim's state is the controller's `/json/state` shape, saved as `params.projection.wled` in the handoff
   JSON** (agent, 2026-10-25; [../strips_and_power/statue_geometry/handoff.md](../strips_and_power/statue_geometry/handoff.md)):
   `bri` and one segment (`fx, sx, ix, c1, c2, c3, o1–o3, col, pal, si`), plus the page's own `layout`. What the sim
