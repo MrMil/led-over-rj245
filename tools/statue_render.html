@@ -45,6 +45,9 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); f
 .pl input[type=text] { flex: 1; min-width: 80px; background: #241f19; color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 3px 5px; font: inherit; }
 .pl input[type=number] { width: 52px; background: #241f19; color: var(--accent); border: 1px solid var(--line); border-radius: 6px; padding: 2px 4px; font: inherit; text-align: right; }
 .pl .fx { color: var(--muted); }
+.pl .params { color: var(--muted); font-size: 11px; margin: 4px 0 2px 22px; line-height: 1.5; }
+.pl .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: middle; border: 1px solid var(--line); margin-right: 3px; }
+.pl button.caret { padding: 0 6px; min-width: 22px; }
 .pl button.small { margin-top: 0; padding: 2px 7px; }
 .panel h2 { font-size: 11px; margin: 12px 0 6px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .param { display: grid; grid-template-columns: 1fr 96px; gap: 4px 8px; align-items: center; margin: 3px 0; }
@@ -158,7 +161,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     </div>
     <h2>Playlist</h2>
     <div class="note">Set an effect up above, then add it: each entry is a WLED preset with its own duration. The list plays in order here (hard cuts; the controller cross-fades over the transition time). Export writes WLED's <code>presets.json</code>: on the controller, Config → Security &amp; Updates → Restore presets, which replaces every preset there.</div>
-    <div class="bar"><button id="btnPlAdd" class="small">Add the current effect</button><button id="btnPlPlay" class="small">▶ Play the playlist</button><span id="plStatus" class="note"></span></div>
+    <div class="bar"><button id="btnPlAdd" class="small">Add the current effect</button><button id="btnPlPlay" class="small">▶ Play the playlist</button><button id="btnPlPrev" class="small" title="Previous entry" hidden>⏮ Previous</button><button id="btnPlNext" class="small" title="Next entry" hidden>⏭ Next</button><span id="plStatus" class="note"></span></div>
     <div id="plList"></div>
     <div id="plParams"></div>
     <div class="param"><label for="plName">Playlist name</label><span></span><input type="text" id="plName" class="plname"></div>
@@ -1560,6 +1563,11 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     for (let i = 0; i < E.length; i++) { const d = Math.max(0.1, E[i].dur); if (u < d) return { index: i, entry: E[i], left: d - u }; u -= d; }
     return { index: 0, entry: E[0], left: 0 };
   }
+  const pageTime = () => (performance.now() - t0) / 1000;
+  const startOf = i => state.playlist.entries.slice(0, i).reduce((a, e) => a + Math.max(0.1, e.dur), 0);
+  // Start, or jump, at entry i: the clock is set so that the elapsed time lands on the entry's start (owner, 2026-10-26:
+  // previous / next while playing, and playing from the middle of the list).
+  function playFrom(i) { const n = state.playlist.entries.length; if (!n) return; i = ((i % n) + n) % n; playing = { t0: pageTime() - startOf(i) }; plTick = 0; showPlaylist(); playlistStatus(pageTime()); }
   const segCopy = seg => JSON.parse(JSON.stringify(seg));
   function plAdd() {
     const e = wledSelected(); if (!e) { $('plMsg').textContent = 'Choose a WLED effect first: the page\'s own shows are not controller presets.'; return; }
@@ -1568,37 +1576,59 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     $('plMsg').textContent = ''; showPlaylist(); saveSettings();
   }
   const fxName = fx => { const e = WLED.EFFECTS.get(fx); return e ? e.meta.name : `effect ${fx}`; };
+  const plOpen = new WeakSet();                             // entries whose parameters are unfolded (owner, 2026-10-26: a caret per entry)
+  const defaultPaletteOf = e => { const m = /(?:^|,)pal=(\d+)/.exec((e.metaString.split('@')[1] || '').split(';')[4] || ''); const n = m ? +m[1] : 0; return n <= 0 ? 6 : n; };   // Segment::setMode's rule, read from the string so no effect is switched
+  function entrySummary(en) {                               // the parameters as the controls name them, read-only
+    const e = WLED.EFFECTS.get(en.seg.fx), seg = en.seg, parts = [];
+    if (e) {
+      e.meta.sliders.forEach(sl => parts.push(`${sl.label} ${seg[sl.key]}`));
+      e.meta.checks.forEach(c => parts.push(`${c.label} ${seg[c.key] ? 'on' : 'off'}`));
+      if (e.meta.palette) parts.push(`${e.meta.palette.label}: ${seg.pal === 0 ? `Default (${WLED.PALETTES[defaultPaletteOf(e)] || defaultPaletteOf(e)})` : (WLED.PALETTES[seg.pal] || seg.pal)}`);
+      if (/[vf]/.test(e.meta.flags)) parts.push(`Sound simulation ${['BeatSin', 'WeWillRockYou', '10/13', '14/3'][seg.si | 0]}`);
+      const cols = e.meta.colors.map(c => `<span class="sw" style="background:${hex(seg.col[c.slot])}"></span>${c.label}`).join(' ');
+      if (cols) parts.push(cols);
+    }
+    parts.push(`Master brightness ${en.bri}`);
+    return parts.join(' · ');
+  }
   function showPlaylist() {
     const host = $('plList'), E = state.playlist.entries; host.innerHTML = '';
     const at = playlistAt((performance.now() - t0) / 1000);
     E.forEach((en, i) => {
       const d = document.createElement('div'); d.className = 'pl' + (at && at.index === i ? ' playing' : '');
-      d.innerHTML = `<div class="row"><b>${state.playlist.first + i}</b><input type="text" value="" aria-label="Preset name"><span class="fx">${fxName(en.seg.fx)}</span></div>
+      const open = plOpen.has(en);
+      d.innerHTML = `<div class="row"><button class="small caret" data-a="caret" title="Show the parameters" aria-expanded="${open}">${open ? '▾' : '▸'}</button><b>${state.playlist.first + i}</b><input type="text" value="" aria-label="Preset name"><span class="fx">${fxName(en.seg.fx)}</span></div>
         <div class="row"><label>for <input type="number" min="0.1" max="3600" step="1" data-k="dur"> s</label><label>fade <input type="number" min="0" max="60" step="0.1" data-k="tr"> s</label>
-        <button class="small" data-a="load" title="Put this entry's settings back in the controls">Edit</button><button class="small" data-a="up">↑</button><button class="small" data-a="down">↓</button><button class="small" data-a="del">✕</button></div>`;
+        <button class="small" data-a="play" title="Play the playlist from this entry">▶ From here</button><button class="small" data-a="load" title="Put this entry's settings back in the controls">Edit</button><button class="small" data-a="up">↑</button><button class="small" data-a="down">↓</button><button class="small" data-a="del">✕</button></div>`;
       const name = d.querySelector('input[type=text]'); name.value = en.name; name.addEventListener('change', () => { en.name = name.value; saveSettings(); });
       d.querySelectorAll('input[type=number]').forEach(inp => { inp.value = en[inp.dataset.k]; inp.addEventListener('change', () => { const v = parseFloat(inp.value); if (!isNaN(v)) en[inp.dataset.k] = Math.max(+inp.min, Math.min(+inp.max, v)); inp.value = en[inp.dataset.k]; saveSettings(); }); });
       d.querySelectorAll('button[data-a]').forEach(b => b.addEventListener('click', () => {
         const a = b.dataset.a;
+        if (a === 'caret') { if (plOpen.has(en)) plOpen.delete(en); else plOpen.add(en); showPlaylist(); return; }
+        if (a === 'play') { playFrom(i); return; }
         if (a === 'del') E.splice(i, 1);
         else if (a === 'up' && i > 0) [E[i - 1], E[i]] = [E[i], E[i - 1]];
         else if (a === 'down' && i < E.length - 1) [E[i + 1], E[i]] = [E[i], E[i + 1]];
         else if (a === 'load') { state.wled.seg = segCopy(en.seg); state.wled.bri = en.bri; state.anim = 'wled:' + en.seg.fx; fillAnimSelect(); $('anim').value = state.anim; showWled(); }
         showPlaylist(); saveSettings();
       }));
+      if (open) { const pr = document.createElement('div'); pr.className = 'params'; pr.innerHTML = entrySummary(en); d.appendChild(pr); }
       host.appendChild(d);
     });
     $('btnPlPlay').textContent = playing ? '■ Stop' : '▶ Play the playlist'; $('btnPlPlay').disabled = !E.length;
+    $('btnPlPrev').hidden = $('btnPlNext').hidden = !playing;
     $('plName').value = state.playlist.name;
   }
   paramRow($('plParams'), 'plFirst', 'First preset number', 1, 200, 1, '', () => state.playlist.first, v => state.playlist.first = Math.round(v), () => { showPlaylist(); saveSettings(); });
   $('plName').addEventListener('change', () => { state.playlist.name = $('plName').value || 'Show'; saveSettings(); });
   $('btnPlAdd').addEventListener('click', plAdd);
-  $('btnPlPlay').addEventListener('click', () => { playing = playing ? null : { t0: (performance.now() - t0) / 1000 }; showPlaylist(); });
+  $('btnPlPlay').addEventListener('click', () => { if (playing) { playing = null; showPlaylist(); } else playFrom(0); });
+  $('btnPlPrev').addEventListener('click', () => { const at = playlistAt(pageTime()); if (at) playFrom(at.index - 1); });
+  $('btnPlNext').addEventListener('click', () => { const at = playlistAt(pageTime()); if (at) playFrom(at.index + 1); });
   let plTick = 0;
   function playlistStatus(t) {                              // once a second while playing: which entry, how long it has left
     if (!playing) { if ($('plStatus').textContent) $('plStatus').textContent = ''; return; }
-    if (t - plTick < 1) return; plTick = t;
+    if (t - plTick < 1 && plTick) return; plTick = t;
     const at = playlistAt(t); if (!at) return;
     $('plStatus').textContent = `${at.index + 1} / ${state.playlist.entries.length} · ${at.entry.name} · ${Math.ceil(at.left)} s`;
     document.querySelectorAll('#plList .pl').forEach((d, i) => d.classList.toggle('playing', i === at.index));

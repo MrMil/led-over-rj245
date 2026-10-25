@@ -117,6 +117,10 @@ the playlist, we can then export the playlist as json from the browser and uploa
 - **The segment of a preset carries no bounds** (`start`/`stop` left out), so it applies to whatever segment the
   controller is configured with; the sim's strip-or-matrix choice is not exported, because on the controller it is
   the LED map's business ([README.md](README.md)).
+- **Previous / Next while playing, and "From here" on every entry** (owner, 2026-10-26): playback is a clock
+  offset into the loop, so a jump only moves the clock to the entry's start; the entry then runs its full duration.
+- **A caret on every entry unfolds its parameters** (owner, 2026-10-26), named as the controls name them, with the
+  palette resolved and the colours as swatches; the fold state is per page load, not saved.
 - **The sim cuts hard between entries; the controller cross-fades** over the transition time. The firmware's
   cross-fade runs the old effect alongside the new one in `WS2812FX::service()`'s blending, which the sim does not
   compile; the durations and the order are what a playlist is judged on.
