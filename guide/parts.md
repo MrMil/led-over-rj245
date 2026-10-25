@@ -19,11 +19,11 @@
 | Power strip | 2 | At each apex, ≥ 5 sockets |
 | C13 cord, H07RN-F 3 × 1.5 (buried) | 8 | 4 per statue: to A, B, D, E |
 | C13 cord, short | 2 | 1 per statue: to the apex box (C) |
-| 3-core cable 3 × 2.5 (flexible PVC, "פנדל") | per layout | 2 buried 5 V runs per statue: A → T1, E → T7 |
-| NYAF 2.5 mm², red + blue | ~10 m each | Inside boxes and neighbour bases |
-| XT60 pairs | 8 + 4 spare | 2 runs per statue × 2 ends |
+| 3-core cable 3 × 2.5 (flexible PVC, "פנדל") | per layout | 2 buried 5 V runs per statue: A → T1, E → T7. 5 top-feed cables per statue: tower height + the reach to its box |
+| NYAF 2.5 mm², red + blue | ~20 m each | Inside boxes and neighbour bases; 8 short tails per top feed |
+| XT60 pairs | 58 + 6 spare | 8: 2 buried runs per statue × 2 ends. 50: top-feed cables, 1 at the bottom + 4 at the top, T2–T6 (25 per statue) |
 | JST-SM 3-pin pairs | 68 + spares | 28 strands + 6 data inputs per statue |
-| WAGO 221-415 | 8 + spares | 2 per neighbour base (T1, T7) |
+| WAGO 221-415 | 28 + spares | 2 per neighbour base (T1, T7), 2 at the top of each top feed (T2–T6) |
 | 22 AWG 2-core | per layout | Tip-tower data: A → T1, E → T7 |
 | Wire 0.5 mm², red + black | ~2 m each | PSU → perfboard |
 
@@ -43,14 +43,14 @@ in PETG or ASA (not PLA):
 
 | Enclosure | Qty | For |
 |---|---|---|
-| `100W-masterbox` | 2 | Apex box per statue: supply C, T4's splitter and its 4 JST-SM, + ESP32 (statue 1) or receivers (statue 2); needs data outputs to A, B, D, E (change pending) |
-| `100W` | 8 | Supplies A, B, D, E per statue: 4 JST-SM out; needs data inputs, and on A, E an XT60 + tip-tower data output (change pending) |
+| `100W-masterbox` | 2 | Apex box per statue: supply C, T4's splitter and its 4 JST-SM, + ESP32 (statue 1) or receivers (statue 2); needs data outputs to A, B, D, E and a top-feed XT60 out (change pending) |
+| `100W` | 8 | Supplies A, B, D, E per statue: 4 JST-SM out; needs data inputs, a top-feed XT60 out, and on A, E an XT60 + tip-tower data output (change pending) |
 
 ## LED strips
 
 WS2812B, 5 V, 60/m (bought). Supplied and mounted by the statue artist: 4 strips per tower,
-one per face, 150 mm dark base. 74.8 m in all: 16 reels of 5 m, 8 per statue, every face cut
-whole from one reel.
+one per face, 150 mm dark base. 74.8 m in all: 15 reels of 5 m cut, every face whole from one
+reel ([cut list](build.md#cutting-the-led-strips)), + 1 reel spare.
 
 ## Consumables
 

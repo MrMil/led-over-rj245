@@ -31,7 +31,7 @@ makes them; see [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md).
 | [Troubleshooting](guide/troubleshooting.md) | Symptom → check, spares |
 | [Wiring](guide/wiring.md) | Diagrams and pin tables: apex boxes, supply boxes, neighbour bases, power |
 | [Parts](guide/parts.md) | Bill of materials, spares |
-| [Build](guide/build.md) | Workshop assembly, flashing and configuring WLED, backup and restore |
+| [Build](guide/build.md) | Strip cut list, workshop assembly, configuring WLED, backup and restore |
 
 ## System
 

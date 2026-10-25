@@ -40,7 +40,10 @@ PSU efficiency): ~575 W worst case, inside the 1.5 kW generator budget (owner, 2
   the original design notes.
 - **Five S-100-5 (100 W) per statue** (owner, 2026-10-18). 500 W per statue against a 302 W
   worst case.
-- **Every strand (one face's strip) has its own XT60 at its start** (owner, 2026-10-10).
+- **Every strand (one face's strip) has its own JST-SM at its start; strands of 75 LEDs or
+  more also an XT60 top feed** (owner, 2026-10-18 and 2026-10-25;
+  [power_distribution.md](power_distribution.md)).
+  **Changed 2026-10-18:** previously an XT60 at every strand's start (owner, 2026-10-10).
 - **Supply grouping** (see [power_distribution.md](power_distribution.md)), worst case at
   full white, 15 cm base:
 
@@ -57,7 +60,9 @@ PSU efficiency): ~575 W worst case, inside the 1.5 kW generator budget (owner, 2
 - **Voltage drop: the 2000 mm strands may need a second feed** (agent estimate, 2026-10-10).
   Fed at the bottom only, at full white, a 1.85 m strand (3.3 A) drops ~0.35–0.7 V, given
   strip copper of ~0.12–0.24 Ω/m round trip. The 1700 mm towers' strands (1.55 m, 2.7 A) drop
-  ~0.25–0.5 V; shorter ones less. Measure the bought strip to decide (see `TODO.md`).
+  ~0.25–0.5 V; shorter ones less.
+  **Changed 2026-10-25:** the owner decided a top feed on every strand of 75 LEDs or more
+  without waiting for the voltage-drop test ([power_distribution.md](power_distribution.md)).
 - **Size PSUs at 80–90 % of rating** (agent, 2026-10-10). Generic S-series clones run
   continuously inside a closed box.
 - **WLED's current estimate is corrected 4×** (agent, 2026-10-10). Each output is configured

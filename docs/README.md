@@ -116,7 +116,8 @@ failure — mitigated by a pre-flashed spare ESP32 in a socket ([controller/](co
    grouping proposed in [strips_and_power/led_power_budget.md](strips_and_power/led_power_budget.md).
 3. ~~Tower power wiring~~ — decided 2026-10-10: see
    [strips_and_power/power_distribution.md](strips_and_power/power_distribution.md). Pending: the
-   enclosure repo's `100W` box with XT60 outputs, and the strip voltage-drop measurement.
+   enclosure repo's `100W` box with XT60 outputs, including a top-feed XT60 on every box
+   (every strand of 75 LEDs or more, owner, 2026-10-25).
 4. ~~Tower order and heights~~ — final (artist, 2026-10-21): 1100, 1400, 1700, 2000, 1700,
    1400, 1100 mm ([strips_and_power/tower_layout.md](strips_and_power/tower_layout.md)).
 5. ~~Distance between the statues~~ — 17.4 m apex to apex in the final layout (artist,

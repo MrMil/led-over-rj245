@@ -34,6 +34,7 @@ along the line between the two apexes, towards the other statue.
 | Apex box, tower data outputs | Supply boxes A (T1, T2), B (T3), D (T5), E (T6, T7); T4 stays inside the apex box | DATA + GND, JST-SM |
 | Apex power strip | Supply boxes A, B, D, E (C14) | C13 cords |
 | Each supply box, 4 × JST-SM out | Its own tower's 4 strands | JST-SM |
+| Each supply box, top-feed XT60 | Up its own tower's post → 4 × XT60 to the strand tops | 3 × 2.5 |
 | Box A, E: XT60 + data out | Tip towers T1 (A), T7 (E) | 3 × 2.5 + 22 AWG pair |
 
 **The CAT5e cables are not Ethernet.** Never connect them to network equipment. PoE puts

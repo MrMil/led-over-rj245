@@ -5,6 +5,42 @@
 Workshop steps. [Restore a backup](#restore-a-backup) and
 [prepare a spare ESP32](#prepare-a-spare-esp32) also apply in the field.
 
+## Cutting the LED strips
+
+56 face strips from 16 reels of 300 LEDs (5 m, 60/m). 15 reels are cut; the 16th stays whole
+as the spare. Every face is one piece, no joins.
+
+| LEDs | Length | Towers | Pieces |
+|---|---|---|---|
+| 111 | 1.85 m | T4 (2000) | 8 |
+| 93 | 1.55 m | T3, T5 (1700) | 16 |
+| 75 | 1.25 m | T2, T6 (1400) | 16 |
+| 57 | 0.95 m | T1, T7 (1100) | 16 |
+
+Lengths run from 150 mm above the bottom of the tower to its top.
+
+**Cut list**, pieces in order from the reel's input end (arrows pointing away):
+
+| Reels | Pieces | Cut after LED | Left |
+|---|---|---|---|
+| 8 | 93 · 93 · 57 · 57 | 93, 186, 243 | 0 |
+| 4 | 111 · 111 · 75 | 111, 222, 297 | 3 |
+| 3 | 75 · 75 · 75 · 75 | 75, 150, 225 | 0 |
+| 1 | spare, uncut | | |
+
+1. **Test each reel whole before cutting:** all 300 LEDs at low-brightness white, then a
+   rainbow. Every LED lights, in the right colour.
+2. A reel with a dead or wrong LED becomes the spare. Write the LED's number on it; its good
+   stretches are still spare pieces.
+3. **Count LEDs, don't measure.** The metre lengths are a check. Cut across the middle of the
+   copper pads between two LEDs.
+4. If a cut falls on a factory solder joint (the 75s reel, after LED 150, on some reels),
+   separate the joint with the iron instead of cutting through it.
+5. Label each piece at its input end with its LED count, and bundle by count.
+6. **75, 93 and 111 pieces:** solder a male XT60 to 5V / GND at the far (output) end, for the
+   top feed. 57 pieces get none.
+7. Test each piece after cutting: every LED lights.
+
 ## 1. Enclosures
 
 Print from [MrMil/electronics-enclosure](https://github.com/MrMil/electronics-enclosure):
@@ -47,7 +83,8 @@ module and spare 74AHCT125s.
 Per [supply-box.svg](img/supply-box.svg) and [statue-power.svg](img/statue-power.svg): C14 to
 the PSU, PSU to the 4 strand JST-SMs and (A, E) the XT60 output, and in the apex box a
 separate thin pair to the perfboard. Make up the buried 5 V cables (3 × 2.5) with XT60s at
-both ends. Ferrules on every stranded wire.
+both ends. Make up 10 top-feed cables (3 × 2.5, one per tower T2–T6): male XT60 at the bottom;
+at the top 2 WAGO 221-415, each with 4 NYAF tails to 4 female XT60s. Ferrules on every stranded wire.
 
 ## 4. Data cables
 

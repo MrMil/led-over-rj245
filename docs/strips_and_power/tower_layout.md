@@ -2,7 +2,7 @@
 
 Path: [docs](../README.md) › [strips_and_power](README.md) › **tower_layout**
 Parent: [README.md](README.md)
-**Code:** `tools/wiring_diagrams.py` (`TOWER_H`, `TOWERS`, `GPIO`), `guide/setup.md` (layout table), `guide/build.md` (LED counts)
+**Code:** `tools/wiring_diagrams.py` (`TOWER_H`, `TOWERS`, `GPIO`), `guide/setup.md` (layout table), `guide/build.md` (LED counts, strip cut list)
 **Covers:** the towers of a statue and how their LEDs map onto channels.
 
 ## What it does
@@ -29,8 +29,9 @@ A structural post stands in the middle. Each face has one strip, mounted
 on the post facing out, about 15 cm behind a diffuser and the CNC-cut face. **Each tower is
 one channel; its 4 strips get the same data in parallel** through the tower-base splitter
 ([tower_base.md](tower_base.md)). Strips run bottom to top. Per statue: 561 rendered pixels,
-2244 physical LEDs, 37.4 m of strip. Both statues: 4488 LEDs, 74.8 m, 16 reels of 5 m (8 per
-statue) with every face cut whole from one reel (no joins).
+2244 physical LEDs, 37.4 m of strip. Both statues: 4488 LEDs, 74.8 m, every face cut whole
+from one reel (no joins): 15 reels of 5 m cut, the 16th kept whole as the spare (cut list in
+`guide/build.md`).
 
 ## Decisions
 
@@ -60,6 +61,27 @@ the central post blocks the light (owner). *Two strips per face:* double LEDs an
 **Constrains.** If faces ever need different content, light will bleed ~10–20 cm round the
 corners. Evenness numbers are geometry estimates; check with the brightness mock-up
 ([led_power_budget.md](led_power_budget.md)).
+
+### The cut list: 15 reels cut, one kept whole
+
+**What** (agent, 2026-10-25). Three reel patterns, pooled across both statues: 8 × (93, 93,
+57, 57), 4 × (111, 111, 75), 3 × (75, 75, 75, 75). 15 × 300 = 4500 LEDs for 4488 needed, so 12
+LEDs are wasted, in 3-LED tails on the 111 reels. Pieces are labelled by LED count only, not by
+statue or tower, because pieces of one count are interchangeable.
+**Why.** 15 reels is the minimum (4488 / 300 = 14.96). An exhaustive search over every maximal
+reel pattern found it; the layout tool's first-fit-decreasing packing
+([statue_geometry/handoff.md](statue_geometry/handoff.md)) reports 8 per statue and 16 even pooled,
+with the 312 spare LEDs scattered as tails of 3–129 LEDs. Cutting 15 leaves a whole 300-LED reel
+instead, which yields two spare faces of any height in the field (111 + 111 + 75).
+**Rejected.** *8 reels per statue, (93, 93, 57, 57) and (111, 75, 75):* keeps each statue on its
+own reels, but spends the 16th reel on 8 tails of 39 LEDs, too short for any face. Statue-separate reels buy nothing, since
+pieces of one count are identical.
+**Constrains.** 11 of the 15 reels have no slack: a reel with a bad LED cannot be cut to its
+pattern, so it becomes the spare and the field spare is reduced to its good stretches. The
+counts assume the 150 mm base and a strip up to the tower top, still to confirm with the
+artist (`TODO.md`); they are the maximum, since a piece can be trimmed at mounting but not
+lengthened. The 75s pattern cuts after LED 150, which is 2.5 m and so a factory joint on reels
+built from 0.5 m sections.
 
 ## Gotchas
 

@@ -128,6 +128,7 @@ jacks; don't rely on colours.
 | 74AHCT125 #2 pin 3 | 100 Ω → tip-tower data out (22 AWG pair: DATA + GND) |
 | 74AHCT125 VCC (14) / GND (7), OE (1, 4, 10, 13) | +5V / GND, GND; unused inputs to GND |
 | XT60 out (A, E only) | PSU +V / −V, NYAF 2.5 mm² |
+| XT60 out · top feed (every box) | PSU +V / −V, NYAF 2.5 mm² |
 
 ---
 
@@ -150,8 +151,10 @@ jacks; don't rely on colours.
   a neighbour base.
 - **Buried 5 V (A → T1, E → T7):** 3 × 2.5 cable, brown +5 V, blue GND,
   green/yellow unused or GND, XT60 at both ends.
-- **T4:** if the strip voltage-drop test calls for it, a second feed to the top of each
-  strand, up the post, from supply C.
+- **Top feed (T2–T6):** every strand of 75 LEDs or more gets 5 V / GND at its top end too.
+  One cable per tower, 3 × 2.5 (brown +5 V, blue GND), from the box's top-feed XT60 up the
+  post. At the top: two WAGO 221-415 (+5 V, GND), each with 4 NYAF 2.5 mm² tails to 4 female
+  XT60s, one per strand top (male XT60 on the strip). T1 and T7 have none.
 - **Supply C only:** PSU 5 (−V) / 7 (+V) → apex box perfboard rails, 0.5 mm².
 
 ---

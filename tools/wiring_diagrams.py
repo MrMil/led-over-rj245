@@ -491,10 +491,10 @@ def jst_block(d, x, y, title, sub, pins, w=300):
 
 
 def supply_box():
-    d = Drawing(1600, 1400, "Supply box wiring")
+    d = Drawing(1600, 1640, "Supply box wiring")
     header(d, "Supply box — A, B, D, E (and C, inside the apex box)",
-           ["Mains in, the box's own tower out on 4 JST-SM (one per face), and for boxes A and E the",
-            "neighbouring tip tower's power (XT60) and buffered data. Same pixels on all 4 faces."])
+           ["Mains in, the box's own tower out on 4 JST-SM (one per face) and a top feed (XT60), and for",
+            "boxes A and E the neighbouring tip tower's power (XT60) and buffered data. Same pixels on all 4 faces."])
     # own tower: data in -> pull-down -> buffer #1 -> 4 faces
     din = jst_block(d, 40, 190, "JST-SM in · own tower data", "from apex box",
                     [("DATA", ""), ("GND", ""), ("5V", "not connected")], w=330)
@@ -555,7 +555,10 @@ def supply_box():
     d.rect(1200, top3 - 10, 360, 130, fill="#fde3e3", stroke=RED)
     d.lines(1214, top3 + 16, ["XT60 out · neighbour power", "A: to T1 · E: to T7",
                               "3 × 2.5 cable, brown +5 V, blue GND", "B, C, D: none"], size=13, fill="#333")
-    d.lines(40, top3 + 170, ["All flags with the same label are the same wire. The data inputs' 5V pins stay unconnected so two supplies never join on +5 V.",
+    d.rect(1200, top3 + 140, 360, 130, fill="#fde3e3", stroke=RED)
+    d.lines(1214, top3 + 166, ["XT60 out · top feed, own tower", "3 × 2.5 cable up the post, WAGOs",
+                               "at the top → 4 × XT60 to the strand tops", "every box: A, B, C, D, E"], size=13, fill="#333")
+    d.lines(40, top3 + 310, ["All flags with the same label are the same wire. The data inputs' 5V pins stay unconnected so two supplies never join on +5 V.",
                              "Box C: the same circuit inside the apex box (its own tower is T4), plus the perfboard feed for the ESP32 / transceivers.",
                              "100 Ω resistors optional. The neighbours' data shares one buffer gate per tower; it is split to 4 faces at that tower's base."],
             size=14, fill="#333")

@@ -47,12 +47,11 @@ alongside. The tip tower's base splits both passively to its 4 strands
   enclosure repo's `100W` design (S-100-5, C14, perfboard, 4 JST-SM exits), so no mains
   terminals are exposed in a tower base. C shares the apex `100W-masterbox` with the ESP32 or
   receivers. **Enclosure change pending:** data inputs on A, B, D and E; XT60 and neighbour
-  data outputs on A and E.
+  data outputs on A and E; a top-feed XT60 out on all five.
 - **One JST-SM per strand, from the box straight to the strand** (owner, 2026-10-18). Every
   strand is ≤ 2.5 A at full white except the 2000 mm tower's 3.3 A. A JST-SM contact is rated
-  3 A, and it also carries the strand's DATA, so no separate connector is needed. For the
-  2000 strands, either the top feed (if the strip voltage-drop test calls for it) halves the
-  bottom current, or the firmware holds the tower to 12 A (~8 % dimmer at full white only).
+  3 A, and it also carries the strand's DATA, so no separate connector is needed. The 2000
+  strands' top feed (below) brings their bottom current under 3 A.
 - **XT60 only where a whole tower's current travels between towers** (owner, 2026-10-18): the
   runs A → T1 and E → T7, 2 per statue, 8 XT60 pairs in total. A tower's combined current
   (5.6 A on these runs) is over a JST-SM's 3 A.
@@ -72,8 +71,26 @@ alongside. The tip tower's base splits both passively to its 4 strands
   mains, and every supply box receives a data cable with its own GND from the apex box. That
   ties all supplies to one reference, and only leakage-level current flows through it.
   **Changed 2026-10-18:** previously a 1.5 mm² bond wire along each arm.
-- **T4's strands may get a second feed at the top, up the post** (agent, 2026-10-10), from
-  supply C. Decided by the strip voltage-drop test (`TODO.md`).
+- **Every strand of 75 LEDs or more gets a second feed at its top, on an XT60** (owner,
+  2026-10-25): the strands of T2–T6, 20 per statue, 40 in all. The tip towers' 57-LED strands
+  are fed from the bottom only. The owner did not state the reason or why the line is at 75;
+  the measured evidence on record is the bench reel that read 3 V at LED 111 fed from one end
+  ([led_power_budget.md](led_power_budget.md)). Feeding both ends roughly halves the current
+  through each end and the drop along the strip. The towers that get a top feed are exactly the
+  ones with their own supply box, so no top-feed current crosses between towers.
+  **Changed 2026-10-25:** previously only T4's strands, and only if the strip voltage-drop
+  test called for it (agent, 2026-10-10); that test no longer decides anything.
+- **One top-feed cable per tower: one XT60 at the bottom, four at the top** (owner,
+  2026-10-25: "a thick cable with 1 xt60 at the bottom and 4 at the top"). It plugs into an XT60
+  out on the tower's own supply box (all five: A–E), climbs the post, and splits at the top to
+  the 4 strand tops. 10 cables, 10 box outputs, 50 XT60 pairs in all (10 bottom + 40 top).
+  The cable is the buried runs' 3 × 2.5 mm² (agent, 2026-10-25): one cable type to stock, and
+  a tower's top share (~6.6 A worst case at T4, half its 13.1 A) is well inside it. The split is
+  two WAGO 221-415 at the top of the post, +5 V and GND, each with the cable core in and 4 short
+  NYAF 2.5 mm² tails to the XT60s (agent, 2026-10-25): the same part and joint as the neighbour
+  bases, and no soldered harness to make or repair.
+- **XT60 gender: male on the strip, female on the feed cable** (agent, 2026-10-25). The
+  powered side carries the shrouded female, so an unplugged live feed has no exposed contacts.
 - **Logic power only from supply C** (agent, 2026-10-09). The apex box perfboard gets its own
   pair from C's second terminals, so tower current never flows through perfboard copper.
 - **C14 fuse 1 A on the AC side** (owner, 2026-10-09). ~240 W of input for a 100 W PSU. The
