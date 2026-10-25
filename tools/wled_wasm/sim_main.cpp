@@ -90,6 +90,7 @@ void WS2812FX::finalizeInit() {
   _segments.clear();
   _segments.push_back(Segment(0, g_w, 0, g_h));
   _segments[0].setColor(0, DEFAULT_COLOR);
+  _segments[0].refreshLightCapabilities();       // marks the segment RGB; without it color_from_palette() ignores every palette
   _currentSegment = &_segments[0];
   updatePixelBuffer();
   _transitionDur = 0;                            // no transitions: a change shows on the next frame, as a preset does

@@ -32,12 +32,19 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); f
 #unfold button { border-radius: 0 8px 8px 0; border-left: none; padding: 10px 10px; writing-mode: vertical-rl; }
 #unfold[hidden] { display: none; }
 .tabs { display: flex; gap: 0; margin: 0 -14px 10px; border-bottom: 1px solid var(--line); }
-.tabs button { flex: 1; border: none; border-bottom: 2px solid transparent; border-radius: 0; background: none; color: var(--muted); padding: 7px 8px; }
+.tabs button { flex: 1; border: none; border-bottom: 2px solid transparent; border-radius: 0; background: none; color: var(--muted); padding: 7px 4px; font-size: 12px; }
 .tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
 .tabs button:hover { border-bottom-color: var(--line); }
 .swatch { display: grid; grid-template-columns: 1fr 96px; gap: 4px 8px; align-items: center; margin: 3px 0; }
 .swatch input[type=color] { width: 66px; height: 26px; padding: 0 2px; background: #241f19; border: 1px solid var(--line); border-radius: 6px; justify-self: end; }
 .wled { font-size: 11px; color: var(--muted); }
+.pl { border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; margin: 6px 0; font-size: 12px; }
+.pl.playing { border-color: var(--accent); }
+.pl .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: 2px 0; }
+.pl input[type=text] { flex: 1; min-width: 80px; background: #241f19; color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 3px 5px; font: inherit; }
+.pl input[type=number] { width: 52px; background: #241f19; color: var(--accent); border: 1px solid var(--line); border-radius: 6px; padding: 2px 4px; font: inherit; text-align: right; }
+.pl .fx { color: var(--muted); }
+.pl button.small { margin-top: 0; padding: 2px 7px; }
 .panel h2 { font-size: 11px; margin: 12px 0 6px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .param { display: grid; grid-template-columns: 1fr 96px; gap: 4px 8px; align-items: center; margin: 3px 0; }
 .param label { color: var(--fg); }
@@ -47,6 +54,7 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); f
 .param[hidden] { display: none; }
 .param .unit { color: var(--muted); font-size: 11px; min-width: 2ch; }
 .param input[type=range] { grid-column: 1 / -1; width: 100%; margin: 0 0 2px; accent-color: var(--accent); }
+.param input.plname { grid-column: 1 / -1; background: #241f19; color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; font: inherit; }
 .param select { grid-column: 1 / -1; background: #241f19; color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; font: inherit; }
 .views { position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); right: 12px; max-width: 62vw; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 button {
@@ -101,7 +109,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   <button id="btnDrone" aria-pressed="false" title="Press again to reset the camera">Drone view</button>
   <button id="btnTop" aria-pressed="false">Top-down view</button>
   <button id="btnDrag" aria-pressed="false" title="Move towers by dragging them in any view">✥ Drag towers</button>
-  <button id="btnNight" aria-pressed="false" title="Night: dark sky, the LEDs carry the picture">Night</button>
+  <button id="btnNight" aria-pressed="false" title="Night: no sunlight, the LEDs are the only light">Night</button>
   <button id="btnPng">Save PNG</button>
   <button id="btnUndo" title="Undo (Ctrl/Cmd+Z)" disabled>↶ Undo</button>
   <button id="btnRedo" title="Redo (Ctrl/Cmd+Shift+Z)" disabled>↷ Redo</button>
@@ -120,16 +128,22 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
 </div>
 
 <div id="unfold" hidden>
-  <button id="btnUnfold" data-tab="settings" aria-label="Show the settings panel">Settings ▸</button>
-  <button id="btnUnfoldAnim" data-tab="anim" aria-label="Show the animations panel">Animations ▸</button>
+  <button data-tab="layout" aria-label="Show the layout panel">Layout ▸</button>
+  <button data-tab="pictures" aria-label="Show the pictures panel">Pictures ▸</button>
+  <button data-tab="anim" aria-label="Show the animations panel">Animations ▸</button>
+  <button data-tab="power" aria-label="Show the power panel">Power ▸</button>
+  <button data-tab="file" aria-label="Show the file panel">File ▸</button>
 </div>
 <div class="panel" id="panel">
   <h1>Statue tower sightlines <button id="btnFold" class="small" title="Fold the panel to the side" aria-label="Hide the panel">◂ Hide</button></h1>
   <div class="tabs" role="tablist">
-    <button role="tab" data-tab="settings" aria-selected="true" aria-controls="tabSettings">Settings</button>
-    <button role="tab" data-tab="anim" aria-selected="false" aria-controls="tabAnim">Animations</button>
+    <button role="tab" data-tab="layout" aria-selected="true" aria-controls="tab_layout">Layout</button>
+    <button role="tab" data-tab="pictures" aria-selected="false" aria-controls="tab_pictures">Pictures</button>
+    <button role="tab" data-tab="anim" aria-selected="false" aria-controls="tab_anim">Animations</button>
+    <button role="tab" data-tab="power" aria-selected="false" aria-controls="tab_power">Power</button>
+    <button role="tab" data-tab="file" aria-selected="false" aria-controls="tab_file">File</button>
   </div>
-  <div id="tabAnim" role="tabpanel" hidden>
+  <div id="tab_anim" role="tabpanel" hidden>
     <div class="note">The LEDs behind every face run the chosen show. WLED entries run the controller firmware's own effect code, compiled to WebAssembly (<code>tools/wled_wasm/</code>), on the same logical strip the controller drives or on the rolled matrix, with WLED's own controls; the JSON below is the segment state the controller's <code>/json/state</code> takes.</div>
     <h2>LED show</h2>
     <div class="param"><label for="anim">Animation</label><span></span><select id="anim"></select></div>
@@ -141,8 +155,15 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       <textarea id="wledJson" rows="3" spellcheck="false" readonly></textarea>
       <div class="bar"><button id="btnWledCopy" class="small">Copy</button><button id="btnWledDefaults" class="small">Effect defaults</button></div>
     </div>
+    <h2>Playlist</h2>
+    <div class="note">Set an effect up above, then add it: each entry is a WLED preset with its own duration. The list plays in order here (hard cuts; the controller cross-fades over the transition time). Export writes WLED's <code>presets.json</code>: on the controller, Config → Security &amp; Updates → Restore presets, which replaces every preset there.</div>
+    <div class="bar"><button id="btnPlAdd" class="small">Add the current effect</button><button id="btnPlPlay" class="small">▶ Play the playlist</button><span id="plStatus" class="note"></span></div>
+    <div id="plList"></div>
+    <div id="plParams"></div>
+    <div class="param"><label for="plName">Playlist name</label><span></span><input type="text" id="plName" class="plname"></div>
+    <div class="bar"><button id="btnPlExport" class="small">Download presets.json</button><button id="btnPlCopy" class="small">Copy</button><button id="btnPlLoad" class="small">Load presets.json</button><input id="plFileIn" type="file" accept="application/json,.json" hidden><span id="plMsg" class="note"></span></div>
   </div>
-  <div id="tabSettings" role="tabpanel">
+  <div id="tab_layout" role="tabpanel">
   <div class="note">Two statues of 7 towers, corner to the centre of the circle, a bench at the centre. The defaults are the artist's final layout (23 Oct 2026): her heights and her six spacings, placed on the solver's rails so neighbouring silhouettes touch from the bench. "Reset to the solved layout" places them so that, seen from the bench, neighbouring silhouettes exactly touch. Each of the four viewpoints below owns 14 faces; its picture is projected from that eye onto them and cut into the wood, lit by the LEDs behind. Lengths in mm.</div>
 
   <h2>Towers</h2>
@@ -185,6 +206,10 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   <div class="check"><input id="labels" type="checkbox"><label for="labels">Tower labels</label></div>
   <div class="note">Eye view: drag to look around, right-drag (or arrow keys / WASD, or the pad) to walk. Drone: drag to orbit, right-drag or arrows to pan, wheel or ± to zoom. Press the active view button, or ⟲, to reset that camera.</div>
 
+  <h2>Readout</h2>
+  <div id="readout"></div>
+  </div>
+  <div id="tab_pictures" role="tabpanel" hidden>
   <h2>Pictures and cuts</h2>
   <div class="note">White (or outside the DXF shapes) stays wood, the rest is cut and lit. A picture is stretched to the silhouette of its 14 faces as seen from the viewpoint, shrinkable from each side. Moving towers re-projects the cuts.</div>
   <div id="cutParams"></div>
@@ -199,11 +224,15 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   <div class="bar"><label for="expStatue">Statue</label><select id="expStatue"><option value="0">Statue 1</option><option value="1">Statue 2</option></select><button id="btnExpStatue" class="small">Export statue (28 faces)</button></div>
   <div class="bar"><button id="btnExpAll" class="small">Export everything (56 faces)</button><span id="expMsg" class="note"></span></div>
 
+  </div>
+  <div id="tab_power" role="tabpanel" hidden>
   <h2>LEDs and power supplies</h2>
   <div id="powerParams"></div>
   <button id="btnPower" class="small">Compute LEDs and power supplies</button>
   <div id="powerOut"></div>
 
+  </div>
+  <div id="tab_file" role="tabpanel" hidden>
   <h2>Export and load</h2>
   <div class="note">The JSON carries every input, the pictures, and the solved layout (positions in mm, LED counts, supplies) for the blueprints and the LED order in the led-over-rj245 repository. Older files without pictures load too.</div>
   <div class="bar"><button id="btnExport" class="small">Export JSON</button><button id="btnLoadFile" class="small">Load JSON file</button><input id="fileIn" type="file" accept="application/json,.json" hidden></div>
@@ -211,13 +240,17 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   <div class="bar"><button id="btnApplyJson" class="small">Apply pasted JSON</button><button id="btnCopyJson" class="small">Copy</button><span id="jsonMsg" class="note"></span></div>
   <div class="bar"><button id="btnDefaults" class="small">Restore project defaults</button><span class="note">Your last settings are kept in this browser and come back when you reopen the page.</span></div>
 
-  <h2>Readout</h2>
-  <div id="readout"></div>
   </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="wled_wasm/wled_fx.js"></script>
 <script>
@@ -261,6 +294,11 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     same2: false,                      // true: statue 2's viewpoints mirror statue 1's. Off by default so the artist can upload statue 2's pictures directly (owner, 2026-10-23)
     night: q.get('night') === '1',
     anim: 'rainbow', speed: 0.15, bright: 1.0,   // 0.15 cycles/s: one full rainbow pass every ~7 s, plainly moving
+    // The playlist: WLED presets in order, each the effect state (seg, bri) with a duration and transition in seconds, exported
+    // as presets.json for the controller (owner, 2026-10-25). Numbered from `first` (10: the workshop range, docs/firmware/README.md);
+    // the playlist preset itself follows the entries.
+    playlist: { name: 'Show', first: 10, entries: [] },
+    glow: 1.0,                         // the LEDs as a light source: bloom around the lit faces and the light each tower throws on its surroundings (owner, 2026-10-25)
     // WLED state for the ported effects: the keys of the controller's /json/state (bri = master brightness; seg = the one
     // segment: fx effect id, sx/ix/c1/c2/c3 sliders, o1–o3 checkboxes, col the three colours, pal the palette id). Defaults
     // are WLED's own (orange, 128, 128). Kept in this shape so the sim's state can be sent to the controller as it is.
@@ -711,11 +749,13 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   const towersGroup = new THREE.Group(); scene.add(towersGroup);
 
   // ---------- Night, wood and the lit diffuser ----------
+  // Night: no sunlight at all (owner, 2026-10-25). A faint starlight hemisphere keeps the wood and the ground legible; the LEDs
+  // are the only real light, so what the camera sees is what they throw.
   function applyNight() {
     const n = state.night;
-    scene.background.set(n ? 0x0b1020 : 0xc9dbea); scene.fog.color.set(n ? 0x0b1020 : 0xc9dbea);
-    hemi.intensity = n ? 0.12 : 0.5; sun.intensity = n ? 0.15 : 1.05; sun.color.set(n ? 0x9fb4ff : 0xfff1dc);
-    ground.material.color.set(n ? 0x4a4030 : 0xc9ad83); grid.material.transparent = true; grid.material.opacity = n ? 0.25 : 1;
+    scene.background.set(n ? 0x05070e : 0xc9dbea); scene.fog.color.set(n ? 0x05070e : 0xc9dbea);
+    hemi.intensity = n ? 0.05 : 0.5; sun.intensity = n ? 0 : 1.05; sun.visible = !n;
+    ground.material.color.set(n ? 0x2a2620 : 0xc9ad83); grid.material.transparent = true; grid.material.opacity = n ? 0.12 : 1;
     $('btnNight').setAttribute('aria-pressed', n);
   }
   function hash(x, y, s) { const v = Math.sin(x * 12.9898 + y * 78.233 + s * 37.719) * 43758.5453; return v - Math.floor(v); }
@@ -840,12 +880,14 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   let ledTextures = [];
   function animate(t) {
     const anim = ANIMATIONS[state.anim] || ANIMATIONS.rainbow;
-    if (anim.wled !== undefined) {                           // one WLED frame over the whole segment, then per-tower copies
+    const pl = playlistAt(t);                                // a playing playlist overrides the chosen show
+    if (pl || anim.wled !== undefined) {                     // one WLED frame over the whole segment, then per-tower copies
       if (!WLED.ready) return;
-      WLED.layout(ledTextures.map(l => l.n), WLED.matrixFor(WLED.EFFECTS.get(anim.wled)));
-      WLED.apply(Object.assign({}, state.wled.seg, { fx: anim.wled }));
+      const seg = pl ? pl.entry.seg : Object.assign({}, state.wled.seg, { fx: anim.wled }), bri = pl ? pl.entry.bri : state.wled.bri;
+      WLED.layout(ledTextures.map(l => l.n), WLED.matrixFor(WLED.EFFECTS.get(seg.fx)));
+      WLED.apply(seg);
       const px = WLED.frame(t * 1000);
-      ledTextures.forEach((l, k) => { if (l.n >= 1) { WLED.copyTower(k, px, l.tex.image.data, state.wled.bri); l.tex.needsUpdate = true; } });
+      ledTextures.forEach((l, k) => { if (l.n >= 1) { WLED.copyTower(k, px, l.tex.image.data, bri); l.tex.needsUpdate = true; } });
       return;
     }
     const nMax = Math.max(1, ...ledTextures.map(l => l.n)), total = ledTextures.reduce((a, l) => a + l.n, 0);
@@ -907,7 +949,9 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       const toCentre = new THREE.Vector3(-t.x, 0, -t.z).normalize();
       const n = Math.floor((t.h - base) * state.lpm + 1e-9);
       const tex = new THREE.DataTexture(new Uint8Array(Math.max(1, n) * 4), Math.max(1, n), 1, THREE.RGBAFormat); tex.magFilter = tex.minFilter = THREE.NearestFilter; tex.needsUpdate = true;
-      ledTextures.push({ tex, n, tower: t });
+      // the light this tower throws on the ground and its neighbours: a point light inside the box, coloured each frame from its LEDs
+      const light = new THREE.PointLight(0xffffff, 0, 9, 2); light.position.set(0, t.h * 0.55, 0); g.add(light);
+      ledTextures.push({ tex, n, tower: t, light });
       faces.forEach((f, fi) => {
         const normal = new THREE.Vector3(0, 0, 1).applyAxisAngle(Y, f.ry).applyAxisAngle(Y, g.rotation.y);
         const inner = normal.dot(toCentre) > 0.01;
@@ -1201,7 +1245,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     camDrone.position.add(d); controls.target.add(d); controls.update();
   }
   function droneZoom(f) { camDrone.position.sub(controls.target).multiplyScalar(f).add(controls.target); controls.update(); }
-  function resize() { renderer.setSize(viewEl.clientWidth, viewEl.clientHeight, false); applyView(); }
+  function resize() { renderer.setSize(viewEl.clientWidth, viewEl.clientHeight, false); composer.setSize(viewEl.clientWidth, viewEl.clientHeight); applyView(); }
   window.addEventListener('resize', resize);
 
   // Right-drag walks the eye camera (3D-software habit); the drone's own right-drag pan comes from OrbitControls.
@@ -1283,8 +1327,30 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
 
   const tmp = new THREE.Vector3();
   let t0 = performance.now();
+  // ---------- The LEDs as a light source (owner, 2026-10-25: "a source of light, not a colourful matte piece") ----------
+  // Bloom around everything bright (the lit diffusers; by day the threshold sits above the sky), and the per-tower point
+  // lights above, coloured by the mean of the tower's LEDs and scaled by how much of the strip is lit.
+  const composer = new THREE.EffectComposer(renderer, renderer.capabilities.isWebGL2 ? new THREE.WebGLMultisampleRenderTarget(2, 2, { format: THREE.RGBAFormat }) : undefined);
+  const renderPass = new THREE.RenderPass(scene, camCentre); composer.addPass(renderPass);
+  const bloom = new THREE.UnrealBloomPass(new THREE.Vector2(2, 2), 0.5, 0.3, 0.8); composer.addPass(bloom);
+  // Tuned by eye, 2026-10-25. The bloom threshold stays above anything the point lights can make the wood (about 0.5 at night),
+  // so only the diffusers bloom: a lower threshold bloomed the lit wood and the halo filled the cut shapes, hiding the picture.
+  // By day the LEDs throw nothing the eye can see next to the sun, so the lights and the bloom are off (owner, 2026-10-25).
+  const GLOW = { light: { night: 0.9, day: 0 }, bloom: { night: 0.45, day: 0 }, threshold: { night: 0.7, day: 0.95 }, radius: 0.3 };
+  function lightTowers() {
+    const night = state.night, k = state.glow * (night ? GLOW.light.night : GLOW.light.day);
+    ledTextures.forEach(({ tex, n, light }) => {
+      const d = tex.image.data; let r = 0, g = 0, b = 0;
+      for (let i = 0; i < n; i++) { r += d[i * 4]; g += d[i * 4 + 1]; b += d[i * 4 + 2]; }
+      const m = Math.max(r, g, b, 1);
+      light.color.setRGB(r / m, g / m, b / m);
+      light.intensity = n ? k * (m / n / 255) * Math.min(1.6, n / 60) : 0;   // m / n: mean of the brightest channel; n / 60: a metre of strip is one unit
+    });
+    bloom.strength = state.glow * (night ? GLOW.bloom.night : GLOW.bloom.day); bloom.threshold = night ? GLOW.threshold.night : GLOW.threshold.day;
+  }
   function render() {
-    keyWalk(); animate((performance.now() - t0) / 1000);
+    const tNow = (performance.now() - t0) / 1000;
+    keyWalk(); animate(tNow); lightTowers(); playlistStatus(tNow);
     const cam = isPov() ? camCentre : view === 'drone' ? camDrone : camTop;
     if (view === 'drone') controls.update();
     const base = isPov() ? 0.09 : 0.032;        // small in the drone view so labels never hide towers
@@ -1296,7 +1362,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       const w = view === 'top' ? 0.7 : l.position.distanceTo(cam.position) * base;
       l.scale.set(w, w / u.ratio, 1);
     });
-    renderer.render(scene, cam);
+    renderPass.camera = cam; composer.render();
     requestAnimationFrame(render);
   }
 
@@ -1446,6 +1512,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   $('anim').value = state.anim; $('anim').addEventListener('change', () => { state.anim = $('anim').value; const e = wledSelected(); if (e) wledLoadDefaults(e); showWled(); saveSettings(); });
   paramRow($('showParams'), 'speed', 'Animation speed', 0, 0.5, 0.01, 'cyc/s', () => state.speed, v => state.speed = v, () => saveSettings());
   paramRow($('showParams'), 'bright', 'Diffuser brightness', 0.2, 3, 0.1, '×', () => state.bright, v => state.bright = v, () => { towersGroup.traverse(o => { if (o.material && o.material.uniforms && o.material.uniforms.gain) o.material.uniforms.gain.value = state.bright; }); saveSettings(); });
+  paramRow($('showParams'), 'glow', 'LED glow (bloom and light on the surroundings)', 0, 2, 0.1, '×', () => state.glow, v => state.glow = v, () => saveSettings());
 
   // ---------- WLED controls: generated from the effect's metadata string, as WLED's own UI does (parseMeta above) ----------
   function wledSelected() { const a = ANIMATIONS[state.anim]; return (a && a.wled !== undefined && WLED.ready) ? WLED.EFFECTS.get(a.wled) : null; }
@@ -1473,6 +1540,94 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   $('btnWledDefaults').addEventListener('click', () => { const e = wledSelected(); if (e) { wledLoadDefaults(e); showWled(); saveSettings(); } });
   $('btnWledCopy').addEventListener('click', () => { try { navigator.clipboard.writeText($('wledJson').value); } catch (e) { $('wledJson').select(); } });
   showWled();
+
+  // ---------- Playlist: WLED presets in order, played here and exported as presets.json (owner, 2026-10-25) ----------
+  let playing = null;                                       // { t0 } while the playlist runs in the sim
+  function playlistAt(t) {                                  // the entry due at page time t, or null
+    const E = state.playlist.entries; if (!playing || !E.length) return null;
+    const total = E.reduce((a, e) => a + Math.max(0.1, e.dur), 0); let u = (t - playing.t0) % total;
+    for (let i = 0; i < E.length; i++) { const d = Math.max(0.1, E[i].dur); if (u < d) return { index: i, entry: E[i], left: d - u }; u -= d; }
+    return { index: 0, entry: E[0], left: 0 };
+  }
+  const segCopy = seg => JSON.parse(JSON.stringify(seg));
+  function plAdd() {
+    const e = wledSelected(); if (!e) { $('plMsg').textContent = 'Choose a WLED effect first: the page\'s own shows are not controller presets.'; return; }
+    const seg = segCopy(state.wled.seg); seg.fx = e.id;
+    state.playlist.entries.push({ name: e.meta.name, dur: 30, tr: 0.7, bri: state.wled.bri, seg });
+    $('plMsg').textContent = ''; showPlaylist(); saveSettings();
+  }
+  const fxName = fx => { const e = WLED.EFFECTS.get(fx); return e ? e.meta.name : `effect ${fx}`; };
+  function showPlaylist() {
+    const host = $('plList'), E = state.playlist.entries; host.innerHTML = '';
+    const at = playlistAt((performance.now() - t0) / 1000);
+    E.forEach((en, i) => {
+      const d = document.createElement('div'); d.className = 'pl' + (at && at.index === i ? ' playing' : '');
+      d.innerHTML = `<div class="row"><b>${state.playlist.first + i}</b><input type="text" value="" aria-label="Preset name"><span class="fx">${fxName(en.seg.fx)}</span></div>
+        <div class="row"><label>for <input type="number" min="0.1" max="3600" step="1" data-k="dur"> s</label><label>fade <input type="number" min="0" max="60" step="0.1" data-k="tr"> s</label>
+        <button class="small" data-a="load" title="Put this entry's settings back in the controls">Edit</button><button class="small" data-a="up">↑</button><button class="small" data-a="down">↓</button><button class="small" data-a="del">✕</button></div>`;
+      const name = d.querySelector('input[type=text]'); name.value = en.name; name.addEventListener('change', () => { en.name = name.value; saveSettings(); });
+      d.querySelectorAll('input[type=number]').forEach(inp => { inp.value = en[inp.dataset.k]; inp.addEventListener('change', () => { const v = parseFloat(inp.value); if (!isNaN(v)) en[inp.dataset.k] = Math.max(+inp.min, Math.min(+inp.max, v)); inp.value = en[inp.dataset.k]; saveSettings(); }); });
+      d.querySelectorAll('button[data-a]').forEach(b => b.addEventListener('click', () => {
+        const a = b.dataset.a;
+        if (a === 'del') E.splice(i, 1);
+        else if (a === 'up' && i > 0) [E[i - 1], E[i]] = [E[i], E[i - 1]];
+        else if (a === 'down' && i < E.length - 1) [E[i + 1], E[i]] = [E[i], E[i + 1]];
+        else if (a === 'load') { state.wled.seg = segCopy(en.seg); state.wled.bri = en.bri; state.anim = 'wled:' + en.seg.fx; fillAnimSelect(); $('anim').value = state.anim; showWled(); }
+        showPlaylist(); saveSettings();
+      }));
+      host.appendChild(d);
+    });
+    $('btnPlPlay').textContent = playing ? '■ Stop' : '▶ Play the playlist'; $('btnPlPlay').disabled = !E.length;
+    $('plName').value = state.playlist.name;
+  }
+  paramRow($('plParams'), 'plFirst', 'First preset number', 1, 200, 1, '', () => state.playlist.first, v => state.playlist.first = Math.round(v), () => { showPlaylist(); saveSettings(); });
+  $('plName').addEventListener('change', () => { state.playlist.name = $('plName').value || 'Show'; saveSettings(); });
+  $('btnPlAdd').addEventListener('click', plAdd);
+  $('btnPlPlay').addEventListener('click', () => { playing = playing ? null : { t0: (performance.now() - t0) / 1000 }; showPlaylist(); });
+  let plTick = 0;
+  function playlistStatus(t) {                              // once a second while playing: which entry, how long it has left
+    if (!playing) { if ($('plStatus').textContent) $('plStatus').textContent = ''; return; }
+    if (t - plTick < 1) return; plTick = t;
+    const at = playlistAt(t); if (!at) return;
+    $('plStatus').textContent = `${at.index + 1} / ${state.playlist.entries.length} · ${at.entry.name} · ${Math.ceil(at.left)} s`;
+    document.querySelectorAll('#plList .pl').forEach((d, i) => d.classList.toggle('playing', i === at.index));
+  }
+  // presets.json, as the controller saves it (wled00/presets.cpp): one preset per entry, then the playlist preset
+  const presetSeg = seg => ({ id: 0, on: true, col: seg.col.map(c => c.slice(0, 3)), fx: seg.fx, sx: seg.sx, ix: seg.ix, pal: seg.pal, c1: seg.c1, c2: seg.c2, c3: seg.c3, o1: !!seg.o1, o2: !!seg.o2, o3: !!seg.o3, si: seg.si | 0 });
+  function presetsObject() {
+    const P = state.playlist, out = {}, ids = [];
+    P.entries.forEach((e, i) => { const id = P.first + i; ids.push(id); out[id] = { n: e.name, on: true, bri: e.bri, transition: Math.round(e.tr * 10), mainseg: 0, seg: [presetSeg(e.seg)] }; });
+    out[P.first + P.entries.length] = { n: P.name, on: true, playlist: { ps: ids, dur: P.entries.map(e => Math.round(e.dur * 10)), transition: P.entries.map(e => Math.round(e.tr * 10)), repeat: 0, end: 0, r: false } };
+    return out;
+  }
+  function loadPresets(o) {                                  // a presets.json: the playlist preset's order if there is one, else every preset with a segment
+    const num = (v, d) => typeof v === 'number' && !isNaN(v) ? v : d;
+    const ids = Object.keys(o).filter(k => /^\d+$/.test(k)).map(Number).sort((a, b) => a - b);
+    const plId = ids.find(id => o[id] && o[id].playlist && Array.isArray(o[id].playlist.ps));
+    const pl = plId !== undefined ? o[plId].playlist : null;
+    const order = pl ? pl.ps : ids.filter(id => o[id] && Array.isArray(o[id].seg));
+    const entries = [];
+    order.forEach((id, i) => {
+      const pr = o[id]; if (!pr || !Array.isArray(pr.seg) || !pr.seg.length) return;
+      const sg = pr.seg.find(x => x && (x.id === 0 || x.id === undefined)) || pr.seg[0], seg = segCopy(state.wled.seg);
+      ['fx', 'sx', 'ix', 'c1', 'c2', 'c3', 'pal', 'si'].forEach(k => seg[k] = num(sg[k], seg[k]));
+      ['o1', 'o2', 'o3'].forEach(k => { if (typeof sg[k] === 'boolean') seg[k] = sg[k]; });
+      if (Array.isArray(sg.col)) sg.col.slice(0, 3).forEach((c, j) => { if (Array.isArray(c) && c.length >= 3) seg.col[j] = c.slice(0, 3).map(v => Math.min(255, Math.max(0, num(v, 0)))); });
+      const dur = pl && Array.isArray(pl.dur) ? num(pl.dur[i], num(pl.dur[0], 300)) : 300, tr = pl && Array.isArray(pl.transition) ? num(pl.transition[i], num(pl.transition[0], 7)) : num(pr.transition, 7);
+      entries.push({ name: pr.n || fxName(seg.fx), dur: dur / 10, tr: tr / 10, bri: num(pr.bri, 255), seg });
+    });
+    if (!entries.length) throw new Error('no presets with a segment in the file');
+    state.playlist = { name: pl ? (o[plId].n || 'Show') : 'Show', first: order[0] || 10, entries };
+    showPlaylist(); saveSettings();
+  }
+  $('btnPlExport').addEventListener('click', () => {
+    const txt = JSON.stringify(presetsObject(), null, 1); $('plMsg').textContent = `presets ${state.playlist.first}–${state.playlist.first + state.playlist.entries.length} written.`;
+    try { const a = document.createElement('a'); a.download = 'presets.json'; a.href = URL.createObjectURL(new Blob([txt], { type: 'application/json' })); a.click(); } catch (e) { /* downloads blocked: use Copy */ }
+  });
+  $('btnPlCopy').addEventListener('click', () => { const txt = JSON.stringify(presetsObject()); if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(() => { $('plMsg').textContent = 'Copied presets.json.'; }, () => { $('plMsg').textContent = txt; }); else $('plMsg').textContent = txt; });
+  $('btnPlLoad').addEventListener('click', () => $('plFileIn').click());
+  $('plFileIn').addEventListener('change', () => { const f = $('plFileIn').files[0]; if (!f) return; const rd = new FileReader(); rd.onload = () => { try { loadPresets(JSON.parse(rd.result)); $('plMsg').textContent = `Loaded ${f.name}: ${state.playlist.entries.length} entries.`; } catch (e) { $('plMsg').textContent = 'Could not load: ' + e.message; } }; rd.readAsText(f); $('plFileIn').value = ''; });
+  showPlaylist();
   POV_KEYS.forEach(key => { const o = document.createElement('option'); o.value = key; o.textContent = POV_LABEL[key]; $('expPov').appendChild(o); });
   const fillTowerSelect = () => { $('expTower').innerHTML = ''; (current ? current.towers : []).forEach(t => { const o = document.createElement('option'); o.value = t.idx; o.textContent = `Statue ${t.statue} · ${t.name}`; $('expTower').appendChild(o); }); };
   $('btnExpPov').addEventListener('click', () => exportFaces(faceList.filter(f => f.povKey === $('expPov').value), `dxf-${$('expPov').value}.zip`));
@@ -1524,17 +1679,18 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       viewer: { eye_mm: state.eye, fov_deg: state.hfov },
       leds: { unlit_base_mm: state.unlit, per_m: state.lpm, mA_per_led: state.mA, psu_max_A: state.psuA, reel_mm: state.reel },
       projection: {
-        border_mm: state.border, thickness_mm: state.thick, statue2_mirrors_statue1: state.same2, animation: state.anim, speed: state.speed, brightness: state.bright, night: state.night,
+        border_mm: state.border, thickness_mm: state.thick, statue2_mirrors_statue1: state.same2, animation: state.anim, speed: state.speed, brightness: state.bright, glow: state.glow, night: state.night,
         wled: JSON.parse(JSON.stringify(state.wled)),      // the WLED state as /json/state takes it (bri + one segment)
+        playlist: JSON.parse(JSON.stringify(state.playlist)),
         viewpoints: POV_KEYS.map(key => { const p = state.povs[key]; return { key, fit: p.fit, distance_mm: p.dist, eye_mm: p.eye, fov_deg: p.fov, insets: Object.assign({}, p.insets), picture: p.image ? { name: p.image.name, type: p.image.type, source: p.image.source } : null }; }),
       },
     };
   }
   // pictures come back from their saved source; raster decoding is asynchronous, so loaders call build() again when done
-  function applyProjection(PR) {
+  function applyProjection(PR, fromStore) {   // fromStore: a viewpoint saved without a picture keeps the page's default, never clears it
     if (!PR) return Promise.resolve();
     const num = (v, d) => typeof v === 'number' && !isNaN(v) ? v : d;
-    state.border = num(PR.border_mm, state.border); state.thick = num(PR.thickness_mm, state.thick); state.speed = num(PR.speed, state.speed); state.bright = num(PR.brightness, state.bright);
+    state.border = num(PR.border_mm, state.border); state.thick = num(PR.thickness_mm, state.thick); state.speed = num(PR.speed, state.speed); state.bright = num(PR.brightness, state.bright); state.glow = num(PR.glow, state.glow);
     if (typeof PR.statue2_mirrors_statue1 === 'boolean') state.same2 = PR.statue2_mirrors_statue1; if (typeof PR.night === 'boolean') state.night = PR.night;
     if (PR.animation && (ANIMATIONS[PR.animation] || /^wled:\d+$/.test(PR.animation))) state.anim = PR.animation;   // WLED entries may still be loading
     if (PR.wled && typeof PR.wled === 'object') {           // merge key by key: a file from before a key existed keeps the default
@@ -1544,13 +1700,17 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
       ['o1', 'o2', 'o3'].forEach(k => { if (typeof S[k] === 'boolean') seg[k] = S[k]; });
       if (Array.isArray(S.col)) S.col.slice(0, 3).forEach((c, i) => { if (Array.isArray(c) && c.length >= 3) seg.col[i] = c.slice(0, 3).map(v => Math.min(255, Math.max(0, num(v, 0)))); });
     }
+    if (PR.playlist && Array.isArray(PR.playlist.entries)) {
+      const E = PR.playlist.entries.filter(e => e && e.seg && typeof e.seg.fx === 'number').map(e => ({ name: String(e.name || ''), dur: num(e.dur, 30), tr: num(e.tr, 0.7), bri: num(e.bri, 255), seg: Object.assign(JSON.parse(JSON.stringify(state.wled.seg)), e.seg) }));
+      state.playlist = { name: String(PR.playlist.name || 'Show'), first: num(PR.playlist.first, 10), entries: E };
+    }
     const pending = [];
     (PR.viewpoints || []).forEach(v => {
       const p = state.povs[v.key]; if (!p) return;
       if (v.key.startsWith('back')) { p.dist = num(v.distance_mm, p.dist); p.eye = num(v.eye_mm, p.eye); p.fov = num(v.fov_deg, p.fov); }
       if (v.insets) ['l', 'r', 't', 'b'].forEach(sd => p.insets[sd] = num(v.insets[sd], 0));
       p.fit = ['band', 'band7'].includes(v.fit) ? v.fit : 'full'; const fs = document.getElementById('fit_' + v.key); if (fs) fs.value = p.fit;
-      p.image = null;
+      if (!fromStore || (v.picture && v.picture.source)) p.image = null;
       if (v.picture && v.picture.source) {
         if (v.picture.type === 'dxf') { try { p.image = Object.assign(maskFromDxf(v.picture.source), { name: v.picture.name, type: 'dxf', source: v.picture.source }); } catch (e) { /* skip a bad picture */ } }
         else pending.push(new Promise(res => { const img = new Image(); img.onload = () => { p.image = Object.assign(maskFromRaster(img), { name: v.picture.name, type: 'raster', source: v.picture.source }); res(); }; img.onerror = res; img.src = v.picture.source; }));
@@ -1560,10 +1720,12 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   }
   // Last settings live in this browser only. URL state parameters win (headless renders and shared links stay
   // deterministic) and are never saved; view flags alone still restore the store.
-  const STORE_KEY = 'statueSettings';
+  // The key carries a version: bumping it makes every browser that opened an earlier page start from the project defaults
+  // once, with no "Restore project defaults" click (owner, 2026-10-25: a store from an earlier page left the faces uncut).
+  const STORE_KEY = 'statueSettings/2';
   const urlHasParams = [...q.keys()].some(k => !['view', 'shot', 'dump', 'labels', 'tab'].includes(k));
   let storedParams = null;
-  try { if (!urlHasParams) storedParams = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); } catch (e) { storedParams = null; }
+  try { localStorage.removeItem('statueSettings'); if (!urlHasParams) storedParams = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); } catch (e) { storedParams = null; }
   function saveSettings() {
     if (urlHasParams) return;
     try { localStorage.setItem(STORE_KEY, JSON.stringify(paramsObject())); }
@@ -1636,8 +1798,8 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     $('decoupled').checked = state.decoupled; showDecoupled();
     [1, 2, 3, 4, 5, 6, 7].forEach(i => inputs['h2_' + i]()); [1, 2, 3, 4, 5, 6].forEach(i => { inputs['p' + i](); inputs['p2_' + i](); });
     askOpen = null; snap = null; $('confirmBox').hidden = true;
-    const after = () => { Object.values(inputs).forEach(f => f()); if (typeof showSame2 === 'function') { showSame2(); POV_KEYS.forEach(showPicture); $('anim').value = state.anim; showWled(); applyNight(); } applyView(); build(); };
-    if (P.projection) { const done = applyProjection(P.projection).then(after); if (P.projection.viewpoints && P.projection.viewpoints.some(v => v.picture && v.picture.type === 'raster')) { applyView(); build(); return done; } }   // raster pictures arrive a moment later
+    const after = () => { Object.values(inputs).forEach(f => f()); if (typeof showSame2 === 'function') { showSame2(); POV_KEYS.forEach(showPicture); $('anim').value = state.anim; showWled(); showPlaylist(); applyNight(); } applyView(); build(); };
+    if (P.projection) { const done = applyProjection(P.projection, !!o.from_store).then(after); if (P.projection.viewpoints && P.projection.viewpoints.some(v => v.picture && v.picture.type === 'raster')) { applyView(); build(); return done; } }   // raster pictures arrive a moment later
     after(); return Promise.resolve();
   }
   const jsonMsg = t => { $('jsonMsg').textContent = t; };
@@ -1702,23 +1864,25 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   });
 
   // Fold the panel to the side so the render is unobstructed; remembered per browser (a convenience only).
-  // Two tabs, Settings and Animations, so the show can be chosen without the settings (owner, 2026-10-25); folded, each tab
-  // has its own edge button. The chosen tab is remembered per browser like the fold; ?tab=anim opens it from a link.
-  const setTab = tab => { const a = tab === 'anim'; $('tabAnim').hidden = !a; $('tabSettings').hidden = a; document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === tab)); $('panel').scrollTop = 0; try { localStorage.setItem('panelTab', tab); } catch (e) { /* storage unavailable */ } };
+  // Tabs: Layout, Pictures, Animations, Power, File (owner, 2026-10-25: the animations reachable with the settings hidden,
+  // then the rest split the same way). Folded, each tab has its own edge button. The chosen tab is remembered per browser
+  // like the fold; ?tab=<name> opens one from a link. "settings", the name before the split, opens Layout.
+  const TABS = ['layout', 'pictures', 'anim', 'power', 'file'];
+  const setTab = tab => { if (!TABS.includes(tab)) tab = 'layout'; TABS.forEach(k => { $('tab_' + k).hidden = k !== tab; }); document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === tab)); $('panel').scrollTop = 0; try { localStorage.setItem('panelTab', tab); } catch (e) { /* storage unavailable */ } };
   document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
   const setFolded = f => { $('panel').classList.toggle('folded', f); $('unfold').hidden = !f; try { localStorage.setItem('panelFolded', f ? '1' : '0'); } catch (e) { /* storage unavailable */ } };
   $('btnFold').addEventListener('click', () => setFolded(true));
   document.querySelectorAll('#unfold button').forEach(b => b.addEventListener('click', () => { setTab(b.dataset.tab); setFolded(false); }));
-  try { if (localStorage.getItem('panelFolded') === '1') setFolded(true); if (localStorage.getItem('panelTab') === 'anim') setTab('anim'); } catch (e) { /* storage unavailable */ }
-  if (q.get('tab') === 'anim') setTab('anim');
+  try { if (localStorage.getItem('panelFolded') === '1') setFolded(true); const t = localStorage.getItem('panelTab'); if (t) setTab(t); } catch (e) { /* storage unavailable */ }
+  if (q.get('tab')) setTab(q.get('tab'));
   $('shotClose').addEventListener('click', () => { $('shotOverlay').hidden = true; $('shotImg').src = ''; });
 
-  window.statueDebug = { get faces() { return faceList; }, get current() { return current; }, povPose, povBox, projectPt, faceMask, analyse, contours, state };   // for tests and scripts
+  window.statueDebug = { get faces() { return faceList; }, get current() { return current; }, povPose, povBox, projectPt, faceMask, analyse, contours, state, GLOW, bloom, composer, presetsObject, loadPresets };   // for tests and scripts
   applyNight();
   resize();
   build();
   resetCentre();
-  if (storedParams) { try { applyObject({ format: JSON_FORMAT, params: storedParams }); resetCentre(); } catch (e) { /* ignore a stale or foreign store */ } }
+  if (storedParams) { try { applyObject({ format: JSON_FORMAT, params: storedParams, from_store: true }); resetCentre(); } catch (e) { /* ignore a stale or foreign store */ } }
   // ?load=<url>: open a saved layout JSON by link (the handoff file with its pictures), so headless renders and shared links
   // show the real file; like every URL parameter it is never written to the store.
   const loaded = q.get('load') ? fetch(q.get('load')).then(r => r.json()).then(o => applyObject(o)).then(() => { resetCentre(); jsonMsg(`Loaded ${q.get('load')}.`); }).catch(e => jsonMsg('Could not load ' + q.get('load') + ': ' + e.message))

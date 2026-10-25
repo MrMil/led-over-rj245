@@ -43,7 +43,23 @@ face so a slider only recomputes what it touches. The page opens with the demo s
 - **LEDs are a diffuser one plate thickness behind the cut face** (owner: thickness 6 mm default).
   Each LED lights the line opposite it and blends additively with its neighbours over one pitch, in
   a shader fed by one small colour texture per tower; all four faces share the strip as in the real
-  wiring. Night mode darkens the scene.
+  wiring.
+- **The LEDs are a light source, not a lit texture** (owner, 2026-10-25: "a source of light and not just a
+  colourful matte piece"). Two things make that: a bloom pass over the frame (Three.js `UnrealBloomPass`, loaded
+  from the same CDN as the controls), so lit faces glow past their edges, and one point light inside every tower,
+  coloured each frame by the mean of its LEDs and scaled by how much strip is lit, so the ground and the
+  neighbouring wood take the colour. The `LED glow` slider scales both; the constants behind it (`GLOW` in the
+  page) were set by eye on the drone view. The bloom threshold stays above anything the point lights can make
+  the wood, so only the diffusers bloom: the first values (night 0.7 at threshold 0.4) bloomed the lit wood too
+  and the halo filled the cut shapes, which hid the picture (owner, 2026-10-25: "I don't see the smiley now").
+  By day both are off (owner, 2026-10-25: "the sun is so much stronger than LEDs"; the first version lit the
+  floor by day, which looked wrong); the glow exists at night only. The render goes through an
+  `EffectComposer` with a multisampled target where WebGL2 allows, so edges stay smooth; `Save PNG` reads the
+  same canvas. Point lights cast no shadows: fourteen shadow maps would cost more than the look is worth.
+- **Night has no sunlight** (owner, 2026-10-25). The sun is off and a faint starlight hemisphere keeps the wood
+  and the ground legible; the LEDs are the only real light. **Changed 2026-10-25:** previously night kept a dim
+  blue sun (0.15) so the towers stayed visible; the point lights now do that where the show reaches, and the
+  owner asked for a night with no sun.
 - **The LED show is a registry of animations, and the moving rainbow is its first entry** (owner,
   2026-10-21: "a slowly moving rainbow … the basis for the future animations work"). Each entry is
   a `frame(ctx)` function called once per tower per frame with the time, the tower, its LED count and

@@ -72,16 +72,26 @@ subtends. Headless Chrome produced `renders/*.png` from URL parameters (`view=ce
   defaults" clears them and reloads** (owner, 2026-10-19). URL parameters win over the store and
   are never saved, so headless renders and shared links stay deterministic. The store is a
   per-browser convenience: the page works without it, and the JSON export is the real record.
+  **The store key carries a version (`statueSettings/2` since 2026-10-25) and the loader never
+  clears a picture the store does not carry** (owner, 2026-10-25: a store written by an earlier
+  page left the owner with uncut faces, and nobody who opened the page before must have to press
+  "Restore project defaults"). Bumping the key makes every browser start from the project defaults
+  once; a stored viewpoint without a picture, whether cleared on purpose or dropped when the store
+  was full, keeps the page's default picture, because an uncut statue is the worse surprise. The
+  JSON file keeps the strict reading: no picture in the file means no picture.
 - **Eye height runs from 400 mm** (owner, 2026-10-19: the piece should work for people sitting).
   The level-top heights and the mural band follow the eye height, so a seated eye gives a different
   height set; the export records which eye height it was computed for.
 - **The settings panel folds to a tab at the left edge** (owner, 2026-10-19) so the render can be
   seen whole; the folded state is kept in `localStorage` only, a per-browser convenience that the
-  page works without. **Since 2026-10-25 the panel has two tabs, Settings and Animations, and the
-  folded edge shows one button per tab** (owner, 2026-10-25: the animations must be reachable
-  with the settings hidden). The LED show controls moved from the settings to the Animations tab;
-  the chosen tab is kept beside the folded state, and `?tab=anim` opens it from a link, never
-  saved like every URL parameter.
+  page works without. **Since 2026-10-25 the panel has five tabs, Layout, Pictures, Animations, Power and File, and
+  the folded edge shows one button per tab** (owner, 2026-10-25: first the animations reachable
+  with the settings hidden, then the rest split "into tabs that make sense"). Layout holds the
+  towers, statue 2, spacings, circle, arm shape, viewer and readout, the things the solver and the
+  sightlines depend on; Pictures the viewpoints' pictures, islands and the DXF export; Power the
+  LED and supply calculator; File the JSON export and load. The chosen tab is kept beside the
+  folded state, and `?tab=<name>` opens one from a link, never saved like every URL parameter;
+  the old name `settings` opens Layout.
 - **The top-down camera sits at 25 m, under the fog start** (agent, 2026-10-19): at 60 m the
   scene fog greyed the plan out.
 - **The 4 m radius is the apex tower's far corner, not its centre** (agent, 2026-10-19). "The

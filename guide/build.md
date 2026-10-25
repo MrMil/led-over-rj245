@@ -19,11 +19,11 @@ Follow [wiring.md](wiring.md) and the diagrams there.
 - ESP32 board (breadboard-style, 30 rows), in this order along the board:
   - ESP32 on 2 × 1×15 female headers, at one end, over a mounting hole.
   - 74AHCT125 #1 in a socket.
-  - 74AHCT125 #2 on 2 × 1×7 female headers, at the other end, over the other mounting hole.
-    Dry-fit the two strips over a bolt head first; if they don't sit flat, file their inside
-    faces.
-  To bolt or unbolt the board, pull the ESP32 and chip #2; the hex key goes in between the
-  header strips. Tape or a dab of hot glue keeps chip #2 in its headers.
+  - 74AHCT125 #2 in a socket, at the other end, over the other mounting hole.
+  The board is held by **one bolt**, in the hole under the ESP32. The hole under chip #2
+  gets no bolt: that end rests on its standoff. To bolt or unbolt the board, pull the ESP32;
+  the hex key goes in between its header strips. When pulling chip #2, hold that end of the
+  board down.
 - 7 × 100 Ω, standing upright: one lead in a free hole of the chip output's row (not on the
   chip leg, which must stay removable), the wire to the tower data output soldered to the
   top lead. Heat shrink over the resistor and that joint. Tie the 7 wires down so they don't

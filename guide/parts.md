@@ -8,8 +8,7 @@
 |---|---|---|
 | ESP32 dev board, 30-pin, ESP32-WROOM-32, USB-C, CH340C (HW-394), **no PSRAM** | 1 + 1 spare | All 14 GPIOs in [wiring.md](wiring.md) must be broken out. Both arrive with the installation's WLED on them; do not reflash. Laptop needs the CH340 driver |
 | Female header 1 × 15, 2.54 mm (Assmann A-BL254-EG-Z15D) | 2 + 2 spare | The ESP32 plugs into a socket so it can be swapped in the field |
-| Female header 1 × 7, 2.54 mm | 2 + 1 spare | Controller 74AHCT125 #2, in place of its socket: it sits over a mounting bolt |
-| 74AHCT125 (DIP-14) + socket | 2 (controller, optional) + 14 (supply boxes: A 2, B 1, C 1, D 1, E 2 per statue) + 2 spare; one socket fewer (controller #2 uses headers) | SN74AHCT125N + Assmann A 14-LC-TT sockets. Replacements must be **AHCT** and DIP (N suffix; NSR is surface-mount) |
+| 74AHCT125 (DIP-14) + socket | 2 (controller, optional) + 14 (supply boxes: A 2, B 1, C 1, D 1, E 2 per statue) + 2 spare | SN74AHCT125N + Assmann A 14-LC-TT sockets. Replacements must be **AHCT** and DIP (N suffix; NSR is surface-mount) |
 | MAX485 module, 5 V (blue board) | 7 + 7 + 2 spare | 7 transmitters (controller), 7 receivers (box 2). **Chip must read MAX485** |
 | Resistor 560 Ω | 14 + spares | Idle bias, 2 per receiver |
 | Resistor 100 Ω | 7 + 7 + 44 + spares | Controller outputs (optional), box 2 outputs, supply-box outputs (optional) |

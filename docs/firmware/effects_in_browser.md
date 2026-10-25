@@ -92,6 +92,43 @@ none of those can build it; rebuild it whenever the fork's effects change.
   of frames each; it fails on a trap and lists effects that stayed dark. Run it after a rebuild. 2026-10-25: 365
   runs, no traps.
 
+## Playlists and presets.json
+
+The Animations tab keeps a playlist: the current effect with its settings is added as an entry, each entry has a
+name, a duration and a transition in seconds, the list plays in order in the sim, and it exports as the
+controller's `presets.json` (owner, 2026-10-25: "the user can change the animation parameters and then add them to
+the playlist, we can then export the playlist as json from the browser and upload them to the real WLED").
+
+- **The export is the firmware's own file, not a format of ours** (agent, 2026-10-25): one preset per entry
+  (`n, on, bri, transition, mainseg, seg:[{id:0, on, col, fx, sx, ix, pal, c1, c2, c3, o1–o3, si}]`, as
+  `wled00/presets.cpp` writes them) and the playlist as the next preset (`playlist:{ps, dur, transition, repeat:0,
+  end:0, r:false}`, times in tenths of a second, as `wled00/playlist.cpp` reads them). It goes onto the controller
+  with Config → Security & Updates → Restore presets, which replaces every preset there; the same file loads back
+  into the page, so the controller's presets can be brought to the sim.
+- **Entries are numbered from a chosen first preset, 10 by default, and the playlist preset follows them**:
+  10–99 is the workshop range of the preset-numbering decision in [README.md](README.md), and the boot preset the
+  crew needs is then one known number, the last one.
+- **The segment of a preset carries no bounds** (`start`/`stop` left out), so it applies to whatever segment the
+  controller is configured with; the sim's strip-or-matrix choice is not exported, because on the controller it is
+  the LED map's business ([README.md](README.md)).
+- **The sim cuts hard between entries; the controller cross-fades** over the transition time. The firmware's
+  cross-fade runs the old effect alongside the new one in `WS2812FX::service()`'s blending, which the sim does not
+  compile; the durations and the order are what a playlist is judged on.
+- **The playlist travels in the browser store and in the handoff JSON** (`params.projection.playlist`,
+  [../strips_and_power/statue_geometry/handoff.md](../strips_and_power/statue_geometry/handoff.md)) so it survives
+  a reload; `presets.json` is the record that leaves the page.
+
+## Gotchas
+
+- **The segment's light capabilities must be refreshed after it is created** (`refreshLightCapabilities()` in
+  `finalizeInit()`, `sim_main.cpp`). The firmware does it from its bus list in `setGeometry()`; the sim creates its
+  segment directly, and without the call `_isRGB` stays false and `color_from_palette()` returns the segment colour
+  for every palette. Until 2026-10-25 every effect that takes its colours from the palette (Aurora, Pacifica, the
+  noise effects, …) showed orange in the sim; the owner noticed on Aurora.
+- **"Default" in the palette list is the firmware's rule, not a palette**: with palette 0 an effect asking for one
+  of the three colour slots gets that colour, and an effect asking for the palette gets its own `pal=` default
+  (Party when it has none). Selecting an effect loads its `pal=` default into the list, as the phone does.
+
 ## Licence
 
 WLED is EUPL-1.2 and `wled_fx.js` is compiled from it, so the built file is a derivative distributed by this

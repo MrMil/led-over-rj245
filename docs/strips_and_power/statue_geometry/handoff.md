@@ -15,7 +15,9 @@ comes back into this repository for the field blueprints and the LED order. It h
 every input under `params` (so a load restores the page exactly), the solved layout under
 `layout` (per tower: height, lit length, LEDs per face, `r_mm`, `azimuth_deg`, plan `x_mm`/`y_mm`
 with statue 1's apex on +y and azimuth clockwise from it, box yaw, spacing to the next tower,
-full-white current) and the per-side and both-sides totals under `leds_power`. Since 2026-10-25 `params.projection.wled` carries the WLED state of the Animations tab in the
+full-white current) and the per-side and both-sides totals under `leds_power`. Since 2026-10-25 `params.projection.glow` carries the LED glow slider ([pictures.md](pictures.md)),
+`params.projection.playlist` the playlist of presets ([../../firmware/effects_in_browser.md](../../firmware/effects_in_browser.md)) and
+`params.projection.wled` carries the WLED state of the Animations tab in the
 controller's `/json/state` shape (`bri` and one segment), merged key by key on load so older
 files keep the defaults ([../../firmware/effects_in_browser.md](../../firmware/effects_in_browser.md)).
 Derived values
