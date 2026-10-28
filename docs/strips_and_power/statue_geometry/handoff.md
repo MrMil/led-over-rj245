@@ -23,7 +23,11 @@ files keep the defaults ([../../firmware/effects_in_browser.md](../../firmware/e
 Derived values
 are ignored on load. The current export lives at `layout/statue-layout.json`; regenerate it
 with `?dump=1` (see the Hosting section's headless command in git history, or the dump line in
-the page) rather than by hand. **Not done yet:** `tools/wiring_diagrams.py` still carries its own
+the page) rather than by hand. **To dump the page's own defaults, add any state parameter, e.g.
+`?dump=1&thick=4`** (agent, 2026-10-28): `dump`, `view`, `shot`, `labels` and `tab` alone still
+restore the browser store, so a bare `?dump=1` exports whatever that browser last had, pictures
+included, not the project defaults. Since 2026-10-28 the file is such a dump (4 mm wood,
+[final_layout.md](final_layout.md#4-mm-wood-owner-2026-10-28)), so the file and the page's defaults agree. **Not done yet:** `tools/wiring_diagrams.py` still carries its own
 `TOWER_H`; reading heights from this file is the natural next step once the artist's layout is
 final.
 
@@ -56,6 +60,12 @@ stops Jekyll from processing the site, since nothing here is a Jekyll site and i
 build time and surprises. The same file is also published as a private claude.ai artifact; since 2026-10-25 the page loads
 `tools/wled_wasm/wled_fx.js` beside it, published as the artifact's supporting file; republish both
 together whenever either changes ([../../firmware/effects_in_browser.md](../../firmware/effects_in_browser.md)).
+**Since 2026-10-28 the artifact also carries the page's default files beside it** (owner: "the
+claude.ai should have 4 mm"): `art/eye/EyeFinal-4mm-supported.dxf`, `art/praying/Praying-supported.dxf`
+and `wled/presets.json`, at those same paths. The page fetches each default at `../<path>` (the
+repository served from its root) and, when that fails, at `<path>` beside the page, because the
+artifact has no parent directory; before this the artifact opened with the smiley and no playlist.
+Republish the drawings and the presets too whenever they change.
 Locally, `.claude/launch.json` serves the repository root on 127.0.0.1:8765 (`python3 -m
 http.server`) for Claude Code's preview browser, so agents can open the page, `?load=` the layout
 file and run `?dump=1` against it; a bare `file://` page cannot fetch the layout file (agent,

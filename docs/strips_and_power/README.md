@@ -32,7 +32,7 @@ and timing.
 ### Pages
 
 - [`tower_layout.md`](tower_layout.md) — 7 towers per statue, 4 faces per tower, same data on all faces, strips on the central post, no dividers.
-- [`statue_geometry/`](statue_geometry/README.md) — where the towers stand in the 18 m circle (the final layout, the 400 / 412 mm box), what the eye at the bench sees, the 3D sightline check (`tools/statue_render.html`, `renders/`).
+- [`statue_geometry/`](statue_geometry/README.md) — where the towers stand in the 18 m circle (the final layout, the 400 / 408 mm box of 4 mm plywood), what the eye at the bench sees, the 3D sightline check (`tools/statue_render.html`, `renders/`).
 - [`tower_base.md`](tower_base.md) — tower data splitting: 74AHCT125 in each power box for its own tower; neighbour towers' bases are passive.
 - [`power_distribution.md`](power_distribution.md) — five supplies per statue, mains from the apex, JST-SM per strand, XT60 runs to the tip towers, cable types.
 - [`trenches.md`](trenches.md) — what runs in each trench segment.

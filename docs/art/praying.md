@@ -53,14 +53,31 @@ corrected the same day; the 0.2 run left the top 370 mm of the apex blank and is
 the eye's format ([eye_final.md](eye_final.md)), with `manifest.json`, `plates.png` and the bundle
 `art/praying/Praying-cut-files.zip`. The owner sends the supported drawing and the bundle to the
 artist together, so that on her approval she can pass the bundle straight to the laser cutter (owner,
-2026-10-28). Six slivers under 10 mm² dropped; every plate one piece, no islands, nothing loose.
+2026-10-28). Every plate one piece, no islands, nothing loose.
 `--cut` names the files after the projection's viewpoint (`back2` → `S2`); the first run named them
 `S1` and was redone.
 
+## The 4 mm layout (2026-10-28)
+
+Checked against the re-extracted `art/praying/back2-projection.json` for the 4 mm box
+([eye_final.md](eye_final.md#the-4-mm-layout-2026-10-28)): no islands, nothing loose, no specks on any
+plate, so `Praying-supported.dxf` stays the drawing of record. The cut files and the zip were
+regenerated the same day for the 408 mm plates (one sliver dropped, six on the 412 mm plates;
+`Praying-supported-check.png` and `Praying-supported-plates.png` are that run's check, clean); the
+bundle sent to the artist in the morning was the 412 mm one and must be replaced by this one, which the
+owner has (artist's approval by phone, 2026-10-28).
+
 ```bash
 .venv/bin/python tools/check_art.py art/praying/Praying.dxf --projection art/praying/back2-projection.json --shrink-top 0.02 --support --bake --out art/praying
+```
+
+```bash
 .venv/bin/python tools/check_art.py art/praying/Praying-supported.dxf --projection art/praying/back2-projection.json --cut art/praying/cut
 ```
+
+## The 22 mm trial (2026-10-28)
+
+A 22 mm wood minimum was tried: 47 bars at 22 spots, all on the apex plates. The owner kept 15 mm and the trial files were deleted ([cuttability.md](cuttability.md)).
 
 ## Related
 

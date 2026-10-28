@@ -1,0 +1,8 @@
+# The project's Python environment: python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+# Used by every tool in tools/ (face_art.py, check_art.py, embed_pictures.py, wiring_diagrams.py, wled_image.py, wled_wasm/build.py).
+numpy
+pillow
+scipy
+shapely
+ezdxf
+matplotlib

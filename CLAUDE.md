@@ -13,6 +13,9 @@ checkout, do not clone it.
   `guide/img/*.svg`. Pin tables also appear, hand-written, in `guide/wiring.md` and
   `guide/build.md`; keep them in step.
 - **Never commit the WLED AP password** (the repo is meant to be public).
+- **Python runs in the project's `.venv`** (`.venv/bin/python`, gitignored; create it once with
+  `python3 -m venv .venv && .venv/bin/pip install -r requirements.txt`). Use it for every tool in
+  `tools/`; never set up another environment or install outside it.
 - Decisions marked "(agent, date)" in `docs/` were not confirmed by the owner; confirm before
   building on them.
 

@@ -22,7 +22,7 @@ R12, mm, layer OUTLINE the plate and CUT the holes), manifest.json and plates.pn
 has islands or loose pieces. Outputs go to --out: <stem>-check.png (the drawing with every problem
 circled), <stem>-plates.png (the 14 plates), and with --support <stem>-supported.dxf/.png.
 
-Needs numpy, shapely, ezdxf, matplotlib (python3 -m venv .venv; .venv/bin/pip install numpy shapely ezdxf matplotlib).
+Runs in the project's .venv (python3 -m venv .venv; .venv/bin/pip install -r requirements.txt).
 """
 import argparse, json, math, os, sys
 import numpy as np, shapely, shapely.affinity, ezdxf
@@ -464,11 +464,12 @@ def main():
     ap.add_argument('--support', action='store_true', help='add bridges until nothing is loose, write <stem>-supported.dxf/.png')
     ap.add_argument('--bake', action='store_true', help='write the supported drawing so that it needs no bottom inset')
     ap.add_argument('--out', default=None, help='output directory (default: next to the drawing)')
+    ap.add_argument('--stem', default=None, help="output file stem (default: the drawing's own name), e.g. EyeFinal-4mm for EyeFinal-4mm-supported.dxf")
     ap.add_argument('--rounds', type=int, default=4)
     ap.add_argument('--cut', default=None, metavar='DIR', help='write the per-plate cut files (R12 DXF, mm) and plates.png into DIR; the drawing is cut as given, with --shrink-bottom if any')
     a = ap.parse_args()
     out_dir = a.out or os.path.dirname(os.path.abspath(a.drawing)); os.makedirs(out_dir, exist_ok=True)
-    stem = os.path.join(out_dir, os.path.splitext(os.path.basename(a.drawing))[0])
+    stem = os.path.join(out_dir, a.stem or os.path.splitext(os.path.basename(a.drawing))[0])
     black, units = read_drawing(a.drawing)
     bounds = black.bounds
     print(f"{a.drawing}: {len(polys(black))} cut shapes, units code {units}, box {bounds[2]-bounds[0]:.2f} x {bounds[3]-bounds[1]:.2f}")

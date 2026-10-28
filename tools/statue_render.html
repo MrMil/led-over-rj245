@@ -294,7 +294,7 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     psuA: num('psua', 18),             // current ceiling per supply
     reel: num('reel', 5000),           // reel length, mm
     border: num('border', 20),         // wood kept around every face, mm, measured on the wood
-    thick: num('thick', 6),            // plywood thickness, mm: the box is side + 2 × thick outside, and the diffuser sits this far behind the cut face
+    thick: num('thick', 4),            // plywood thickness, mm (4 since 2026-10-28, owner; 6 before): the box is side + 2 × thick outside, and the diffuser sits this far behind the cut face
     same2: false,                      // true: statue 2's viewpoints mirror statue 1's. Off by default so the artist can upload statue 2's pictures directly (owner, 2026-10-23)
     night: q.get('night') === '1',
     anim: 'rainbow', speed: 0.15, bright: 1.0,   // 0.15 cycles/s: one full rainbow pass every ~7 s, plainly moving
@@ -585,10 +585,13 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   // were applied gets its default: the smiley is a demo, never a choice to keep.
   // The show, wled/presets.json (docs/firmware/README.md), is the default playlist the same way (owner, 2026-10-28: "add the
   // playlist to the default settings as well"): an empty playlist after the store and ?load were applied gets it.
-  const DEFAULT_PICTURES = { back1: '../art/eye/EyeFinal-supported-added.dxf', back2: '../art/praying/Praying-supported.dxf' };
+  const DEFAULT_PICTURES = { back1: '../art/eye/EyeFinal-4mm-supported.dxf', back2: '../art/praying/Praying-supported.dxf' };
   const DEFAULT_PLAYLIST = '../wled/presets.json';
   function loadDefaults() {
-    const fetched = src => fetch(src, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(String(r.status)); return r.text(); });
+    // '../x' finds the file when the repository is served; the published artifact carries the same files beside the page,
+    // so the path without '../' is tried next (agent, 2026-10-28: the artifact opened with the smiley and no playlist).
+    const fetchOne = src => fetch(src, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(String(r.status)); return r.text(); });
+    const fetched = src => fetchOne(src).catch(() => fetchOne(src.replace(/^\.\.\//, '')));
     const pics = Object.entries(DEFAULT_PICTURES).map(([key, src]) => {
       const p = state.povs[key];
       if (p.image && p.image.name !== 'demo smiley') return Promise.resolve(false);

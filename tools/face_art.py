@@ -20,7 +20,7 @@ border through wood at least CORE_MM wide, else it is bridged), cuts no narrower
 wood no narrower than MIN_WOOD_MM, nothing anchored at one end only.
 
 Usage:  python3 tools/face_art.py [name ...] [-v]   (names: bench1 back1 bench2 back2; default all)
-Needs numpy, pillow, scipy and shapely (python3 -m venv .venv; .venv/bin/pip install numpy pillow scipy shapely).
+Runs in the project's .venv (python3 -m venv .venv; .venv/bin/pip install -r requirements.txt).
 Output: art/dxf/S<statue>-T<n>-<face>.dxf (one per plate), art/<name>.png (the picture for the tool),
 art/<name>-preview.png (the picture with the faces, their wood borders and unlit bases drawn in).
 """

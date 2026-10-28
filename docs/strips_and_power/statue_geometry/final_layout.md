@@ -2,7 +2,7 @@
 
 Path: [docs](../../README.md) › [strips_and_power](../README.md) › [statue_geometry](README.md) › **final_layout**
 Parent: [README.md](README.md)
-**Covers:** the artist's final layout as the tool's default, the 400 / 412 mm box and which faces are long, and the bench at the centre.
+**Covers:** the artist's final layout as the tool's default, the 400 / 408 mm box of 4 mm wood (412 with the 6 mm before it) and which faces are long, and the bench at the centre.
 
 ## Final layout (artist, 2026-10-23)
 
@@ -27,7 +27,8 @@ sit exactly where her file put them** (owner chose this over keeping her positio
 move 8 mm in, the tips up to 35 mm sideways, the spacings stay hers. `layout/statue-layout.json`
 was then regenerated from the page with `?dump=1`, and later replaced by the owner's file with the
 artist's phone changes (below), which was made with the 412 mm box; her first raw file is in git
-history.
+history. Since 2026-10-28 the file is the page's export for the 408 mm box of 4 mm wood (below),
+which moved the towers again by a few millimetres.
 **The default reads "artist's spacings", not "set by hand"** (owner, 2026-10-23: "it should be
 tool-solved"). Her six spacings are hand-set pairs in the file format, but the solver still places
 every tower so neighbouring silhouettes touch; only the spacings are hers. The badge says "set by
@@ -48,22 +49,23 @@ centre. Changed because the artist sent the final layout.
 
 ## The box: two short and two long pieces (owner, 2026-10-23)
 
-A tower is built from two 400 mm pieces on opposite sides and two 412 mm pieces on the other two,
-which cover the short pieces' edges, so the 6 mm wood thickness is accounted for: 412 × 412 mm
-outside, 400 × 400 inside. The page models it: "Short piece width" (`side`, 400) and "Wood
-thickness" (`thick`, 6) give the outside `side + 2 × thick`.
+A tower is built from two 400 mm pieces on opposite sides and two pieces on the other two that
+cover the short pieces' edges, so the wood thickness is accounted for: with 4 mm plywood (owner,
+2026-10-28, below) the long pieces are 408 mm and the box 408 × 408 mm outside, 400 × 400 inside.
+The page models it: "Short piece width" (`side`, 400) and "Wood thickness" (`thick`, 4) give the
+outside `side + 2 × thick`.
 - **Everything seen from outside uses the outside size**: the silhouettes the solver makes touch,
   the circle, the free radius and the bench clearance. So the wood thickness is a solver input now,
   and changing it re-solves like changing the side. Old files load with `side_mm` 400 read as the
-  short pieces, which makes their towers 412 outside; that is the intent, the boxes were never 400
-  outside (owner).
+  short pieces and their own `thickness_mm`, so a 6 mm file still makes 412 mm towers; that is the
+  intent, the boxes were never 400 outside (owner).
 - **Which faces are long** (owner): the inner face nearer the centre line (the line through both
   apexes) and, necessarily, the face opposite it; on the apex, which sits on the line, the inner
   face on the left as seen from the bench (A). So T1–T3 have long B and D, T4–T7 long A and C, in
   both statues. From behind, the long outer face is therefore the one farther from the centre line.
   Reason for the rule: not recorded.
 - **Each plate spans only its own piece**: picture, mask, island check and DXF of a long face are
-  412 mm wide, of a short face 400 mm, centred on the face; the 6 mm strips either side of a short
+  408 mm wide, of a short face 400 mm, centred on the face; the 4 mm strips either side of a short
   face are the long pieces' end grain, drawn as plain wood. The DXF manifest's `width_mm` and the
   export's per-tower `plate_widths_mm` (by face letter) and `outside_mm` say which is which. The
   picture box is still taken from the whole outside of the faces, because that is the silhouette.
@@ -72,6 +74,32 @@ thickness" (`thick`, 6) give the outside `side + 2 × thick`.
 **Changed 2026-10-23:** previously the box was `side` (400) outside with four equal faces of zero
 thickness, and the diffuser stood one thickness behind each face, `side − 2 × thick` wide. Changed
 because the real build uses 400 and 412 pieces.
+
+### 4 mm wood (owner, 2026-10-28)
+
+The owner went from 6 mm plywood to 4 mm ("we are considering going down to 4 mm wood … the
+sheets are 400 × 408", then "make 4 mm the default"), so the long pieces are 408 mm (400 + 2 × 4)
+and the box 408 × 408 outside. The page's `thick` default is 4, and `layout/statue-layout.json` is the
+page's own export of its defaults (`?dump=1&thick=4`: any state parameter in the URL keeps the browser
+store out of the dump, [handoff.md](handoff.md)). The 6 mm file it replaced is in git history.
+**Changed 2026-10-28:** 6 mm and 412 mm from 2026-10-23.
+- **What moved:** the solver keeps her six spacings and places the towers so the 408 mm silhouettes
+  touch, so each tower moves by the millimetres its box lost: the tips up to 11 mm sideways (T1 x
+  −1108 → −1097 mm, T7 1072 → 1061 mm), the apex 3 mm outward (8709 → 8712 mm from the centre, its
+  far corner still on the circle), the inner towers less. Bench clearance stays 2088 mm; each statue
+  spans 31.2° from its eye point instead of 31.4°. Heights and apexes did not change, so LED counts,
+  currents, the supply grouping, the trench segments (to the millimetre) and the CAT5e length did not
+  either.
+- **The back viewpoints' projections moved with the towers**, so the artist's drawings land a few
+  millimetres differently on every plate: `art/eye/back1-projection.json` and
+  `art/praying/back2-projection.json` were re-extracted (still identical to each other) and the
+  drawings re-checked. The praying figure needed nothing; the eye gained one piece held by 14 mm on
+  the apex, 1 mm under the rule, so it got two more supports and a new drawing of record, and both
+  sets of cut files were regenerated for 408 mm plates
+  ([../../art/eye_final.md](../../art/eye_final.md#the-4-mm-layout-2026-10-28),
+  [../../art/praying.md](../../art/praying.md#the-4-mm-layout-2026-10-28)).
+- **The cuttability minimum stays 15 mm of wood** although it was derived from 6 mm stock: thinner
+  plywood is weaker, so the margin is needed more, not less ([../../art/cuttability.md](../../art/cuttability.md)).
 
 ## The bench at the centre (owner, 2026-10-21)
 

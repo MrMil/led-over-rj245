@@ -19,7 +19,7 @@ source of truth for what happens. These docs are the source of truth for why.
 
 The system: **two statues** facing each other across an 18 m circle at Midburn (Negev desert),
 apexes 17.4 m apart, each a V of 7 towers
-(1100–2000 mm tall, 412 × 412 mm outside: two 400 mm and two 412 mm plywood sides, CNC-cut faces with a diffuser behind, a structural post in the
+(1100–2000 mm tall, 408 × 408 mm outside: two 400 mm and two 408 mm sides of 4 mm plywood, laser-cut faces with a diffuser behind, a structural post in the
 middle). WS2812B 60/m strips inside, 4 per tower (one per face, on the post, facing out), run
 one show from one controller. Outdoors for the event: dust,
 40 °C+ days, near-freezing nights, generator power, heavy 2.4 GHz congestion, Leave No Trace.

@@ -4,8 +4,8 @@ Path: [docs](../README.md) › [art](README.md) › **eye_final**
 Parent: [README.md](README.md)
 **Covers:** the artist's final drawing for the back of statue 1 (`art/eye/EyeFinal.dxf`), how it is
 checked at real plate scale with `tools/check_art.py`, what was wrong with it, the supported copy
-sent back to her (`art/eye/EyeFinal-supported.dxf`), and the 14 cut files made from it for the laser
-(`art/eye/cut/`).
+sent back to her (`art/eye/EyeFinal-supported.dxf`, then `EyeFinal-supported-added.dxf` with her band, then
+`EyeFinal-4mm-supported.dxf` for the 4 mm wood), and the 14 cut files made from it for the laser (`art/eye/cut/`).
 
 ## What the drawing is
 
@@ -99,31 +99,60 @@ below are made from it.
 
 ## The tool's default (owner, 2026-10-28)
 
-`EyeFinal-supported-added.dxf` is the back-1 picture the layout tool opens with and the one in
-`layout/statue-layout.json`, with zero insets since the 0.13 is baked in
+`EyeFinal-4mm-supported.dxf` (below; `EyeFinal-supported-added.dxf` earlier the same day) is the
+back-1 picture the layout tool opens with and the one in `layout/statue-layout.json`, with zero
+insets since the 0.13 is baked in
 ([../strips_and_power/statue_geometry/pictures.md](../strips_and_power/statue_geometry/pictures.md)).
+
+## The 4 mm layout (2026-10-28)
+
+The owner went to 4 mm wood, which makes the long plates 408 mm and moves every tower by a few
+millimetres ([../strips_and_power/statue_geometry/final_layout.md](../strips_and_power/statue_geometry/final_layout.md#4-mm-wood-owner-2026-10-28)).
+`art/eye/back1-projection.json` was re-extracted from the tool for it (the snippet above; the 6 mm
+one is in git history).
+- **Checked against it, `EyeFinal-supported-added.dxf` was one neck short** (agent, 2026-10-28): no
+  islands, but on T4-D a piece of 4678 mm² (604 mm up the plate, right of its centre, below the iris)
+  was held by 14 mm, 1 mm under the 15 mm rule; it passed on the 412 mm plates, where the same neck
+  mapped a millimetre wider. The five specks the cut rule removes anyway were the same as before.
+- **`EyeFinal-4mm-supported.dxf` is the drawing of record** (owner, 2026-10-28: "add the support"):
+  the support pass against the 4 mm projection added 2 bars on T4-D and cut the 5 specks away (3 on
+  T4-D, 2 on T3-D), nothing else; `EyeFinal-4mm-supported.png` shows them in red (specks in blue) and
+  `EyeFinal-4mm-supports-sheet.png` close up, which is what the owner showed the artist by phone.
+  `EyeFinal-4mm-check.png` and `EyeFinal-4mm-plates.png` are the check before the bars,
+  `EyeFinal-4mm-supported-check.png` and `EyeFinal-4mm-supported-plates.png` the check of the drawing of
+  record (clean), written by the `--cut` run. The artist approved it by phone the same day. `--stem` names the outputs, because the
+  drawing's own name would have given `EyeFinal-supported-added-supported.dxf`.
 
 ## The cut files (owner, 2026-10-27: "this is what we send to the laser guy")
 
 `art/eye/cut/` holds the 14 cut files for the outer faces of statue 1, made from
-`EyeFinal-supported-added.dxf`, a quarter of the wood: `S1-T<n>-<C|D>.dxf`, R12, millimetres, layer `OUTLINE` the
-plate rectangle (400 or 412 wide by the tower height, [../strips_and_power/statue_geometry/final_layout.md](../strips_and_power/statue_geometry/final_layout.md)),
+`EyeFinal-4mm-supported.dxf` on the 4 mm projection (2026-10-28; the first set, from
+`EyeFinal-supported-added.dxf` on 412 mm plates, is in git history and must not be cut: the long plates
+would be 4 mm too wide and the picture a few millimetres off at every seam), a quarter of the wood:
+`S1-T<n>-<C|D>.dxf`, R12, millimetres, layer `OUTLINE` the
+plate rectangle (400 or 408 wide by the tower height, [../strips_and_power/statue_geometry/final_layout.md](../strips_and_power/statue_geometry/final_layout.md)),
 layer `CUT` every closed contour, holes inside a cut as separate contours on the same layer, the same
 format as the generator's and the tool's exports. `manifest.json` lists each file with its size, cut
-count and cut fraction (29 to 40 % of each plate); `plates.png` shows all 14 in the order seen from
-behind; `art/eye/EyeFinal-cut-files.zip` is the bundle to send.
+count and cut fraction (30 to 40 % of each plate); `plates.png` shows all 14 in the order seen from
+behind; `art/eye/EyeFinal-cut-files.zip` is the bundle to send (regenerated 2026-10-28; whoever has the
+first zip needs this one instead).
 - **They are made by `tools/check_art.py --cut`, from the supported drawing with no inset, the same
   projection the check used** (agent, 2026-10-27): the vector shapes are mapped plate by plate
   through the tool's homography, clipped to the plate inside its 20 mm border and above the 150 mm
   unlit base, simplified at 0.05 mm, and written only when the check finds nothing loose, so a cut
   file can never disagree with the check that passed it. The tool's own DXF export was not used
   because it traces the 2 mm raster mask ([pipeline.md](pipeline.md)).
-- **Cut pieces under 10 mm² are dropped** (agent, 2026-10-27): six slivers the plate border clipped
-  off strokes that cross a seam; a laser would just scorch them. Nothing else is cleaned: the laser's
-  kerf needs no minimum cut width.
+- **Cut pieces under 10 mm² are dropped** (agent, 2026-10-27): five slivers (six on the 412 mm plates)
+  the plate border clipped off strokes that cross a seam; a laser would just scorch them. Nothing
+  else is cleaned: the laser's kerf needs no minimum cut width.
 - **Specks are cut away in the cut files too** (agent, 2026-10-28, see [praying.md](praying.md) for
-  the rule): six on the eye, 6 to 37 mm², wood wedges where two strokes all but touch.
-- Every plate is one piece of wood, no islands, nothing loose (`manifest.json` records it per file).
+  the rule); on the 4 mm drawing of record they are already gone from the drawing itself.
+- Every plate is one piece of wood, no islands, nothing loose (`manifest.json` records it per file);
+  the tool's island report on `layout/statue-layout.json` agrees.
+
+## The 22 mm trial (2026-10-28)
+
+A 22 mm wood minimum (the 15 mm lane's strength in 4 mm wood) was tried on the drawing of record: 217 bars at 92 spots, mostly in the iris. The owner kept 15 mm and the trial files were deleted ([cuttability.md](cuttability.md)).
 
 ## Running it
 
@@ -132,11 +161,16 @@ behind; `art/eye/EyeFinal-cut-files.zip` is the bundle to send.
 ```
 
 ```bash
-.venv/bin/python tools/check_art.py art/eye/EyeFinal-supported-added.dxf --cut art/eye/cut
+.venv/bin/python tools/check_art.py art/eye/EyeFinal-supported-added.dxf --projection art/eye/back1-projection.json --support --stem EyeFinal-4mm --out art/eye
 ```
 
-(`.venv` with numpy, shapely, ezdxf, matplotlib.) Without `--support` it only reports and draws
-`<stem>-check.png` and `<stem>-plates.png`. The script takes 30 s.
+```bash
+.venv/bin/python tools/check_art.py art/eye/EyeFinal-4mm-supported.dxf --projection art/eye/back1-projection.json --cut art/eye/cut
+```
+
+(the project's `.venv`, [README.md](README.md#gotchas).) Without `--support` or `--cut` it only reports and
+draws `<stem>-check.png` and `<stem>-plates.png`. The script takes 30 s. The zip is `zip -j` of the
+14 DXFs, `manifest.json` and `plates.png`.
 
 ## Related
 

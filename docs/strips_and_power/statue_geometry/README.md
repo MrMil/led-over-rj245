@@ -2,14 +2,14 @@
 
 Path: [docs](../../README.md) › [strips_and_power](../README.md) › **statue_geometry**
 Parent: [../README.md](../README.md)
-**Code:** `tools/statue_render.html` (layout solver, four viewpoints, picture projection and cut masks, LED render, DXF export, LED/supply calculator, JSON export/load, `?load=`), `tools/wled_wasm/wled_fx.js` (the controller's WLED effects compiled to WebAssembly for the LED render, [../../firmware/effects_in_browser.md](../../firmware/effects_in_browser.md)), `layout/statue-layout.json` (the handoff file: the artist's final layout, with the demo smiley), `renders/*.png`, `index.html`, `.nojekyll`, `.claude/launch.json`
+**Code:** `tools/statue_render.html` (layout solver, four viewpoints, picture projection and cut masks, LED render, DXF export, LED/supply calculator, JSON export/load, `?load=`), `tools/wled_wasm/wled_fx.js` (the controller's WLED effects compiled to WebAssembly for the LED render, [../../firmware/effects_in_browser.md](../../firmware/effects_in_browser.md)), `layout/statue-layout.json` (the handoff file: the artist's final layout on 4 mm wood, with the artist's back drawings and the demo smiley at the benches), `renders/*.png`, `index.html`, `.nojekyll`, `.claude/launch.json`
 **Covers:** where the 14 towers stand inside the 18 m circle, what a viewer at the bench sees, and
 the 3D check that the owner and the artist use to judge the tower heights. Not the wiring between
 towers ([trenches.md](../trenches.md)).
 
 ## What it does
 
-The owner's constraints (owner, 2026-10-19): every tower is a 400 × 400 mm box (412 × 412 outside since 2026-10-23, [final_layout.md](final_layout.md)); one corner of each
+The owner's constraints (owner, 2026-10-19): every tower is a 400 × 400 mm box (408 × 408 outside with 4 mm wood since 2026-10-28, 412 × 412 with 6 mm from 2026-10-23, [final_layout.md](final_layout.md)); one corner of each
 tower points at the centre of the circle (since 2026-10-23 every tower is turned like its apex
 instead, [controls.md](controls.md)); towers are 1–2 m apart, 1.5 m preferred; seen from the
 centre, the silhouettes of neighbouring towers touch, so the cut pattern reads as one picture (a
@@ -36,7 +36,7 @@ subtends. Headless Chrome produced `renders/*.png` from URL parameters (`view=ce
 ## Contents
 
 - [`controls.md`](controls.md) — individual spacings, the arm methods (touching, straight, all at 45°), statue 2 on its own, dragging towers, undo.
-- [`final_layout.md`](final_layout.md) — the artist's final layout as the default, the 400 / 412 mm box and its long faces, the bench.
+- [`final_layout.md`](final_layout.md) — the artist's final layout as the default, the 400 / 408 mm box (4 mm wood) and its long faces, the bench.
 - [`pictures.md`](pictures.md) — viewpoints, pictures projected onto the faces, cut masks, the LED render, DXF export.
 - [`handoff.md`](handoff.md) — the JSON handoff file, the LED / supply calculator, hosting.
 

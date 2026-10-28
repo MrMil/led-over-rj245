@@ -7,6 +7,12 @@
 - [x] **Layout and heights** — final from the artist, 2026-10-23: `layout/statue-layout.json`
   (heights 1100/1400/1700/2000, positions, segment lengths in
   [trenches](docs/strips_and_power/trenches.md)).
+- [x] **Wood thickness:** 4 mm, 408 mm long pieces (owner, 2026-10-28); layout, projections, the
+  eye's supports and both cut-file zips redone
+  ([final_layout](docs/strips_and_power/statue_geometry/final_layout.md#4-mm-wood-owner-2026-10-28)).
+- [ ] **Send the 4 mm cut-file zips to the laser cutter** (`art/eye/EyeFinal-cut-files.zip`,
+  `art/praying/Praying-cut-files.zip`; artist approved 2026-10-28). The zips sent before 2026-10-28
+  are for 412 mm plates and must not be cut.
 - [ ] **CAT5e length:** the apexes are 17.4 m apart, so the 10 m cables do not reach. Buy or
   make 3 × 20 m (plus spare), or decide otherwise ([cabling](docs/data_link/cabling.md)).
 - [ ] **With the artist:** strips run bottom to top; 15 cm dark base; LED count per face as

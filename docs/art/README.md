@@ -13,8 +13,9 @@ plate, each with an `.svg` twin to inspect in a browser), `art/<viewpoint>.png` 
 (the pictures with the faces drawn in), `art/<viewpoint>-towers.png` (only the plates, 8192 px, anti-aliased), `tools/embed_pictures.py` (puts the preview pictures into
 `layout/statue-layout.json`), `tools/statue_render.html` (`PICTURE_MAX`, `?load=`).
 `tools/check_art.py` checks an artist's drawing on the plates, adds supports and writes the cut files; `art/eye/`
-and `art/praying/` hold the artist's drawings, their projections and the supported copies
-([eye_final.md](eye_final.md), [praying.md](praying.md)).
+and `art/praying/` hold the artist's drawings, their projections (`<view>-projection.json`, for the 4 mm
+box since 2026-10-28) and the supported copies (`art/eye/EyeFinal-4mm-supported.dxf`,
+`art/praying/Praying-supported.dxf`; [eye_final.md](eye_final.md), [praying.md](praying.md)).
 
 **Status (owner, 2026-10-23): superseded, kept as they are.** The pictures, `art/viewpoints.json`
 and the cut files in `art/dxf/` were made for the layout of 2026-10-21. The final layout of
@@ -61,8 +62,9 @@ see [eye_final.md](eye_final.md).
 
 ## Gotchas
 
-- The generator needs a Python environment with numpy, pillow, scipy and shapely (not in the repo:
-  `python3 -m venv .venv && .venv/bin/pip install numpy pillow scipy shapely`). The 14 plates of a
+- Every tool runs in the project's `.venv` (`python3 -m venv .venv && .venv/bin/pip install -r
+  requirements.txt`, once; gitignored; owner, 2026-10-28: one environment for everything, so no
+  agent sets up another). The 14 plates of a
   picture run in parallel across the cores (each plate is independent): about 20 s per picture on
   a 16-core machine, 15 to 20 s of CPU per plate. Run one generator at a time; the plates already
   use every core.
