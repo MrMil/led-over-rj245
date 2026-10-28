@@ -127,6 +127,14 @@ the playlist, we can then export the playlist as json from the browser and uploa
 - **The sim cuts hard between entries; the controller cross-fades** over the transition time. The firmware's
   cross-fade runs the old effect alongside the new one in `WS2812FX::service()`'s blending, which the sim does not
   compile; the durations and the order are what a playlist is judged on.
+- **The show is the default playlist** (owner, 2026-10-28: "add the playlist to the default settings as well"):
+  a page whose playlist is still empty after the browser store and `?load=` were applied fetches
+  `wled/presets.json` next to itself and loads it as the Load button would, so the sim opens playing the show
+  when the repository is served (GitHub Pages or a local server) and empty as a bare file, like the default
+  pictures ([../strips_and_power/statue_geometry/pictures.md](../strips_and_power/statue_geometry/pictures.md)).
+  `layout/statue-layout.json` carries the same playlist, read from the page after loading that file, so the
+  handoff file and the page defaults agree. Change the show in `wled/presets.json`, then put it into the handoff file
+  the same way (`?load=../layout/statue-layout.json&dump=1` after clearing the file's playlist, or Load then Export).
 - **The playlist travels in the browser store and in the handoff JSON** (`params.projection.playlist`,
   [../strips_and_power/statue_geometry/handoff.md](../strips_and_power/statue_geometry/handoff.md)) so it survives
   a reload; `presets.json` is the record that leaves the page.

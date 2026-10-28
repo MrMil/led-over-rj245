@@ -41,6 +41,12 @@ corrected the same day; the 0.2 run left the top 370 mm of the apex blank and is
   corner roundings are a few mm across and stay). Vector and raster now agree: no islands on either
   back. The eye's cut files were regenerated under the same rule (six specks on T3-D, T4-C, T4-D).
 
+## The tool's default (owner, 2026-10-28)
+
+`Praying-supported.dxf` is the back-2 picture the layout tool opens with and the one in
+`layout/statue-layout.json`, with zero insets since the 0.02 is baked in
+([../strips_and_power/statue_geometry/pictures.md](../strips_and_power/statue_geometry/pictures.md)).
+
 ## The cut files (2026-10-28)
 
 `art/praying/cut/` holds the 14 cut files `S2-T<n>-<C|D>.dxf` for the outer faces of statue 2, in

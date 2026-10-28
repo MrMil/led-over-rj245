@@ -574,10 +574,37 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     return c;
   }
   const demoPicture = () => { const c = demoSmiley(); return Object.assign(maskFromRaster(c), { name: 'demo smiley', type: 'raster', source: c.toDataURL('image/png') }); };
-  state.povs.bench1.image = demoPicture();                      // the smiley is the default picture (owner, 2026-10-23: the artist is drawing new art)
+  state.povs.bench1.image = demoPicture();                      // the smiley is the bench default until the artist's bench drawings come (owner, 2026-10-23)
   state.povs.back1.image = demoPicture();
   state.povs.bench2.image = demoPicture();
   state.povs.back2.image = demoPicture();
+  // The artist's back drawings are the defaults of the two back viewpoints (owner, 2026-10-28: "make these the project defaults
+  // in the backs instead of the smileys"): the supported copies with their tool insets baked in (docs/art/eye_final.md,
+  // docs/art/praying.md), so the insets are zero. Fetched next to the page, so they need the repository served (GitHub Pages
+  // or a local server); as a bare file the smiley stays. A back viewpoint still showing the smiley after the store and ?load
+  // were applied gets its default: the smiley is a demo, never a choice to keep.
+  // The show, wled/presets.json (docs/firmware/README.md), is the default playlist the same way (owner, 2026-10-28: "add the
+  // playlist to the default settings as well"): an empty playlist after the store and ?load were applied gets it.
+  const DEFAULT_PICTURES = { back1: '../art/eye/EyeFinal-supported-added.dxf', back2: '../art/praying/Praying-supported.dxf' };
+  const DEFAULT_PLAYLIST = '../wled/presets.json';
+  function loadDefaults() {
+    const fetched = src => fetch(src, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(String(r.status)); return r.text(); });
+    const pics = Object.entries(DEFAULT_PICTURES).map(([key, src]) => {
+      const p = state.povs[key];
+      if (p.image && p.image.name !== 'demo smiley') return Promise.resolve(false);
+      return fetched(src).then(txt => {
+        p.image = Object.assign(maskFromDxf(txt), { name: src.replace(/^\.\.\//, ''), type: 'dxf', source: txt });
+        p.insets = { l: 0, r: 0, t: 0, b: 0 }; return true;
+      }).catch(() => false);
+    });
+    const playlist = state.playlist.entries.length ? Promise.resolve(false)
+      : fetched(DEFAULT_PLAYLIST).then(txt => { loadPresets(JSON.parse(txt)); return true; }).catch(() => false);
+    return Promise.all([...pics, playlist]).then(ok => {
+      if (ok.slice(0, -1).some(x => x)) { POV_KEYS.forEach(k => showPicture(k)); build(); }
+      if (ok[ok.length - 1] && typeof showPlaylist === 'function') showPlaylist();
+      return ok;
+    });
+  }
 
   // The picture's box in the viewpoint's tangent plane, shrunk by the insets. 'full' (owner's default): the whole silhouette of the
   // 14 faces from this eye, tip towers' feet included, so the picture is designed for all towers at once. 'band' / 'band7': only the
@@ -1924,12 +1951,14 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
   resize();
   build();
   resetCentre();
-  if (storedParams) { try { applyObject({ format: JSON_FORMAT, params: storedParams, from_store: true }); resetCentre(); } catch (e) { /* ignore a stale or foreign store */ } }
+  let stored = Promise.resolve();   // the store's raster pictures arrive a moment later; the defaults must not race them
+  if (storedParams) { try { stored = applyObject({ format: JSON_FORMAT, params: storedParams, from_store: true }); resetCentre(); } catch (e) { /* ignore a stale or foreign store */ } }
   // ?load=<url>: open a saved layout JSON by link (the handoff file with its pictures), so headless renders and shared links
-  // show the real file; like every URL parameter it is never written to the store.
-  const loaded = q.get('load') ? fetch(q.get('load')).then(r => r.json()).then(o => applyObject(o)).then(() => { resetCentre(); jsonMsg(`Loaded ${q.get('load')}.`); }).catch(e => jsonMsg('Could not load ' + q.get('load') + ': ' + e.message))
+  // show the real file; like every URL parameter it is never written to the store. Fetched with revalidation, so an edited
+  // handoff file is never served stale from the browser cache.
+  const loaded = q.get('load') ? fetch(q.get('load'), { cache: 'no-cache' }).then(r => r.json()).then(o => applyObject(o)).then(() => { resetCentre(); jsonMsg(`Loaded ${q.get('load')}.`); }).catch(e => jsonMsg('Could not load ' + q.get('load') + ': ' + e.message))
     : Promise.resolve();
-  loaded.then(() => {
+  Promise.all([stored, loaded]).then(loadDefaults).then(() => {
     if (q.get('dump') === '1') { document.body.textContent = ''; const pre = document.createElement('pre'); pre.id = 'dump'; pre.textContent = window.statueExport(); document.body.appendChild(pre); return; }
     render();
   });

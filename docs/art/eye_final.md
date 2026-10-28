@@ -97,6 +97,12 @@ the band drawn in, the marker squares kept. It is the drawing of record. Checked
 nothing loose, no islands; the apex plates' cuts now run from the base to the top. The cut files
 below are made from it.
 
+## The tool's default (owner, 2026-10-28)
+
+`EyeFinal-supported-added.dxf` is the back-1 picture the layout tool opens with and the one in
+`layout/statue-layout.json`, with zero insets since the 0.13 is baked in
+([../strips_and_power/statue_geometry/pictures.md](../strips_and_power/statue_geometry/pictures.md)).
+
 ## The cut files (owner, 2026-10-27: "this is what we send to the laser guy")
 
 `art/eye/cut/` holds the 14 cut files for the outer faces of statue 1, made from

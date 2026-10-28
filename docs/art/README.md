@@ -21,8 +21,9 @@ and the cut files in `art/dxf/` were made for the layout of 2026-10-21. The fina
 2026-10-23 ([../strips_and_power/statue_geometry/final_layout.md](../strips_and_power/statue_geometry/final_layout.md))
 moved every tower but the apexes, so they no longer fit the faces and must not be cut. They are
 left unchanged and not regenerated, because the artist is drawing different art (owner,
-2026-10-23: "do not change the art"). The tool shows the demo smiley again
-([pipeline.md](pipeline.md)). What follows records how they were made, for whoever picks the
+2026-10-23: "do not change the art"). The tool showed the demo smiley again from 2026-10-23
+([pipeline.md](pipeline.md)); since 2026-10-28 its back viewpoints open with the artist's drawings
+([eye_final.md](eye_final.md), [praying.md](praying.md)), the bench viewpoints still with the smiley. What follows records how they were made, for whoever picks the
 generator up again.
 **Changed 2026-10-23:** previously a working state, not final, and the tool's defaults so the
 layout could be judged with real cuts in place (owner, 2026-10-22). Changed because the layout

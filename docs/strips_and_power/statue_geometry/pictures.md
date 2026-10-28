@@ -16,7 +16,7 @@ wood above 90 % luminance, transparency counts as white) or DXF (inside the clos
 polylines, lines, circles, arcs and splines, open chains joined by endpoint), is stretched to the
 silhouette of the 14 faces as seen from that eye, shrinkable from left / right / top / bottom
 (owner), and projected onto the faces. Moving a tower re-projects its cuts; masks are cached per
-face so a slider only recomputes what it touches. The page opens with the demo smiley on all four viewpoints (owner, 2026-10-23: "leave the smiley faces for now": the artist is drawing different art). **Changed 2026-10-23:** from 2026-10-22 the page opened with the four generated pictures when it could fetch them; they were made for the previous layout and are superseded ([../art/README.md](../../art/README.md)).
+face so a slider only recomputes what it touches. The two back viewpoints open with the artist's drawings, the supported copies with their insets baked in (`art/eye/EyeFinal-supported-added.dxf`, `art/praying/Praying-supported.dxf`, [../art/eye_final.md](../../art/eye_final.md), [../art/praying.md](../../art/praying.md)), fetched next to the page when the repository is served and left as the smiley as a bare file; a back viewpoint still showing the smiley after the browser store and `?load=` were applied gets its default, so the smiley button is a demo for the session, never a choice that survives a reload (owner, 2026-10-28: "make these the project defaults in the backs instead of the smileys"). `layout/statue-layout.json` carries the same two drawings, so the file and the page defaults agree. The bench viewpoints open with the demo smiley until the artist's bench drawings come (owner, 2026-10-23: "leave the smiley faces for now"). **Changed 2026-10-28:** previously the smiley on all four. **Changed 2026-10-23:** from 2026-10-22 the page opened with the four generated pictures when it could fetch them; they were made for the previous layout and are superseded ([../art/README.md](../../art/README.md)).
 
 - **A picture fits the whole silhouette of its 14 faces from the viewpoint, the tip towers' feet
   included** (owner, 2026-10-21: "the whole point of this tool is to help us create an image that
@@ -91,7 +91,11 @@ face so a slider only recomputes what it touches. The page opens with the demo s
 - **`?load=<url>` opens a layout JSON by link** (agent, 2026-10-22): headless renders and shared
   links can show the real handoff file with its pictures, instead of the page defaults and the demo
   smiley. Like every URL parameter it is never written to the browser store, and `?dump=1` waits
-  for it, so `?load=...&dump=1` round-trips the file through the page.
+  for it, so `?load=...&dump=1` round-trips the file through the page. The file and the default
+  pictures are fetched with revalidation (`cache: 'no-cache'`) since 2026-10-28: a local static server
+  let the browser serve an edited handoff file and an edited page's drawings stale from its cache. The
+  defaults are applied only after both the browser store's and the file's pictures have arrived: the
+  store's raster smiley decodes a moment after it is applied and overwrote the defaults when they did not wait.
 - **Pictures are kept at up to 4096 px on the long side (`PICTURE_MAX`), raster and DXF alike**
   (owner, 2026-10-22: the cuts must not be pixelated). At the previous 2048 the apex tower seen from
   the bench got 3.5 mm per picture pixel, coarser than the 2 mm mask cells; 4096 keeps every face

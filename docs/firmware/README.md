@@ -62,6 +62,9 @@ installation — and how the show is built and changed.
   a commit; the file in `wled/` is the record, the controller is a copy of it. *Restore
   presets* replaces every preset on the controller, so the file must hold everything the
   controller should have.
+  Since 2026-10-28 it is also the layout tool's default playlist and the one in
+  `layout/statue-layout.json` ([effects_in_browser.md](effects_in_browser.md)), so the sim shows the
+  show as it stands.
 
 ### Animations in C++ ahead of time; only parameters and calibration in the field
 
