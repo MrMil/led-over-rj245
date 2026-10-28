@@ -1,0 +1,531 @@
+{
+ "sheet_mm": [
+  2440,
+  1220
+ ],
+ "kerf_mm": 0.0,
+ "rotate": true,
+ "sheets_used": 14,
+ "spare_plates": 0,
+ "note": "x across the sheet width, y along its length; a turned plate has its height across the sheet",
+ "sheets": [
+  {
+   "sheet": 1,
+   "plates": [
+    {
+     "id": "S2-T6-D",
+     "width_mm": 400,
+     "height_mm": 1400,
+     "x_mm": 0,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S2-T7-D",
+     "width_mm": 400,
+     "height_mm": 1100,
+     "x_mm": 400,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S2-T7-C",
+     "width_mm": 408,
+     "height_mm": 1100,
+     "x_mm": 400,
+     "y_mm": 1100,
+     "turned": false
+    },
+    {
+     "id": "S2-T7-A",
+     "width_mm": 408,
+     "height_mm": 1100,
+     "x_mm": 808,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S2-T1-D",
+     "width_mm": 408,
+     "height_mm": 1100,
+     "x_mm": 808,
+     "y_mm": 1100,
+     "turned": false
+    }
+   ]
+  },
+  {
+   "sheet": 2,
+   "plates": [
+    {
+     "id": "S2-T6-C",
+     "width_mm": 408,
+     "height_mm": 1400,
+     "x_mm": 0,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S2-T5-D",
+     "width_mm": 400,
+     "height_mm": 1700,
+     "x_mm": 408,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S2-T4-C",
+     "width_mm": 408,
+     "height_mm": 2000,
+     "x_mm": 808,
+     "y_mm": 0,
+     "turned": false
+    }
+   ]
+  },
+  {
+   "sheet": 3,
+   "plates": [
+    {
+     "id": "S2-T6-A",
+     "width_mm": 408,
+     "height_mm": 1400,
+     "x_mm": 0,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S2-T5-B",
+     "width_mm": 400,
+     "height_mm": 1700,
+     "x_mm": 408,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S2-T4-A",
+     "width_mm": 408,
+     "height_mm": 2000,
+     "x_mm": 808,
+     "y_mm": 0,
+     "turned": false
+    }
+   ]
+  },
+  {
+   "sheet": 4,
+   "plates": [
+    {
+     "id": "S2-T3-C",
+     "width_mm": 400,
+     "height_mm": 1700,
+     "x_mm": 0,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S2-T4-D",
+     "width_mm": 400,
+     "height_mm": 2000,
+     "x_mm": 400,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S1-T4-C",
+     "width_mm": 408,
+     "height_mm": 2000,
+     "x_mm": 800,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S2-T7-B",
+     "width_mm": 400,
+     "height_mm": 1100,
+     "x_mm": 0,
+     "y_mm": 2000,
+     "turned": true
+    }
+   ]
+  },
+  {
+   "sheet": 5,
+   "plates": [
+    {
+     "id": "S2-T3-A",
+     "width_mm": 400,
+     "height_mm": 1700,
+     "x_mm": 0,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S2-T4-B",
+     "width_mm": 400,
+     "height_mm": 2000,
+     "x_mm": 400,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S1-T4-A",
+     "width_mm": 408,
+     "height_mm": 2000,
+     "x_mm": 800,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S2-T1-C",
+     "width_mm": 400,
+     "height_mm": 1100,
+     "x_mm": 0,
+     "y_mm": 2000,
+     "turned": true
+    }
+   ]
+  },
+  {
+   "sheet": 6,
+   "plates": [
+    {
+     "id": "S2-T5-C",
+     "width_mm": 408,
+     "height_mm": 1700,
+     "x_mm": 0,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S2-T5-A",
+     "width_mm": 408,
+     "height_mm": 1700,
+     "x_mm": 408,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S1-T4-D",
+     "width_mm": 400,
+     "height_mm": 2000,
+     "x_mm": 816,
+     "y_mm": 0,
+     "turned": false
+    }
+   ]
+  },
+  {
+   "sheet": 7,
+   "plates": [
+    {
+     "id": "S2-T3-D",
+     "width_mm": 408,
+     "height_mm": 1700,
+     "x_mm": 0,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S2-T3-B",
+     "width_mm": 408,
+     "height_mm": 1700,
+     "x_mm": 408,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S1-T4-B",
+     "width_mm": 400,
+     "height_mm": 2000,
+     "x_mm": 816,
+     "y_mm": 0,
+     "turned": false
+    }
+   ]
+  },
+  {
+   "sheet": 8,
+   "plates": [
+    {
+     "id": "S2-T6-B",
+     "width_mm": 400,
+     "height_mm": 1400,
+     "x_mm": 0,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S2-T2-C",
+     "width_mm": 400,
+     "height_mm": 1400,
+     "x_mm": 400,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S1-T5-D",
+     "width_mm": 400,
+     "height_mm": 1700,
+     "x_mm": 800,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S2-T1-A",
+     "width_mm": 400,
+     "height_mm": 1100,
+     "x_mm": 0,
+     "y_mm": 1700,
+     "turned": true
+    }
+   ]
+  },
+  {
+   "sheet": 9,
+   "plates": [
+    {
+     "id": "S2-T2-A",
+     "width_mm": 400,
+     "height_mm": 1400,
+     "x_mm": 0,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S1-T6-D",
+     "width_mm": 400,
+     "height_mm": 1400,
+     "x_mm": 400,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S1-T5-B",
+     "width_mm": 400,
+     "height_mm": 1700,
+     "x_mm": 800,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S1-T7-D",
+     "width_mm": 400,
+     "height_mm": 1100,
+     "x_mm": 0,
+     "y_mm": 1700,
+     "turned": true
+    }
+   ]
+  },
+  {
+   "sheet": 10,
+   "plates": [
+    {
+     "id": "S1-T3-C",
+     "width_mm": 400,
+     "height_mm": 1700,
+     "x_mm": 0,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S1-T5-C",
+     "width_mm": 408,
+     "height_mm": 1700,
+     "x_mm": 400,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S1-T5-A",
+     "width_mm": 408,
+     "height_mm": 1700,
+     "x_mm": 808,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S2-T1-B",
+     "width_mm": 408,
+     "height_mm": 1100,
+     "x_mm": 0,
+     "y_mm": 1700,
+     "turned": true
+    }
+   ]
+  },
+  {
+   "sheet": 11,
+   "plates": [
+    {
+     "id": "S1-T3-A",
+     "width_mm": 400,
+     "height_mm": 1700,
+     "x_mm": 0,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S1-T3-D",
+     "width_mm": 408,
+     "height_mm": 1700,
+     "x_mm": 400,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S1-T3-B",
+     "width_mm": 408,
+     "height_mm": 1700,
+     "x_mm": 808,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S1-T7-C",
+     "width_mm": 408,
+     "height_mm": 1100,
+     "x_mm": 0,
+     "y_mm": 1700,
+     "turned": true
+    }
+   ]
+  },
+  {
+   "sheet": 12,
+   "plates": [
+    {
+     "id": "S1-T6-B",
+     "width_mm": 400,
+     "height_mm": 1400,
+     "x_mm": 0,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S2-T2-D",
+     "width_mm": 408,
+     "height_mm": 1400,
+     "x_mm": 400,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S2-T2-B",
+     "width_mm": 408,
+     "height_mm": 1400,
+     "x_mm": 808,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S1-T7-A",
+     "width_mm": 408,
+     "height_mm": 1100,
+     "x_mm": 0,
+     "y_mm": 1400,
+     "turned": true
+    },
+    {
+     "id": "S1-T7-B",
+     "width_mm": 400,
+     "height_mm": 1100,
+     "x_mm": 0,
+     "y_mm": 1808,
+     "turned": true
+    }
+   ]
+  },
+  {
+   "sheet": 13,
+   "plates": [
+    {
+     "id": "S1-T2-C",
+     "width_mm": 400,
+     "height_mm": 1400,
+     "x_mm": 0,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S1-T6-C",
+     "width_mm": 408,
+     "height_mm": 1400,
+     "x_mm": 400,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S1-T6-A",
+     "width_mm": 408,
+     "height_mm": 1400,
+     "x_mm": 808,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S1-T1-D",
+     "width_mm": 408,
+     "height_mm": 1100,
+     "x_mm": 0,
+     "y_mm": 1400,
+     "turned": true
+    },
+    {
+     "id": "S1-T1-C",
+     "width_mm": 400,
+     "height_mm": 1100,
+     "x_mm": 0,
+     "y_mm": 1808,
+     "turned": true
+    }
+   ]
+  },
+  {
+   "sheet": 14,
+   "plates": [
+    {
+     "id": "S1-T2-A",
+     "width_mm": 400,
+     "height_mm": 1400,
+     "x_mm": 0,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S1-T2-D",
+     "width_mm": 408,
+     "height_mm": 1400,
+     "x_mm": 400,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S1-T2-B",
+     "width_mm": 408,
+     "height_mm": 1400,
+     "x_mm": 808,
+     "y_mm": 0,
+     "turned": false
+    },
+    {
+     "id": "S1-T1-B",
+     "width_mm": 408,
+     "height_mm": 1100,
+     "x_mm": 0,
+     "y_mm": 1400,
+     "turned": true
+    },
+    {
+     "id": "S1-T1-A",
+     "width_mm": 400,
+     "height_mm": 1100,
+     "x_mm": 0,
+     "y_mm": 1808,
+     "turned": true
+    }
+   ]
+  }
+ ]
+}

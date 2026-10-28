@@ -10,6 +10,9 @@
 - [x] **Wood thickness:** 4 mm, 408 mm long pieces (owner, 2026-10-28); layout, projections, the
   eye's supports and both cut-file zips redone
   ([final_layout](docs/strips_and_power/statue_geometry/final_layout.md#4-mm-wood-owner-2026-10-28)).
+- [ ] **Sea drawing (bench side):** approved 2026-10-29; send `art/sea/SeaFinalll-cut-files.zip` to the
+  cutter ([sea](docs/art/sea.md)). Still to confirm that it is statue 1's bench ("first front"); the files
+  are named S1. The bench of statue 2 is still the smiley.
 - [ ] **Send the 4 mm cut-file zips to the laser cutter** (`art/eye/EyeFinal-cut-files.zip`,
   `art/praying/Praying-cut-files.zip`; artist approved 2026-10-28). The zips sent before 2026-10-28
   are for 412 mm plates and must not be cut.

@@ -61,7 +61,7 @@ build time and surprises. The same file is also published as a private claude.ai
 `tools/wled_wasm/wled_fx.js` beside it, published as the artifact's supporting file; republish both
 together whenever either changes ([../../firmware/effects_in_browser.md](../../firmware/effects_in_browser.md)).
 **Since 2026-10-28 the artifact also carries the page's default files beside it** (owner: "the
-claude.ai should have 4 mm"): `art/eye/EyeFinal-4mm-supported.dxf`, `art/praying/Praying-supported.dxf`
+claude.ai should have 4 mm"): `art/eye/EyeFinal-4mm-supported.dxf`, `art/praying/Praying-supported.dxf`, `art/sea/SeaFinalll-supported.dxf`
 and `wled/presets.json`, at those same paths. The page fetches each default at `../<path>` (the
 repository served from its root) and, when that fails, at `<path>` beside the page, because the
 artifact has no parent directory; before this the artifact opened with the smiley and no playlist.

@@ -25,6 +25,7 @@ before that 800, 1150, 1550, 2000, 1150, 800, 500 mm, read off the owner's model
 Towers are 408 × 408 mm outside, 400 × 400 inside: two opposite sides are 400 mm pieces, the
 other two 408 mm pieces that cover their edges, so the 4 mm wood thickness is accounted for
 (owner, 2026-10-28: 4 mm plywood; which faces are long: [statue_geometry/final_layout.md](statue_geometry/final_layout.md#the-box-two-short-and-two-long-pieces-owner-2026-10-23)).
+The 56 plates cut from 14 sheets of 2440 × 1220 ([../art/sheets.md](../art/sheets.md)).
 **Changed 2026-10-28:** from 2026-10-23 the wood was 6 mm and the box 412 × 412; the owner went
 down to 4 mm, which re-solved the layout by a few millimetres and redid the art checks and cut files
 ([statue_geometry/final_layout.md](statue_geometry/final_layout.md#4-mm-wood-owner-2026-10-28)).
