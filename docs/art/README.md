@@ -12,6 +12,9 @@ each picture, extracted from the tool), `art/dxf/S<statue>-T<n>-<face>.dxf` (the
 plate, each with an `.svg` twin to inspect in a browser), `art/<viewpoint>.png` (the pictures as the tool's preview), `art/<viewpoint>-preview.png`
 (the pictures with the faces drawn in), `art/<viewpoint>-towers.png` (only the plates, 8192 px, anti-aliased), `tools/embed_pictures.py` (puts the preview pictures into
 `layout/statue-layout.json`), `tools/statue_render.html` (`PICTURE_MAX`, `?load=`).
+`tools/check_art.py` checks an artist's drawing on the plates, adds supports and writes the cut files; `art/eye/`
+and `art/praying/` hold the artist's drawings, their projections and the supported copies
+([eye_final.md](eye_final.md), [praying.md](praying.md)).
 
 **Status (owner, 2026-10-23): superseded, kept as they are.** The pictures, `art/viewpoints.json`
 and the cut files in `art/dxf/` were made for the layout of 2026-10-21. The final layout of
@@ -42,6 +45,9 @@ rasterisation of the same cuts for the tool's 3D preview, and `art/<name>-previe
 with the faces outlined, their wood borders and unlit bases greyed, and the area no face shows
 darkened: that is what to look at when judging a picture.
 
+**The artist's own drawings** are not generated: they are checked and patched in their own frame,
+see [eye_final.md](eye_final.md).
+
 ## Contents
 
 ### Pages
@@ -49,6 +55,8 @@ darkened: that is what to look at when judging a picture.
 - [`pipeline.md`](pipeline.md) — design units, the per-plate homography, local frames, `art/viewpoints.json`, previews, why the tool no longer opens with them.
 - [`cuttability.md`](cuttability.md) — minimum widths, islands, cantilevers, needles, seams, the final small-piece pass.
 - [`compositions.md`](compositions.md) — the four pictures, where they land, and their design decisions.
+- [`eye_final.md`](eye_final.md) — the artist's eye drawing for the back of statue 1: checked at plate scale with `tools/check_art.py`, supports added, the 0.13 bottom shrink baked in, and the 14 cut files for the laser in `art/eye/cut/`.
+- [`praying.md`](praying.md) — the artist's praying figure for the back of statue 2: same check, 0.02 top shrink baked in, and its 14 cut files in `art/praying/cut/`, sent with the drawing for her approval.
 
 ## Gotchas
 
