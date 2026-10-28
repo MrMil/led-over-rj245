@@ -36,7 +36,7 @@ and timing.
 - [`tower_base.md`](tower_base.md) — tower data splitting: 74AHCT125 in each power box for its own tower; neighbour towers' bases are passive.
 - [`power_distribution.md`](power_distribution.md) — five supplies per statue, mains from the apex, JST-SM per strand, XT60 runs to the tip towers, cable types.
 - [`trenches.md`](trenches.md) — what runs in each trench segment.
-- [`led_power_budget.md`](led_power_budget.md) — current per tower, PSU sizing, brightness estimates, the current cap.
+- [`led_power_budget.md`](led_power_budget.md) — current per tower, PSU sizing, brightness estimates, why nothing limits current.
 - [`shift_out_timing.md`](shift_out_timing.md) — 30 µs per LED; why it no longer limits anything.
 
 ## Related

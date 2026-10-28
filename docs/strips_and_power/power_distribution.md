@@ -121,4 +121,4 @@ alongside. The tip tower's base splits both passively to its 4 strands
 
 - [trenches.md](trenches.md) — what runs in each trench segment.
 - [tower_base.md](tower_base.md) — the splitter in each power box and the passive neighbour bases.
-- [led_power_budget.md](led_power_budget.md) — current per tower and the limiter ceilings.
+- [led_power_budget.md](led_power_budget.md) — current per tower and the 18 A sizing ceiling per supply.

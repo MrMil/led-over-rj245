@@ -2,7 +2,7 @@
 
 Path: [docs](../README.md) › [strips_and_power](README.md) › **led_power_budget**
 Parent: [README.md](README.md)
-**Code:** `guide/build.md` (LED Preferences → current), firmware current ceiling (not built)
+**Code:** `guide/build.md` (LED Preferences → current), `tools/wled_image.py` (`maxpwr` 0)
 **Covers:** current per tower, per supply and per statue, and the cap.
 
 ## What it does
@@ -55,8 +55,8 @@ PSU efficiency): ~575 W worst case, inside the 1.5 kW generator budget (owner, 2
   | T5 | T5 (1700) | 10.9 A |
   | T6 | T6 + T7 (1400 + 1100) | 15.5 A |
 
-  Firmware ceiling **18 A per supply** (90 % of rating). No supply reaches it, even at full
-  white. If one ever did, the limiter would scale the whole frame evenly.
+  Sizing ceiling **18 A per supply** (90 % of rating). No supply reaches it, even at full
+  white, which is why nothing limits current (below).
 - **Voltage drop: the 2000 mm strands may need a second feed** (agent estimate, 2026-10-10).
   Fed at the bottom only, at full white, a 1.85 m strand (3.3 A) drops ~0.35–0.7 V, given
   strip copper of ~0.12–0.24 Ω/m round trip. The 1700 mm towers' strands (1.55 m, 2.7 A) drop
@@ -68,8 +68,12 @@ PSU efficiency): ~575 W worst case, inside the 1.5 kW generator budget (owner, 2
 - **WLED's current estimate is corrected 4×** (agent, 2026-10-10). Each output is configured
   with one face's LEDs while four faces draw. Set WLED's custom LED current to 4 × 29.4 mA ≈
   118 mA.
-- **The cap cannot be raised from the UI** (owner, 2026-10-10): firmware ceiling, see
-  [../firmware/README.md](../firmware/README.md).
+- **No current limiting, in WLED or in firmware** (owner, 2026-10-26). Ten power boxes feeding
+  whole towers keep every supply under its sizing ceiling even at full white, so there is nothing
+  to limit; WLED's limiter is off (`maxpwr` 0).
+  **Changed 2026-10-26:** previously a firmware ceiling the UI could not raise (owner,
+  2026-10-10), planned when fewer supplies per statue could have been overloaded; see
+  [../firmware/README.md](../firmware/README.md), *No current limiting*.
 - **Overall brightness is set in WLED, not decided by a mock-up** (owner, 2026-10-10). If
   it's too bright, turn it down.
 

@@ -36,7 +36,7 @@ Afterwards start the show again (preset 18).
 ## Do not touch
 
 - **Config → LED Preferences**: the 14 outputs, LED counts, colour order and current
-  settings. The current cap itself is fixed in the firmware and can't be raised from here.
+  settings.
 - **Config → WiFi Setup**: a wrong setting here takes the access point down.
 
 To undo changes to either: [build.md → Restore a backup](build.md#restore-a-backup).

@@ -32,9 +32,10 @@ thing gets onto an ESP32 over USB. Not the firmware build itself ([parallel_i2s_
   controller's AP from the development machine would cut its internet. The image holds all three files, so one
   flash gives a complete controller; *Restore* in the UI stays the field route ([../field_docs/README.md](../field_docs/README.md),
   `guide/build.md`).
-- **The current limiter is off (`maxpwr` 0) and the per-LED current is 118 mA** (agent, 2026-10-26). No supply
+- **The current limiter is off (`maxpwr` 0) and the per-LED current is 118 mA** (limiter off: owner, 2026-10-26;
+  118 mA: agent, 2026-10-26). No supply
   reaches its ceiling even at full white ([../strips_and_power/led_power_budget.md](../strips_and_power/led_power_budget.md)),
-  WLED's limiter is per output and cannot see supply groups ([README.md](README.md), *The current cap*), and the
+  WLED's limiter is per output and cannot see supply groups ([README.md](README.md), *No current limiting*), and the
   bench ran with it off. 118 mA is 4 × the measured 29.4 mA at full white, because WLED sees one face per output
   and the tower has four; with the limiter off it only makes the Info page's estimate right.
 - **Boot preset 18, brightness 255, no auto-segments** (owner: the show resumes by itself after a power cut; one

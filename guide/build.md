@@ -152,8 +152,8 @@ output.
 - Colour order **GRB** (check: the Rainbow look must not come out with red and green swapped).
 - **Current:** WLED sees one face per output, the real draw is 4×. Set **LED current per LED
   (custom) to 118 mA** (4 × the measured 29.4 mA at full white), so WLED's estimate
-  matches reality. Per-output limits: each tower's share of its box's LED
-  budget; the firmware ceiling enforces the maximum.
+  matches reality. **Maximum current: 0 on every output and globally** (WLED's own
+  limiter stays off).
 - **Defaults → apply preset at boot:** **18** (the show playlist in `wled/presets.json`).
 
 ### Presets

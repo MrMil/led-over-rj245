@@ -106,25 +106,26 @@ parameters, needs a playback module (not in stock WLED; an FSEQ PR was open as o
 2026-10-09), and needs 4 GPIOs, which 14 outputs don't leave. With one face rendered per tower
 the frame-rate reason for it is gone.
 
-### The current cap cannot be changed from the UI
+### No current limiting
 
-**Why.** The owner requires it (2026-10-10). The cap protects the PSUs and wiring, and it must
-survive a mistake made by a crew member with full access.
-**Planned shape** (agent, 2026-10-10, not built). The custom build knows which strands feed
-from which PSU (a compile-time table) and each PSU's ceiling. Every frame it estimates each
-PSU group's current, takes the most constrained group's ratio (ceiling ÷ demand), and scales
-**the whole frame by that one factor**. No PSU can be overloaded, and relative brightness
-between towers is preserved: a bright scene never leaves the tall tower dimmer than the rest
-(owner requirement, 2026-10-10). The ceilings cannot be changed from the UI, a restored backup
-or the JSON API; only re-flashing changes them.
-**Rejected.** *WLED's per-output limiter* (each tower capped at a fraction of its worst
-case): even in uniformly bright scenes, but in uneven scenes it clips only the towers above
-the limit, flattening contrast. It also can't see PSU groups that span towers. *WLED's global
-limiter alone:* scales uniformly but only against the total, so one bright PSU group can
-still overload while the total looks fine.
-**Rejected.** *WLED Settings PIN* (owner, 2026-10-10): the people with the WiFi password would
-have the PIN, so it does not prevent their mistakes. *PSU overload protection as the cap:* it
-trips the supply into shutdown, a dark statue rather than a dimmer one.
+**Why.** The supplies cannot be overloaded, so nothing needs to limit (owner, 2026-10-26). Ten
+power boxes, five per statue, each feed whole towers, and the worst case on any one is 15.5 A at
+full white against an 18 A sizing ceiling
+([../strips_and_power/led_power_budget.md](../strips_and_power/led_power_budget.md)). WLED's own
+limiter is off in the shipped config (`maxpwr` 0, [controller_files.md](controller_files.md)).
+**Changed 2026-10-26.** Until then the plan was a firmware ceiling the UI could not change
+(owner requirement, 2026-10-10): a compile-time table of which strands feed from which supply, and
+every frame scaled **as a whole** by the most constrained supply's ceiling ÷ demand, so no supply
+could be overloaded and the towers kept their relative brightness. The reason was fewer supplies:
+the design then had four per statue, or split towers, and one supply could reach its rating in a
+bright scene. The owner built ten power boxes to make that impossible instead, so the ceiling lost
+its reason and was never built.
+**Rejected (2026-10-10, still rejected should a limiter ever be needed).** *WLED's per-output
+limiter:* in uneven scenes it clips only the towers above the limit, flattening contrast, and it
+can't see supply groups that span towers. *WLED's global limiter alone:* scales against the total,
+so one bright supply group can still overload while the total looks fine. *WLED Settings PIN:* the
+people with the WiFi password would have the PIN. *PSU overload protection as the cap:* it trips
+the supply into shutdown, a dark statue rather than a dimmer one.
 
 ### Custom firmware — rejected for now
 
@@ -164,7 +165,6 @@ has exactly 8 RMT channels; `FASTLED_ESP32_I2S` gives headroom.
 ### Not yet documented
 
 - **Tower-position settings** — not built — see *Animations in C++ ahead of time* above.
-- **Firmware current ceiling** — not built — see *The current cap cannot be changed from the UI*.
 
 ## Related
 

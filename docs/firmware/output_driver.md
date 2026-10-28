@@ -55,7 +55,7 @@ fallback (two towers sharing a channel) uses the same drivers, so it does not he
 
 **Why.** WLED's value here is the access point, phone UI, presets, playlists and boot preset
 ([README.md](README.md)), which would take the longest to rebuild; the failure is confined to
-the bus drivers. A custom WLED build is already required for the effects and the current cap,
+the bus drivers. A custom WLED build is already required for the effects,
 so replacing the output layer inside it is a contained change (agent, 2026-10-17; confirmed
 by the owner 2026-10-24, choosing a custom WLED build).
 **Rejected (for now).** *Dropping WLED for FastLED + a web UI* — the owner's earlier fallback,
