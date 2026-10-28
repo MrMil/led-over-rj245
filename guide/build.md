@@ -78,6 +78,17 @@ Check each module's chip marking reads MAX485 (not 483/487/488/489). The control
 74AHCT125s and all 100 Ω resistors are optional, depending on space. Keep a spare receiver
 module and spare 74AHCT125s.
 
+**Handling the 74AHCT125s.** Static kills single gates in them, and one dead gate heats the
+chip until the others die too.
+- Mains cord out before opening the box: one hand on the C13 plug, the other on the far
+  side of the box. Never touch the PSU or its terminals for any reason.
+- With the cord out, touch the GND pin of a data connector to discharge yourself before
+  touching a chip, a socket or a data connector. Keep chips in their foam until they go in.
+- Plug and unplug strips and data cables with the cord out.
+- On a live board, measure only at a resistor's top lead or at a connector. Never put a probe
+  on the chip's pins: an output pin has a grounded pin next to it, and a slip shorts it.
+- Before fitting a chip, [test its gates](troubleshooting.md#testing-a-74ahct125).
+
 ## 3. Power wiring (10 power boxes)
 
 Per [power-box.svg](img/power-box.svg) and [statue-power.svg](img/statue-power.svg): C14 to
@@ -156,7 +167,8 @@ output.
 
 Both boxes, the three 20 m cables, a tower-base board with test strips on each tower output
 in turn. The show for an hour. With a scope: RO on one receiver at the end of a 20 m cable should
-show clean 350/700 ns pulses with no ringing.
+show clean 350/700 ns pulses with no ringing. After the hour, a finger on every 74AHCT125: all
+must be cold. A warm one has a dead gate: [replace it](troubleshooting.md#a-74ahct125-is-warm-or-hot).
 
 ## 8. Back up
 

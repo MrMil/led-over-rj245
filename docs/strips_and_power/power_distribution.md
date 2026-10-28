@@ -105,6 +105,14 @@ alongside. The tip tower's base splits both passively to its 4 strands
 
 ## Gotchas
 
+- **The pre-wired switched C14 inlets shipped with the switch on N** (owner, 2026-10-28,
+  found while wiring the two unwired inlets; 8 pre-wired and 2 self-wired in the boxes). With
+  the switch on N the PSU's primary stays live with the switch off, and a PSU case or
+  terminal that looks safe is not. The owner rewired them. Nothing about this goes in the
+  guide (owner): the crew never opens a box
+  ([../field_docs/README.md](../field_docs/README.md)). It is why the workshop handling rules
+  in `guide/build.md` pull the cord first and discharge static on a data connector's GND pin,
+  never on the PSU (owner's rule).
 - Inlet fuses that blow at power-up need to be time-delay (T).
 - Never parallel two supplies' +V outputs. The data inputs' 5V pins stay unconnected for this
   reason.

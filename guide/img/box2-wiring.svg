@@ -43,15 +43,15 @@
 <circle cx="1020" cy="456" r="4.5" fill="#fff" stroke="#333" stroke-width="2"/>
 <text x="1010" y="461" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="end" font-weight="bold" fill="#222">GND</text>
 <polyline points="580,326 640,326" fill="none" stroke="#777" stroke-width="7" stroke-linejoin="round"/>
-<polyline points="580,326 640,326" fill="none" stroke="#f08a24" stroke-width="5" stroke-linejoin="round"/>
+<polyline points="580,326 640,326" fill="none" stroke="#1f5fbf" stroke-width="5" stroke-linejoin="round"/>
 <polyline points="580,326 640,326" fill="none" stroke="#ffffff" stroke-width="5" stroke-dasharray="8 8" stroke-linejoin="round"/>
-<text x="570" y="331" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">jack 1 · pin 1 (w/orange)</text>
+<text x="570" y="331" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">jack 3 · pin 5 (w/blue)</text>
 <polyline points="640,326 820,326" fill="none" stroke="#777" stroke-width="7" stroke-linejoin="round"/>
-<polyline points="640,326 820,326" fill="none" stroke="#f08a24" stroke-width="5" stroke-linejoin="round"/>
+<polyline points="640,326 820,326" fill="none" stroke="#1f5fbf" stroke-width="5" stroke-linejoin="round"/>
 <polyline points="640,326 820,326" fill="none" stroke="#ffffff" stroke-width="5" stroke-dasharray="8 8" stroke-linejoin="round"/>
-<polyline points="580,352 640,352" fill="none" stroke="#f08a24" stroke-width="5" stroke-linejoin="round"/>
-<text x="570" y="357" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">jack 1 · pin 2 (orange)</text>
-<polyline points="640,352 820,352" fill="none" stroke="#f08a24" stroke-width="5" stroke-linejoin="round"/>
+<polyline points="580,352 640,352" fill="none" stroke="#1f5fbf" stroke-width="5" stroke-linejoin="round"/>
+<text x="570" y="357" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">jack 3 · pin 4 (blue)</text>
+<polyline points="640,352 820,352" fill="none" stroke="#1f5fbf" stroke-width="5" stroke-linejoin="round"/>
 <circle cx="700" cy="326" r="5" fill="#222222"/>
 <polyline points="700,326 700,260" fill="none" stroke="#222222" stroke-width="2" stroke-linejoin="round"/>
 <rect x="692" y="268" width="16" height="44" rx="2" fill="#fff" stroke="#222222" stroke-width="2"/>
@@ -107,12 +107,12 @@
 <polyline points="580,566 640,566" fill="none" stroke="#777" stroke-width="7" stroke-linejoin="round"/>
 <polyline points="580,566 640,566" fill="none" stroke="#2e9e44" stroke-width="5" stroke-linejoin="round"/>
 <polyline points="580,566 640,566" fill="none" stroke="#ffffff" stroke-width="5" stroke-dasharray="8 8" stroke-linejoin="round"/>
-<text x="570" y="571" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">jack 1 · pin 3 (w/green)</text>
+<text x="570" y="571" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">jack 3 · pin 3 (w/green)</text>
 <polyline points="640,566 820,566" fill="none" stroke="#777" stroke-width="7" stroke-linejoin="round"/>
 <polyline points="640,566 820,566" fill="none" stroke="#2e9e44" stroke-width="5" stroke-linejoin="round"/>
 <polyline points="640,566 820,566" fill="none" stroke="#ffffff" stroke-width="5" stroke-dasharray="8 8" stroke-linejoin="round"/>
 <polyline points="580,592 640,592" fill="none" stroke="#2e9e44" stroke-width="5" stroke-linejoin="round"/>
-<text x="570" y="597" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">jack 1 · pin 6 (green)</text>
+<text x="570" y="597" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">jack 3 · pin 6 (green)</text>
 <polyline points="640,592 820,592" fill="none" stroke="#2e9e44" stroke-width="5" stroke-linejoin="round"/>
 <circle cx="700" cy="566" r="5" fill="#222222"/>
 <polyline points="700,566 700,500" fill="none" stroke="#222222" stroke-width="2" stroke-linejoin="round"/>
@@ -166,16 +166,16 @@
 <text x="1010" y="915" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="end" font-weight="bold" fill="#222">VCC</text>
 <circle cx="1020" cy="936" r="4.5" fill="#fff" stroke="#333" stroke-width="2"/>
 <text x="1010" y="941" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="end" font-weight="bold" fill="#222">GND</text>
-<polyline points="580,806 640,806" fill="none" stroke="#1f5fbf" stroke-width="5" stroke-linejoin="round"/>
-<text x="570" y="811" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">jack 1 · pin 4 (blue)</text>
-<polyline points="640,806 820,806" fill="none" stroke="#1f5fbf" stroke-width="5" stroke-linejoin="round"/>
-<polyline points="580,832 640,832" fill="none" stroke="#777" stroke-width="7" stroke-linejoin="round"/>
-<polyline points="580,832 640,832" fill="none" stroke="#1f5fbf" stroke-width="5" stroke-linejoin="round"/>
-<polyline points="580,832 640,832" fill="none" stroke="#ffffff" stroke-width="5" stroke-dasharray="8 8" stroke-linejoin="round"/>
-<text x="570" y="837" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">jack 1 · pin 5 (w/blue)</text>
-<polyline points="640,832 820,832" fill="none" stroke="#777" stroke-width="7" stroke-linejoin="round"/>
-<polyline points="640,832 820,832" fill="none" stroke="#1f5fbf" stroke-width="5" stroke-linejoin="round"/>
-<polyline points="640,832 820,832" fill="none" stroke="#ffffff" stroke-width="5" stroke-dasharray="8 8" stroke-linejoin="round"/>
+<polyline points="580,806 640,806" fill="none" stroke="#777" stroke-width="7" stroke-linejoin="round"/>
+<polyline points="580,806 640,806" fill="none" stroke="#f08a24" stroke-width="5" stroke-linejoin="round"/>
+<polyline points="580,806 640,806" fill="none" stroke="#ffffff" stroke-width="5" stroke-dasharray="8 8" stroke-linejoin="round"/>
+<text x="570" y="811" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">jack 3 · pin 1 (w/orange)</text>
+<polyline points="640,806 820,806" fill="none" stroke="#777" stroke-width="7" stroke-linejoin="round"/>
+<polyline points="640,806 820,806" fill="none" stroke="#f08a24" stroke-width="5" stroke-linejoin="round"/>
+<polyline points="640,806 820,806" fill="none" stroke="#ffffff" stroke-width="5" stroke-dasharray="8 8" stroke-linejoin="round"/>
+<polyline points="580,832 640,832" fill="none" stroke="#f08a24" stroke-width="5" stroke-linejoin="round"/>
+<text x="570" y="837" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">jack 3 · pin 2 (orange)</text>
+<polyline points="640,832 820,832" fill="none" stroke="#f08a24" stroke-width="5" stroke-linejoin="round"/>
 <circle cx="700" cy="806" r="5" fill="#222222"/>
 <polyline points="700,806 700,740" fill="none" stroke="#222222" stroke-width="2" stroke-linejoin="round"/>
 <rect x="692" y="748" width="16" height="44" rx="2" fill="#fff" stroke="#222222" stroke-width="2"/>
@@ -352,16 +352,16 @@
 <text x="1010" y="1635" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="end" font-weight="bold" fill="#222">VCC</text>
 <circle cx="1020" cy="1656" r="4.5" fill="#fff" stroke="#333" stroke-width="2"/>
 <text x="1010" y="1661" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="end" font-weight="bold" fill="#222">GND</text>
-<polyline points="580,1526 640,1526" fill="none" stroke="#1f5fbf" stroke-width="5" stroke-linejoin="round"/>
-<text x="570" y="1531" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">jack 2 · pin 4 (blue)</text>
-<polyline points="640,1526 820,1526" fill="none" stroke="#1f5fbf" stroke-width="5" stroke-linejoin="round"/>
-<polyline points="580,1552 640,1552" fill="none" stroke="#777" stroke-width="7" stroke-linejoin="round"/>
-<polyline points="580,1552 640,1552" fill="none" stroke="#1f5fbf" stroke-width="5" stroke-linejoin="round"/>
-<polyline points="580,1552 640,1552" fill="none" stroke="#ffffff" stroke-width="5" stroke-dasharray="8 8" stroke-linejoin="round"/>
-<text x="570" y="1557" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">jack 2 · pin 5 (w/blue)</text>
-<polyline points="640,1552 820,1552" fill="none" stroke="#777" stroke-width="7" stroke-linejoin="round"/>
-<polyline points="640,1552 820,1552" fill="none" stroke="#1f5fbf" stroke-width="5" stroke-linejoin="round"/>
-<polyline points="640,1552 820,1552" fill="none" stroke="#ffffff" stroke-width="5" stroke-dasharray="8 8" stroke-linejoin="round"/>
+<polyline points="580,1526 640,1526" fill="none" stroke="#777" stroke-width="7" stroke-linejoin="round"/>
+<polyline points="580,1526 640,1526" fill="none" stroke="#f08a24" stroke-width="5" stroke-linejoin="round"/>
+<polyline points="580,1526 640,1526" fill="none" stroke="#ffffff" stroke-width="5" stroke-dasharray="8 8" stroke-linejoin="round"/>
+<text x="570" y="1531" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">jack 1 · pin 1 (w/orange)</text>
+<polyline points="640,1526 820,1526" fill="none" stroke="#777" stroke-width="7" stroke-linejoin="round"/>
+<polyline points="640,1526 820,1526" fill="none" stroke="#f08a24" stroke-width="5" stroke-linejoin="round"/>
+<polyline points="640,1526 820,1526" fill="none" stroke="#ffffff" stroke-width="5" stroke-dasharray="8 8" stroke-linejoin="round"/>
+<polyline points="580,1552 640,1552" fill="none" stroke="#f08a24" stroke-width="5" stroke-linejoin="round"/>
+<text x="570" y="1557" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">jack 1 · pin 2 (orange)</text>
+<polyline points="640,1552 820,1552" fill="none" stroke="#f08a24" stroke-width="5" stroke-linejoin="round"/>
 <circle cx="700" cy="1526" r="5" fill="#222222"/>
 <polyline points="700,1526 700,1460" fill="none" stroke="#222222" stroke-width="2" stroke-linejoin="round"/>
 <rect x="692" y="1468" width="16" height="44" rx="2" fill="#fff" stroke="#222222" stroke-width="2"/>
@@ -415,15 +415,15 @@
 <circle cx="1020" cy="1896" r="4.5" fill="#fff" stroke="#333" stroke-width="2"/>
 <text x="1010" y="1901" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="end" font-weight="bold" fill="#222">GND</text>
 <polyline points="580,1766 640,1766" fill="none" stroke="#777" stroke-width="7" stroke-linejoin="round"/>
-<polyline points="580,1766 640,1766" fill="none" stroke="#f08a24" stroke-width="5" stroke-linejoin="round"/>
+<polyline points="580,1766 640,1766" fill="none" stroke="#2e9e44" stroke-width="5" stroke-linejoin="round"/>
 <polyline points="580,1766 640,1766" fill="none" stroke="#ffffff" stroke-width="5" stroke-dasharray="8 8" stroke-linejoin="round"/>
-<text x="570" y="1771" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">jack 3 · pin 1 (w/orange)</text>
+<text x="570" y="1771" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">jack 1 · pin 3 (w/green)</text>
 <polyline points="640,1766 820,1766" fill="none" stroke="#777" stroke-width="7" stroke-linejoin="round"/>
-<polyline points="640,1766 820,1766" fill="none" stroke="#f08a24" stroke-width="5" stroke-linejoin="round"/>
+<polyline points="640,1766 820,1766" fill="none" stroke="#2e9e44" stroke-width="5" stroke-linejoin="round"/>
 <polyline points="640,1766 820,1766" fill="none" stroke="#ffffff" stroke-width="5" stroke-dasharray="8 8" stroke-linejoin="round"/>
-<polyline points="580,1792 640,1792" fill="none" stroke="#f08a24" stroke-width="5" stroke-linejoin="round"/>
-<text x="570" y="1797" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">jack 3 · pin 2 (orange)</text>
-<polyline points="640,1792 820,1792" fill="none" stroke="#f08a24" stroke-width="5" stroke-linejoin="round"/>
+<polyline points="580,1792 640,1792" fill="none" stroke="#2e9e44" stroke-width="5" stroke-linejoin="round"/>
+<text x="570" y="1797" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="end" font-weight="bold" fill="#222">jack 1 · pin 6 (green)</text>
+<polyline points="640,1792 820,1792" fill="none" stroke="#2e9e44" stroke-width="5" stroke-linejoin="round"/>
 <circle cx="700" cy="1766" r="5" fill="#222222"/>
 <polyline points="700,1766 700,1700" fill="none" stroke="#222222" stroke-width="2" stroke-linejoin="round"/>
 <rect x="692" y="1708" width="16" height="44" rx="2" fill="#fff" stroke="#222222" stroke-width="2"/>
@@ -462,29 +462,29 @@
 <rect x="80" y="346" width="34" height="12" fill="#f08a24" stroke="#777"/>
 <rect x="88" y="346" width="9" height="12" fill="#fff"/><rect x="105" y="346" width="9" height="12" fill="#fff"/>
 <text x="124" y="357" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="normal" fill="#555">w/orange</text>
-<text x="210" y="357" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">A · S2-T1</text>
+<text x="210" y="357" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">A · S2-T6</text>
 <text x="56" y="383" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">2</text>
 <rect x="80" y="372" width="34" height="12" fill="#f08a24" stroke="#777"/>
 <text x="124" y="383" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="normal" fill="#555">orange</text>
-<text x="210" y="383" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">B · S2-T1</text>
+<text x="210" y="383" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">B · S2-T6</text>
 <text x="56" y="409" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">3</text>
 <rect x="80" y="398" width="34" height="12" fill="#2e9e44" stroke="#777"/>
 <rect x="88" y="398" width="9" height="12" fill="#fff"/><rect x="105" y="398" width="9" height="12" fill="#fff"/>
 <text x="124" y="409" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="normal" fill="#555">w/green</text>
-<text x="210" y="409" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">A · S2-T2</text>
+<text x="210" y="409" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">A · S2-T7</text>
 <text x="56" y="435" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">4</text>
 <rect x="80" y="424" width="34" height="12" fill="#1f5fbf" stroke="#777"/>
 <text x="124" y="435" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="normal" fill="#555">blue</text>
-<text x="210" y="435" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">A · S2-T3</text>
+<text x="210" y="435" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">B · spare</text>
 <text x="56" y="461" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">5</text>
 <rect x="80" y="450" width="34" height="12" fill="#1f5fbf" stroke="#777"/>
 <rect x="88" y="450" width="9" height="12" fill="#fff"/><rect x="105" y="450" width="9" height="12" fill="#fff"/>
 <text x="124" y="461" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="normal" fill="#555">w/blue</text>
-<text x="210" y="461" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">B · S2-T3</text>
+<text x="210" y="461" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">A · spare</text>
 <text x="56" y="487" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">6</text>
 <rect x="80" y="476" width="34" height="12" fill="#2e9e44" stroke="#777"/>
 <text x="124" y="487" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="normal" fill="#555">green</text>
-<text x="210" y="487" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">B · S2-T2</text>
+<text x="210" y="487" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">B · S2-T7</text>
 <text x="56" y="513" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">7</text>
 <rect x="80" y="502" width="34" height="12" fill="#8b5a2b" stroke="#777"/>
 <rect x="88" y="502" width="9" height="12" fill="#fff"/><rect x="105" y="502" width="9" height="12" fill="#fff"/>
@@ -514,12 +514,12 @@
 <text x="56" y="995" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">4</text>
 <rect x="80" y="984" width="34" height="12" fill="#1f5fbf" stroke="#777"/>
 <text x="124" y="995" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="normal" fill="#555">blue</text>
-<text x="210" y="995" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">A · S2-T6</text>
+<text x="210" y="995" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">B · spare</text>
 <text x="56" y="1021" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">5</text>
 <rect x="80" y="1010" width="34" height="12" fill="#1f5fbf" stroke="#777"/>
 <rect x="88" y="1010" width="9" height="12" fill="#fff"/><rect x="105" y="1010" width="9" height="12" fill="#fff"/>
 <text x="124" y="1021" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="normal" fill="#555">w/blue</text>
-<text x="210" y="1021" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">B · S2-T6</text>
+<text x="210" y="1021" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">A · spare</text>
 <text x="56" y="1047" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">6</text>
 <rect x="80" y="1036" width="34" height="12" fill="#2e9e44" stroke="#777"/>
 <text x="124" y="1047" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="normal" fill="#555">green</text>
@@ -540,29 +540,29 @@
 <rect x="80" y="1466" width="34" height="12" fill="#f08a24" stroke="#777"/>
 <rect x="88" y="1466" width="9" height="12" fill="#fff"/><rect x="105" y="1466" width="9" height="12" fill="#fff"/>
 <text x="124" y="1477" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="normal" fill="#555">w/orange</text>
-<text x="210" y="1477" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">A · S2-T7</text>
+<text x="210" y="1477" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">A · S2-T3</text>
 <text x="56" y="1503" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">2</text>
 <rect x="80" y="1492" width="34" height="12" fill="#f08a24" stroke="#777"/>
 <text x="124" y="1503" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="normal" fill="#555">orange</text>
-<text x="210" y="1503" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">B · S2-T7</text>
+<text x="210" y="1503" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">B · S2-T3</text>
 <text x="56" y="1529" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">3</text>
 <rect x="80" y="1518" width="34" height="12" fill="#2e9e44" stroke="#777"/>
 <rect x="88" y="1518" width="9" height="12" fill="#fff"/><rect x="105" y="1518" width="9" height="12" fill="#fff"/>
 <text x="124" y="1529" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="normal" fill="#555">w/green</text>
-<text x="210" y="1529" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">A · spare</text>
+<text x="210" y="1529" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">A · S2-T2</text>
 <text x="56" y="1555" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">4</text>
 <rect x="80" y="1544" width="34" height="12" fill="#1f5fbf" stroke="#777"/>
 <text x="124" y="1555" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="normal" fill="#555">blue</text>
-<text x="210" y="1555" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">A · spare</text>
+<text x="210" y="1555" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">B · S2-T1</text>
 <text x="56" y="1581" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">5</text>
 <rect x="80" y="1570" width="34" height="12" fill="#1f5fbf" stroke="#777"/>
 <rect x="88" y="1570" width="9" height="12" fill="#fff"/><rect x="105" y="1570" width="9" height="12" fill="#fff"/>
 <text x="124" y="1581" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="normal" fill="#555">w/blue</text>
-<text x="210" y="1581" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">B · spare</text>
+<text x="210" y="1581" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">A · S2-T1</text>
 <text x="56" y="1607" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">6</text>
 <rect x="80" y="1596" width="34" height="12" fill="#2e9e44" stroke="#777"/>
 <text x="124" y="1607" font-family="Helvetica, Arial, sans-serif" font-size="13" text-anchor="start" font-weight="normal" fill="#555">green</text>
-<text x="210" y="1607" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">B · spare</text>
+<text x="210" y="1607" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">B · S2-T2</text>
 <text x="56" y="1633" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">7</text>
 <rect x="80" y="1622" width="34" height="12" fill="#8b5a2b" stroke="#777"/>
 <rect x="88" y="1622" width="9" height="12" fill="#fff"/><rect x="105" y="1622" width="9" height="12" fill="#fff"/>

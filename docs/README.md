@@ -69,7 +69,9 @@ Most of the design is hardware, so "code" paths below are often diagrams
   The N suffix is the through-hole DIP that fits the perfboard and socket; NSR is the SO-14
   surface-mount version. Generic BSS138 "bidirectional level converter" modules are not a
   substitute: their 10 kΩ pull-up gives rise times near 1 µs on a cable, too slow for WS2812
-  data, and they cannot isolate the four faces of a tower.
+  data, and they cannot isolate the four faces of a tower. Their one observed failure mode, a
+  dead gate that heats the chip until the other gates die, and the handling rules that follow,
+  are recorded in [controller/local_outputs.md](controller/local_outputs.md) (Gotchas).
 - **Human documentation is separate from this tree** (owner, 2026-10-09): `README.md` and
   `guide/` are for the field crew, who will build and run the installation without the owner
   present, reading on a phone on GitHub. See [field_docs/](field_docs/README.md).

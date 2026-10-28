@@ -40,6 +40,12 @@ own tower, passively at the base of a neighbouring tower.
 - **Data inputs' 5V pin left unconnected** (agent, 2026-10-18), so the sender's supply and the
   box's supply never join on +5 V.
 
+## Gotchas
+
+- The same chip's dead-gate failure and the handling rules for it are recorded in
+  [../controller/local_outputs.md](../controller/local_outputs.md) (Gotchas); they apply to
+  every power-box chip too.
+
 ## Related
 
 - [power_distribution.md](power_distribution.md) — which box feeds which towers.

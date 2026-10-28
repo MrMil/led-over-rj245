@@ -31,13 +31,13 @@ RJ45 pigtail wires are drawn in T568B colours (striped = white/colour).
 | 17 | S1-T5 | 74AHCT125 #2 gate 1 → tower T5 data |
 | 18 | S1-T6 | 74AHCT125 #2 gate 2 → tower T6 data |
 | 19 | S1-T7 | 74AHCT125 #2 gate 3 → tower T7 data |
-| 21 | S2-T1 | transmitter → jack 1 pins 1/2 |
-| 22 | S2-T2 | transmitter → jack 1 pins 3/6 |
-| 23 | S2-T3 | transmitter → jack 1 pins 4/5 |
-| 25 | S2-T4 | transmitter → jack 2 pins 1/2 |
-| 26 | S2-T5 | transmitter → jack 2 pins 3/6 |
-| 27 | S2-T6 | transmitter → jack 2 pins 4/5 |
-| 32 | S2-T7 | transmitter → jack 3 pins 1/2 |
+| 21 | S2-T1 | transmitter → jack 3 pins 4/5 (blue pair) |
+| 22 | S2-T2 | transmitter → jack 3 pins 3/6 (green pair) |
+| 23 | S2-T3 | transmitter → jack 3 pins 1/2 (orange pair) |
+| 25 | S2-T4 | transmitter → jack 2 pins 1/2 (orange pair) |
+| 26 | S2-T5 | transmitter → jack 2 pins 3/6 (green pair) |
+| 27 | S2-T6 | transmitter → jack 1 pins 1/2 (orange pair) |
+| 32 | S2-T7 | transmitter → jack 1 pins 3/6 (green pair) |
 | 5V / VIN, GND | | perfboard rails |
 
 GPIO 33 is spare.
@@ -98,18 +98,19 @@ Three channels per cable. Same pinout at both ends; cables are straight-through.
 | 1 | white/orange | channel 1, A |
 | 2 | orange | channel 1, B |
 | 3 | white/green | channel 2, A |
-| 4 | blue | channel 3, A |
-| 5 | white/blue | channel 3, B |
+| 4 | blue | channel 3, B |
+| 5 | white/blue | channel 3, A |
 | 6 | green | channel 2, B |
 | 7 | white/brown | GND |
 | 8 | brown | GND |
 
-| Jack | Channel 1 | Channel 2 | Channel 3 |
+| Jack | Channel 1 (orange) | Channel 2 (green) | Channel 3 (blue) |
 |---|---|---|---|
-| 1 | S2-T1 | S2-T2 | S2-T3 |
-| 2 | S2-T4 | S2-T5 | S2-T6 |
-| 3 | S2-T7 | spare | spare |
+| 1 | S2-T6 | S2-T7 | spare |
+| 2 | S2-T4 | S2-T5 | spare |
+| 3 | S2-T3 | S2-T2 | S2-T1 |
 
+**Striped (white/colour) wire to A, solid colour to B, on every channel in both boxes.**
 Pins 3/6 and 4/5 are each one twisted pair. Verify pin-to-pin with a meter through both
 jacks; don't rely on colours.
 

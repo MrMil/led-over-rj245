@@ -35,6 +35,36 @@ that tower's base, through the trench under the statue.
   statue; differential signalling buys little there. Statue 2's channels cross the trench
   between the statues, which is the long, exposed run.
 
+## Gotchas
+
+- **A 74AHCT125 with one dead gate cooks itself and loses the rest** (owner's bench,
+  2026-10-27/28). Both controller chips ran hot after minutes and statue 1's towers went
+  dark; the dead set then changed between power-ups and did not follow the chips or the ESP32s
+  when they were swapped, because gates kept dying in whichever chip was fitted. The diode
+  test (`guide/troubleshooting.md`, *Testing a 74AHCT125*) showed the dead gates' outputs
+  shorted to GND inside the chip (0 Ω, 2.4 Ω, 85 Ω). Mechanism: a shorted output lets the
+  gate's own pull-up source current into the short, inside the package, whenever the data
+  drives it high; the heat takes the neighbouring gates. Ruled out by measurement before this
+  was found: supply (5.2 V), ground path (0 V strip GND to PSU −V, 0 V across the 100 Ω),
+  enables and unused input grounded, board shorts (none with the chip out), ESP32 (both
+  boards drive all pins alike). **What killed the first gate is unknown.** Static during
+  handling or a probe slip on a live chip pin are the agent's suspicions (dry air-conditioned
+  room, several chip swaps), not confirmed. The owner rules out the earlier episode of chips
+  falling out of their female headers (2026-10-25): the board was not powered then. The
+  guide's handling rules follow from the suspicion (cord out, discharge on a data connector's
+  GND pin, never on the PSU: see
+  [../strips_and_power/power_distribution.md](../strips_and_power/power_distribution.md),
+  Gotchas). Gate damage is progressive (one gate read 85 Ω, a partial short), so a chip that
+  has been through a bad episode can pass the diode test and still warm up later; the
+  finger test after an hour's run (`guide/build.md`, bench test) is the check that counts. A fresh pair of chips restored all seven channels.
+- **The controller chips' inputs have no pull-downs** (unlike the power boxes'
+  [../strips_and_power/tower_base.md](../strips_and_power/tower_base.md)). With the ESP32 out
+  of its socket, or before its driver starts, the seven inputs float and both chips warm up.
+  Harmless for a few seconds at boot; do not run the board powered without the ESP32.
+  **Rejected (owner, 2026-10-28):** 10 kΩ pull-downs on the seven inputs. The ESP32 is meant
+  to stay in its socket, a floating input warms a chip but does not kill it, and the 10 kΩ
+  resistors bought are the power boxes' ([../strips_and_power/tower_base.md](../strips_and_power/tower_base.md)).
+
 ## Related
 
 - [gpio_assignment.md](gpio_assignment.md) — the seven GPIOs.

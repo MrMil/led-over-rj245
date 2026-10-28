@@ -13,6 +13,12 @@ straight-through. Three cables run between the controller box and box 2.
 
 ## Decisions
 
+- **The striped wire of each pair is A, the solid one B, on every channel** (owner,
+  2026-10-28: "white to A"). One rule for all seven channels and both boxes, so the crew
+  lands wires by looking at them and A/B inversions cannot creep in channel by channel. The
+  link only needs both ends to match; the rule picks which match. **Changed 2026-10-28:**
+  channel 3 followed T568B pin order (pin 4 solid blue = A, pin 5 white/blue = B), which made
+  it the one channel with the solid wire on A.
 - **A and B of a channel are always the two wires of one twisted pair** (owner). Common-mode
   rejection only works if noise couples equally into both; split a pair and differential
   signalling stops protecting the link. That is why channel 2 is on 3/6 (one T568B pair,
@@ -21,7 +27,7 @@ straight-through. Three cables run between the controller box and box 2.
   conductor would satisfy the MAX485's common-mode window, and 7 channels + 1 ground fit in two
   cables' 8 pairs. Three cables with ground in each were kept because every cable then carries
   its own reference (one cable alone works, which matters when fault-finding), the ground path
-  is tripled, the pair would otherwise be unused, and jack 3 keeps two spare pairs. Two cables
+  is tripled, the pair would otherwise be unused, and jacks 1 and 2 each keep a spare pair. Two cables
   would save one 20 m lead and nothing else.
 - **Panel-mount coupler in the enclosure wall, short cut patch-cable pigtail inside landing
   on the MAX485 screw terminals** (owner). The trench run is then a factory patch lead: no

@@ -28,6 +28,14 @@ Parent: [../README.md](../README.md)
 - **Troubleshooting is symptom → check, using swap tests** (agent, 2026-10-09). The
   installation is made of twins (statue boxes, cables, channels), so swapping isolates most
   faults with no instruments.
+- **The crew never opens a box** (owner, 2026-10-28, told to the crew directly: there is
+  exposed 230 V inside). So the guide carries nothing about the mains side of a box, including
+  the C14 inlet wiring ([../strips_and_power/power_distribution.md](../strips_and_power/power_distribution.md),
+  Gotchas). The troubleshooting steps that need a box open (swapping a 74AHCT125, a receiver
+  or the ESP32, re-seating pigtails on screw terminals) stay, behind a warning at the top of
+  `guide/troubleshooting.md`: call the owner before opening any box, and if he does not pick
+  up, do not open it (owner, 2026-10-28). They are the only field fix for those faults, and
+  the call puts the owner in the loop on the mains hazard before anyone reaches in.
 - **Secrets are not in the guide** — see [../firmware/README.md](../firmware/README.md).
 - **The guide must stay consistent with these docs.** When a decision here changes something
   a builder or operator does, update the matching guide page in the same change.

@@ -34,15 +34,15 @@ RJ45 = {
     1: ("w/orange", ORANGE, True, ("A", 1)),
     2: ("orange", ORANGE, False, ("B", 1)),
     3: ("w/green", GREEN, True, ("A", 2)),
-    4: ("blue", BLUE, False, ("A", 3)),
-    5: ("w/blue", BLUE, True, ("B", 3)),
+    4: ("blue", BLUE, False, ("B", 3)),
+    5: ("w/blue", BLUE, True, ("A", 3)),
     6: ("green", GREEN, False, ("B", 2)),
     7: ("w/brown", BROWN, True, ("GND", None)),
     8: ("brown", BROWN, False, ("GND", None)),
 }
-CH_PINS = {1: (1, 2), 2: (3, 6), 3: (4, 5)}   # channel in a cable -> (A pin, B pin)
-# jack -> statue-2 tower per channel (None = spare)
-JACKS = {1: ["T1", "T2", "T3"], 2: ["T4", "T5", "T6"], 3: ["T7", None, None]}
+CH_PINS = {1: (1, 2), 2: (3, 6), 3: (5, 4)}   # channel in a cable -> (A pin, B pin); striped wire = A
+# jack -> statue-2 tower per channel (orange, green, blue pair; None = spare), as built (owner, 2026-10-28)
+JACKS = {1: ["T6", "T7", None], 2: ["T4", "T5", None], 3: ["T3", "T2", "T1"]}
 
 # Power boxes per statue, named by the tower they sit in (owner, 2026-10-25; formerly A-E):
 # name -> (box sits at, own tower, neighbour towers fed from it). T4's is inside the apex box. Neighbour towers have no electronics: power arrives

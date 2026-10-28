@@ -2,6 +2,9 @@
 
 [← README](../README.md) · [Wiring](wiring.md) · [Setup](setup.md)
 
+**Call Ofer on the phone before opening any box. There is live 230 V inside; it is
+dangerous. If Ofer doesn't pick up, don't open the box.**
+
 Fastest isolation: swap the suspect part with its twin (towers of the same height, tower
 cables, CAT5e cables, the two jacks' channels) and see whether the fault moves.
 
@@ -28,8 +31,8 @@ Bad data connection between the boxes.
 
 ## Three statue-2 towers dark together
 
-They share one CAT5e cable: T1–T3 = jack 1, T4–T6 = jack 2, T7 = jack 3. Re-seat or replace
-that cable.
+They share one CAT5e cable: T1–T3 = jack 3, T4–T5 = jack 2, T6–T7 = jack 1. Re-seat or
+replace that cable.
 
 ## One tower dark
 
@@ -38,6 +41,31 @@ that cable.
 3. Swap its data cable with another tower's at the box:
    - fault moves → box side (that output's buffer or receiver);
    - fault stays → cable or the tower's power box (its 74AHCT125).
+
+## Several statue-1 towers dark, and which ones changes
+
+Dead gates in the controller's 74AHCT125s. Channels 1–4 are chip #1's gates 1–4, channels
+5–7 are chip #2's gates 1–3. A chip with one dead gate heats up and loses the rest, so the
+dead set grows and changes between power-ups. A tower where only the first few LEDs show
+random colours is the same thing. Replace the chip ([below](#a-74ahct125-is-warm-or-hot)).
+
+## A 74AHCT125 is warm or hot
+
+A healthy one is cold, in any weather. Warm means a gate has failed short inside it, and the
+heat is killing the others. Box off, pull it, [test it](#testing-a-74ahct125), fit a tested
+spare the same way round. Bin the chip; a chip with one dead gate does not stay at one.
+
+Mains cord out first (one hand on the C13 plug, the other on the far side of the box; never
+touch the PSU). Then touch the GND pin of a data connector before you touch a chip, a socket
+or a data connector. Static is what kills these gates.
+
+## Testing a 74AHCT125
+
+Chip out of its socket, meter on the diode setting. Red probe on pin 7 (GND, the corner pin
+on the side away from the notch), black on each output pin: 3, 6, 8, 11. Good: a diode,
+0.5–0.7 V. Dead: about 0.00 V. Then red on pin 14 (VCC, the corner pin by the notch), black on
+each output: good reads open. The controller needs four good gates in chip #1 and gates 1–3
+good in chip #2; a power box needs all four in its chip #1 and gate 1 in chip #2.
 
 ## One face of a tower dark, the others fine
 
@@ -73,7 +101,9 @@ The PSU shuts down on overload or over-temperature.
 Bag: 2 CAT5e cables, 1 receiver module, 1 ESP32 loaded with the show, 2 × 74AHCT125, 1 A
 fuses, XT60 pairs, JST-SM pairs.
 
-- **74AHCT125:** pull it from its socket and seat the spare the same way round.
+- **74AHCT125:** [test the spare](#testing-a-74ahct125) first, pull the old one from its
+  socket and seat the spare the same way round. Cord out and discharge yourself on a data
+  connector's GND pin before handling either; never touch the PSU.
 - **Receiver:** photograph the wiring, move the wires across, check against
   [box2-wiring.svg](img/box2-wiring.svg).
 - **ESP32:** lifts out of its socket. Seat the spare the same way round (USB connector in

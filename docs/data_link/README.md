@@ -17,8 +17,10 @@ in box 2.
   decoded, buffered or re-timed, so there is no firmware in box 2 and no added latency.
 - **Three channels per cable, three cables between the boxes** (owner, 2026-10-10: "we can pass
   9 channels over the rj45 cables"). Three of a CAT5e's four pairs carry data, one carries
-  ground; 9 channels for 7 towers leaves 2 spare. Jack 1 = S2-T1–T3, jack 2 = T4–T6, jack 3 =
-  T7. A bad cable darkens at most three towers.
+  ground; 9 channels for 7 towers leaves 2 spare. As built (owner, 2026-10-28): jack 3 =
+  S2-T1–T3 (blue, green, orange pairs in that order), jack 2 = T4–T5, jack 1 = T6–T7; the blue
+  pair of jacks 1 and 2 is spare. The owner did not state why this order; the recorded plan was
+  jack 1 = T1–T3, jack 2 = T4–T6, jack 3 = T7. A bad cable darkens at most three towers.
   **Changed 2026-10-10:** previously two channels per cable (two ground pairs), one cable per
   remote statue, star from the controller to three statues.
 - **Ground travels with the data, on pins 7/8** (owner; one pair since 2026-10-10). The ground conductors carry no
