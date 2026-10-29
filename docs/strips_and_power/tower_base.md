@@ -2,9 +2,9 @@
 
 Path: [docs](../README.md) › [strips_and_power](README.md) › **tower_base**
 Parent: [README.md](README.md)
-**Code:** `tools/wiring_diagrams.py` (`power_box()`, `neighbour_base()`), `guide/img/power-box.svg`, `guide/img/neighbour-base.svg`, `guide/wiring.md`
+**Code:** `tools/wiring_diagrams.py` (`power_box()`, `tip_tower_cable()`), `guide/img/power-box.svg`, `guide/img/tip-tower-cable.svg`, `guide/wiring.md`
 **Covers:** how each tower's one data line reaches its 4 strands: in the power box for a box's
-own tower, passively at the base of a neighbouring tower.
+own tower, passively at the end of the tip-tower cable for a tip tower.
 
 ## What it does
 
@@ -13,9 +13,11 @@ own tower, passively at the base of a neighbouring tower.
   74AHCT125. Each output goes through 100 Ω to one JST-SM out (5V, DATA, GND) to one strand.
 - **Tip tower** (T1 from the power box in T2; T7 from the one in T6). Its data line enters the power box on its
   own JST-SM (10 kΩ to GND) and drives one gate of a second 74AHCT125. That buffered line
-  leaves as a 22 AWG DATA + GND pair beside the XT60 power run. At the neighbour's base there
-  are no electronics: XT60 into two WAGOs (+5V, GND), the data pair joined to all four JST-SM
-  DATA pins, and 4 JST-SM to the strands.
+  leaves as a 22 AWG DATA + GND pair, taped to the XT60 power run as one tip-tower cable. The
+  tip tower has no electronics and nothing wired in its base: the cable itself ends in the
+  4 strand JST-SMs, their 5V and GND leads in two soldered joints with the power cores (the
+  data GND in the GND joint), their DATA leads soldered to the data wire, heat shrink over
+  every joint ([power_distribution.md](power_distribution.md)).
 
 ## Decisions
 
@@ -23,10 +25,12 @@ own tower, passively at the base of a neighbouring tower.
   damaged strand lead takes out only its own face. One chip has four gates, so it costs nothing.
 - **Neighbour towers get their data already buffered from the power box, with no electronics
   in their base** (owner, 2026-10-18: "I can take it out of the last power box and not have a
-  small perfboard in the towers that don't have power boxes"). The trade-off: the
-  neighbour's four faces share one buffer gate, so a short on one face's data lead darkens
+  small perfboard in the towers that don't have power boxes"; 2026-10-29: "T1 and T7 just get
+  a cable that has 4 jst-SM outputs at the end"). The split lives at the end of the cable,
+  made up on the bench, so there is nothing to wire on site in T1 or T7. The trade-off: the
+  tip tower's four faces share one buffer gate, so a short on one face's data lead darkens
   all four.
-  **Rejected.** *A small 74AHCT125 board in each neighbour base:* more boards to build.
+  **Rejected.** *A small 74AHCT125 board in each tip tower's base:* more boards to build.
   *4 JST-SM cables per neighbour from the box:* each face independent and no XT60, but 22 AWG
   over ~2 m loses 0.2–0.4 V, and the boxes would need 8–12 JST exits.
 - **10 kΩ pull-down on every data input** (agent, 2026-10-10). With the data cable unplugged or

@@ -45,8 +45,8 @@ CH_PINS = {1: (1, 2), 2: (3, 6), 3: (5, 4)}   # channel in a cable -> (A pin, B 
 JACKS = {1: ["T6", "T7", None], 2: ["T4", "T5", None], 3: ["T3", "T2", "T1"]}
 
 # Power boxes per statue, named by the tower they sit in (owner, 2026-10-25; formerly A-E):
-# name -> (box sits at, own tower, neighbour towers fed from it). T4's is inside the apex box. Neighbour towers have no electronics: power arrives
-# on XT60 (3 x 2.5), data already buffered on a 22 AWG pair.
+# name -> (box sits at, own tower, tip towers fed from it). T4's is inside the apex box. A tip tower has no electronics: one cable
+# from the box (XT60 power on 3 x 2.5, data already buffered on a 22 AWG pair) ends in its 4 JST-SM.
 SUPPLIES = {
     "T2": ("T2", "T2", ["T1"]),
     "T3": ("T3", "T3", []),
@@ -352,7 +352,7 @@ def overview():
     d.text(cx, cy + 333, "3 × CAT5e, jacks 1–3 → jacks 1–3", size=14, anchor="middle", fill=cable, weight="bold")
     d.rect(60, 870, 1080, 96, fill="#fafafa", stroke="#bbb", sw=1)
     d.lines(80, 896, ["CTRL / BOX 2 = apex box (with the power box in T4) in statue 1 / 2. Grey P = the power box in T2, T3, T5, T6.",
-                      "Orange: data (DATA + GND) and 230 V from the apex box to the power boxes in T2, T3, T5, T6. Red: power + data to T1, T7.",
+                      "Orange: data (DATA + GND) from the apex box, and 230 V chained tower to tower, to the power boxes in T2, T3, T5, T6. Red: the tip-tower cables to T1, T7.",
                       "Purple: 3 data cables between the apex boxes. Placement and distances to be confirmed."],
             size=14)
     d.save("overview.svg", "Two statues of 7 towers, one controller, three data cables between the boxes.")
@@ -492,9 +492,9 @@ def jst_block(d, x, y, title, sub, pins, w=300):
 
 def power_box():
     d = Drawing(1600, 1640, "Power box wiring")
-    header(d, "Power box — in T2, T3, T5, T6 (and T4, inside the apex box)",
+    header(d, "Power box — one-tower boxes in T3, T5 · two-tower boxes in T2, T6 (and T4, inside the apex box)",
            ["Mains in, the box's own tower out on 4 JST-SM (one per face) and a top feed (XT60), and for",
-            "the power boxes in T2 and T6 the neighbouring tip tower's power (XT60) and buffered data. Same pixels on all 4 faces."])
+            "the two-tower boxes the tip-tower cable's power (XT60) and buffered data. Same pixels on all 4 faces."])
     # own tower: data in -> pull-down -> buffer #1 -> 4 faces
     din = jst_block(d, 40, 190, "JST-SM in · own tower data", "from apex box",
                     [("DATA", ""), ("GND", ""), ("5V", "not connected")], w=330)
@@ -520,9 +520,9 @@ def power_box():
     # neighbours (power box in T2: T1; in T6: T7)
     top2 = bot + 60
     d.rect(30, top2 - 30, 1540, 3, fill="#bbb", stroke="none", rx=0)
-    d.text(40, top2 - 6, "Power boxes in T2 and T6 only: the neighbouring tip tower (T2 → T1; T6 → T7)", size=15, weight="bold", fill="#555")
-    gy2, bot2 = buffer_chip(d, x0, top2 + 20, 1, "74AHCT125 #2 · neighbour", gap=60)
-    for k, (lbl, which) in enumerate((("neighbour", "in T2: T1 · in T6: T7"),)):
+    d.text(40, top2 - 6, "Two-tower boxes (T2, T6) only: the tip tower next door (T2 → T1; T6 → T7)", size=15, weight="bold", fill="#555")
+    gy2, bot2 = buffer_chip(d, x0, top2 + 20, 1, "74AHCT125 #2 · tip tower", gap=60)
+    for k, (lbl, which) in enumerate((("tip tower", "in T2: T1 · in T6: T7"),)):
         yy = top2 + 30 + 130 * k
         pin = jst_block(d, 40, yy, f"JST-SM in · {lbl} data", which, [("DATA", ""), ("GND", "")], w=330)
         d.wire([pin["GND"], (400, pin["GND"][1])], BLACK, 2), d.flag(400, pin["GND"][1], "GND", "right")
@@ -536,7 +536,7 @@ def power_box():
         d.rect(1200, y - 24, 360, 48, fill="#fff8e1", stroke="#b58900")
         d.pin(1200, y)
         d.text(1214, y - 3, f"Data out · {lbl}", size=15, weight="bold")
-        d.text(1214, y + 16, "22 AWG pair (DATA + GND) to its tower", size=12, fill="#555")
+        d.text(1214, y + 16, "22 AWG pair (DATA + GND), part of the tip-tower cable", size=12, fill="#555")
     # power
     top3 = bot2 + 50
     d.rect(30, top3 - 30, 1540, 3, fill="#bbb", stroke="none", rx=0)
@@ -553,59 +553,64 @@ def power_box():
     d.wire([(840, top3 + 80), (920, top3 + 80)], BLUE, 6), d.flag(920, top3 + 80, "GND", "right")
     d.text(930, top3 + 60, "rails: NYAF 2.5 mm², red / blue", size=12, fill="#555")
     d.rect(1200, top3 - 10, 360, 130, fill="#fde3e3", stroke=RED)
-    d.lines(1214, top3 + 16, ["XT60 out · neighbour power", "in T2: to T1 · in T6: to T7",
+    d.lines(1214, top3 + 16, ["XT60 out · tip-tower cable", "in T2: to T1 · in T6: to T7",
                               "3 × 2.5 cable, brown +5 V, blue GND", "in T3, T4, T5: none"], size=13, fill="#333")
     d.rect(1200, top3 + 140, 360, 130, fill="#fde3e3", stroke=RED)
-    d.lines(1214, top3 + 166, ["XT60 out · top feed, own tower", "3 × 2.5 cable up the post, WAGOs",
+    d.lines(1214, top3 + 166, ["XT60 out · top feed, own tower", "3 × 2.5 cable up the post, soldered",
                                "at the top → 4 × XT60 to the strand tops", "every power box, T2–T6"], size=13, fill="#333")
     d.lines(40, top3 + 310, ["All flags with the same label are the same wire. The data inputs' 5V pins stay unconnected so two supplies never join on +5 V.",
                              "Power box in T4: the same circuit inside the apex box, plus the perfboard feed for the ESP32 / transceivers.",
-                             "100 Ω resistors optional. The neighbours' data shares one buffer gate per tower; it is split to 4 faces at that tower's base."],
+                             "100 Ω resistors optional. The tip tower's data shares one buffer gate; it is split to the 4 faces at the end of the tip-tower cable."],
             size=14, fill="#333")
-    d.save("power-box.svg", "Power box: mains, S-100-5, own tower's 74AHCT125 to 4 JST-SM strands, neighbour power and data.")
+    d.save("power-box.svg", "Power box: mains, S-100-5, own tower's 74AHCT125 to 4 JST-SM strands, the tip-tower cable's power and data.")
 
 
-def neighbour_base():
-    d = Drawing(1400, 620, "Neighbour tower base (T1, T7)")
-    header(d, "Neighbour tower base — T1, T7 (no electronics)",
-           ["Power and buffered data arrive from the power box next door and are split to the 4 faces.",
-            "Inside the 15 cm dark space at the bottom of the tower."])
-    d.rect(40, 180, 300, 110, fill="#fde3e3", stroke=RED)
-    d.lines(56, 210, ["XT60 in · from power box", "+5V (brown)", "GND (blue)"], size=15, weight="bold", fill=RED)
-    d.pin(340, 237), d.pin(340, 262)
-    d.rect(40, 340, 300, 110, fill="#fff8e1", stroke="#b58900")
-    d.lines(56, 370, ["Data in · 22 AWG pair", "DATA", "GND"], size=15, weight="bold")
-    d.pin(340, 397), d.pin(340, 422)
-    # WAGO rails
-    d.rect(470, 200, 120, 40, fill="#fff", stroke=RED), d.text(530, 226, "WAGO +5V", size=13, anchor="middle", fill=RED, weight="bold")
-    d.rect(470, 260, 120, 40, fill="#fff", stroke=BLUE), d.text(530, 286, "WAGO GND", size=13, anchor="middle", fill=BLUE, weight="bold")
-    d.wire([(340, 237), (420, 237), (420, 220), (470, 220)], RED, 5)
-    d.wire([(340, 262), (420, 262), (420, 280), (470, 280)], BLUE, 5)
-    d.wire([(340, 422), (440, 422), (440, 300)], BLACK, 2), d.dot(440, 300, BLACK)
-    d.wire([(440, 300), (470, 300)], BLACK, 2)
-    d.text(352, 445, "joins GND", size=11, fill="#555")
-    # data bus
-    d.wire([(340, 397), (700, 397)], DATA_5, 3)
+def tip_tower_cable():
+    d = Drawing(1500, 640, "Tip-tower cable (power box in T2 → T1, in T6 → T7)")
+    header(d, "Tip-tower cable — power box in T2 → T1, power box in T6 → T7",
+           ["One made-up cable: XT60 and the data pair at the box end, 4 JST-SM at the tower end. T1 and T7 have nothing else:",
+            "no box, no base wiring. The cable surfaces inside the 15 cm dark space at the bottom of the tower."])
+    # box end
+    d.rect(40, 180, 280, 110, fill="#fde3e3", stroke=RED)
+    d.lines(56, 210, ["XT60 · into the box's XT60 out", "+5V (brown)", "GND (blue)"], size=15, weight="bold", fill=RED)
+    d.pin(320, 237), d.pin(320, 262)
+    d.rect(40, 340, 280, 110, fill="#fff8e1", stroke="#b58900")
+    d.lines(56, 370, ["Data · from the box's data out", "DATA", "GND"], size=15, weight="bold")
+    d.pin(320, 397), d.pin(320, 422)
+    # the buried run
+    d.rect(380, 150, 300, 320, fill="#f5f5f5", stroke="#bbb", sw=1.5)
+    d.lines(530, 176, ["buried", "3 × 2.5 (+5V, GND) + 22 AWG pair (DATA, GND)", "taped together · T2 → T1 1.2 m, T6 → T7 1.0 m"],
+            size=12, anchor="middle", fill="#555")
+    d.wire([(320, 237), (760, 237), (760, 220), (800, 220)], RED, 5)
+    d.wire([(320, 262), (760, 262), (760, 280), (800, 280)], BLUE, 5)
+    d.wire([(320, 422), (780, 422), (780, 300)], BLACK, 2), d.dot(780, 300, BLACK)
+    d.wire([(780, 300), (800, 300)], BLACK, 2)
+    d.text(690, 440, "data GND joins GND", size=11, fill="#555")
+    # tower end: two soldered joints, heat shrink over each
+    d.rect(800, 200, 120, 40, fill="#fff", stroke=RED), d.text(860, 226, "solder +5V", size=13, anchor="middle", fill=RED, weight="bold")
+    d.rect(800, 260, 120, 40, fill="#fff", stroke=BLUE), d.text(860, 286, "solder GND", size=13, anchor="middle", fill=BLUE, weight="bold")
+    d.wire([(320, 397), (1000, 397)], DATA_5, 3)
     ys = [170, 260, 350, 440]
-    d.wire([(700, ys[0]), (700, ys[-1])], DATA_5, 3), d.dot(700, 397, DATA_5)
+    d.wire([(1000, ys[0]), (1000, ys[-1])], DATA_5, 3), d.dot(1000, 397, DATA_5)
     for i, y in enumerate(ys):
-        d.wire([(700, y), (1000, y)], DATA_5, 3)
-        d.rect(1000, y - 28, 360, 56, fill="#fff8e1", stroke="#b58900")
-        d.pin(1000, y)
-        d.text(1014, y - 6, f"JST-SM out · face {i + 1} strand", size=15, weight="bold")
-        d.text(1014, y + 14, "DATA here · 5V/GND from the WAGOs", size=12, fill="#555")
-    d.wire([(590, 220), (640, 220)], RED, 3), d.flag(640, 220, "+5V", "right")
-    d.wire([(590, 280), (640, 280)], BLUE, 3), d.flag(640, 280, "GND", "right")
-    d.lines(40, 520, ["The 4 faces share one buffered data line from the power box (a short on one face's data lead darkens all 4).",
-                      "+5V / GND flags: the WAGO outputs to each face's JST-SM (22 AWG pigtails are fine over < 0.5 m)."],
+        d.wire([(1000, y), (1100, y)], DATA_5, 3)
+        d.rect(1100, y - 28, 360, 56, fill="#fff8e1", stroke="#b58900")
+        d.pin(1100, y)
+        d.text(1114, y - 6, f"JST-SM out · face {i + 1} strand", size=15, weight="bold")
+        d.text(1114, y + 14, "DATA here · 5V/GND from the joints", size=12, fill="#555")
+    d.wire([(920, 220), (970, 220)], RED, 3), d.flag(970, 220, "+5V", "right")
+    d.wire([(920, 280), (970, 280)], BLUE, 3), d.flag(970, 280, "GND", "right")
+    d.lines(40, 520, ["Tower end, made up on the bench: the cable's +5V core, GND core and the data GND meet the 4 JST-SM pigtails in two soldered joints;",
+                      "the DATA wire is soldered to the 4 DATA pigtails. Heat shrink over every joint. The 4 faces share one buffered data line from the",
+                      "power box, so a short on one face's data lead darkens all 4. 22 AWG pigtails are fine over < 0.5 m."],
             size=14, fill="#333")
-    d.save("neighbour-base.svg", "Neighbour tower base: XT60 power and buffered data split passively to four JST-SM strands.")
+    d.save("tip-tower-cable.svg", "Tip-tower cable: XT60 and data pair at the power box, split by soldered joints to four JST-SM strands at the tower.")
 
 
 def statue_power():
     d = Drawing(1600, 920, "Statue power and data distribution")
     header(d, "Statue power and data — the same at both statues",
-           ["Mains from the apex to 5 power boxes; each drives the tower it sits in, the ones in T2 and T6 also the tip towers.",
+           ["Mains from the apex to 5 power boxes; each drives the tower it sits in, the two-tower boxes (T2, T6) also the tip towers.",
             "Thick lines run in the trench; thin lines stay inside a base."])
     tx = {"T1": 150, "T2": 360, "T3": 570, "T4": 800, "T5": 1030, "T6": 1240, "T7": 1450}
     ty = 540
@@ -614,25 +619,30 @@ def statue_power():
         d.rect(x - 60, ty, 120, 90, fill="#ffe0b2", stroke="#e65100")
         d.text(x, ty + 30, f"{t} · {TOWER_H[t]}", size=15, anchor="middle", weight="bold")
         d.text(x, ty + 52, "4 × JST-SM", size=12, anchor="middle", fill="#555")
-        d.text(x, ty + 72, "own box" if own else "passive base", size=11, anchor="middle", fill="#777")
+        d.text(x, ty + 72, "own box" if own else "cable end", size=11, anchor="middle", fill="#777")
     sx = {n: tx[own] for n, (_, own, _) in SUPPLIES.items()}
     sy0, sy1 = 320, 400
     for n, x in sx.items():
         d.rect(x - 75, sy0, 150, sy1 - sy0, fill="#eceff1", stroke="#455a64")
         d.text(x, sy0 + 28, f"Power box in {n}", size=15, anchor="middle", weight="bold", fill="#455a64")
-        d.text(x, sy0 + 50, "apex box" if n == "T4" else "100W box", size=12, anchor="middle", fill="#555")
+        d.text(x, sy0 + 50, "apex box" if n == "T4" else ("two-tower box" if SUPPLIES[n][2] else "one-tower box"), size=12, anchor="middle", fill="#555")
         d.text(x, sy0 + 68, "S-100-5", size=12, anchor="middle", fill="#555")
     MAINS = "#8b5a2b"
-    d.rect(700, 135, 200, 50, fill="#fff3e0", stroke="#e65100")
-    d.lines(800, 156, ["230 V in + strip", "at the apex"], size=14, anchor="middle", weight="bold", fill="#e65100")
+    d.rect(600, 135, 400, 50, fill="#fff3e0", stroke="#e65100")
+    d.lines(800, 156, ["230 V in + strip at the apex", "from the outlet, or from the other statue"], size=13, anchor="middle", weight="bold", fill="#e65100")
     d.wire([(800, 185), (800, sy0)], MAINS, 2)
-    left = sorted([n for n in sx if sx[n] < 800], key=lambda n: -sx[n])
-    right = sorted([n for n in sx if sx[n] > 800], key=lambda n: sx[n])
-    for side, names in ((-1, left), (1, right)):
-        for k, n in enumerate(names):
-            x0, y = 800 + side * (25 + 18 * k), 245 - 30 * k
-            d.wire([(x0, 185), (x0, y), (sx[n], y), (sx[n], sy0)], MAINS, 6)
-            d.text((x0 + sx[n]) / 2, y - 7, f"230 V → {n}", size=13, anchor="middle", fill=MAINS, weight="bold")
+    # extension cords chained tower to tower, a power strip at the end of each (owner, 2026-10-29)
+    y = 245
+    d.wire([(800, 185), (800, y)], MAINS, 6)
+    d.wire([(sx["T2"], y), (sx["T6"], y)], MAINS, 6)
+    for n in sx:
+        if n == "T4":
+            continue
+        d.wire([(sx[n], y), (sx[n], sy0)], MAINS, 6)
+        d.rect(sx[n] - 26, y - 10, 52, 20, fill="#fff3e0", stroke="#e65100", sw=1.5)
+        d.text(sx[n], y + 4, "strip", size=11, anchor="middle", fill="#e65100", weight="bold")
+    for a, b in (("T4", "T3"), ("T3", "T2"), ("T4", "T5"), ("T5", "T6")):
+        d.text((sx[a] + sx[b]) / 2, y - 9, f"cord {'apex' if a == 'T4' else a} → {b}", size=12, anchor="middle", fill=MAINS, weight="bold")
     # own towers (thin) and neighbours (thick)
     for n, (_, own, nb) in SUPPLIES.items():
         x = sx[n]
@@ -640,11 +650,11 @@ def statue_power():
         for t in nb:
             off = -40 if tx[t] < x else 40
             d.wire([(x + off, sy1), (x + off, 470), (tx[t], 470), (tx[t], ty)], RED, 6)
-            d.text((x + off + tx[t]) / 2, 462, "XT60 · 3×2.5 + data", size=12, anchor="middle", fill=RED, weight="bold")
+            d.text((x + off + tx[t]) / 2, 462, "tip-tower cable", size=12, anchor="middle", fill=RED, weight="bold")
     d.rect(60, 700, 1480, 200, fill="#fafafa", stroke="#bbb", sw=1)
-    rows = [(MAINS, 6, "230 V, buried: H07RN-F 3×1.5 cord with C13 → the power box's C14"),
+    rows = [(MAINS, 6, "230 V, buried: extension cords chained tower to tower, a power strip at each; a short C13 cord from the strip into the box"),
             (MAINS, 2, "230 V inside the apex base (power box in T4)"),
-            (RED, 6, "to a neighbour tower, buried: 5 V on 3×2.5 with XT60 both ends, plus a 22 AWG data pair"),
+            (RED, 6, "tip-tower cable, buried: 3×2.5 + 22 AWG data pair; XT60 + data at the box, 4 JST-SM at the tower"),
             (RED, 2, "own tower: 4 JST-SM from the box straight to the 4 strands (5V, DATA, GND)")]
     for i, (col, w, txt) in enumerate(rows):
         y = 730 + 34 * i
@@ -660,5 +670,5 @@ if __name__ == "__main__":
     controller()
     box2()
     power_box()
-    neighbour_base()
+    tip_tower_cable()
     statue_power()

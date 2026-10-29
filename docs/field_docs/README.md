@@ -36,6 +36,27 @@ Parent: [../README.md](../README.md)
   `guide/troubleshooting.md`: call the owner before opening any box, and if he does not pick
   up, do not open it (owner, 2026-10-28). They are the only field fix for those faults, and
   the call puts the owner in the loop on the mains hazard before anyone reaches in.
+- **The guide never mentions the inlet fuses** (owner, 2026-10-29). Every C14 inlet carries
+  a spare fuse in its drawer, and the owner does not want the crew in there: a box that stays
+  dead after cooling is a call to the owner. `guide/troubleshooting.md` says so; the spares
+  bag carries no fuses. **Changed 2026-10-29:** previously the troubleshooting step was to
+  check and replace the fuse, and the bag held spares.
+- **Nothing is repaired on site, so the field spares are only what plugs in** (owner,
+  2026-10-29: "the crew can't solder in the field"; "I have to make new ones and send it to
+  them - they don't repair anything"). The bag holds the ESP32, MAX485 modules, 74AHCT125s
+  and CAT5e; no strips, bespoke cables, XT60 or JST-SM pairs, solder or ferrules. A dead
+  strip or damaged cable is reported to the owner, who makes a new one.
+- **The crew pages use crew words, not part names; the owner's pages use part names** (owner,
+  2026-10-29: "use it in places that concern the crew in the field ... the wiring guide is for
+  me, I know what those things are"). Crew pages: `README.md`, `guide/setup.md`,
+  `guide/operating.md`, `guide/troubleshooting.md`, `guide/inventory.md`. Owner's pages:
+  `guide/wiring.md`, `guide/parts.md`, `guide/build.md` and the diagrams. On the crew pages:
+  "3-pin LED connector" for JST-SM ("they don't know what JST-SM is"), "kettle lead" for a
+  C13 cord (the Hebrew "כבל קומקום"; the English colloquial name, strictly for the C15 but
+  used for C13 too) and "inlet" for the C14, "CAT5" for CAT5e, no cable specifications ("they don't need to know
+  the specifications"), no enclosure names or wattages, no reels ("they don't know about
+  reels"). Chip and module names (74AHCT125, MAX485, ESP32) stay, because the
+  troubleshooting swap steps name the physical part the crew must pick out of the bag.
 - **Secrets are not in the guide** — see [../firmware/README.md](../firmware/README.md).
 - **The guide must stay consistent with these docs.** When a decision here changes something
   a builder or operator does, update the matching guide page in the same change.
@@ -48,7 +69,7 @@ Parent: [../README.md](../README.md)
 
 ### Not yet documented
 
-- **Guide pages** — `guide/setup.md`, `guide/operating.md`, `guide/troubleshooting.md`, `guide/wiring.md`, `guide/parts.md`, `guide/build.md` — content follows the design pages in this tree; page-specific decisions are recorded above.
+- **Guide pages** — `guide/setup.md`, `guide/operating.md`, `guide/troubleshooting.md`, `guide/wiring.md`, `guide/parts.md`, `guide/inventory.md`, `guide/build.md` — content follows the design pages in this tree; page-specific decisions are recorded above. `guide/inventory.md` (owner asked, 2026-10-29) counts what exists, box by box and cable by cable with lengths, where `guide/parts.md` is the shopping list by part; the cable-length margins are in [../strips_and_power/trenches.md](../strips_and_power/trenches.md).
 
 ## Related
 

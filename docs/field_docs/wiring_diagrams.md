@@ -8,7 +8,7 @@ Parent: [README.md](README.md)
 ## What it does
 
 `python3 tools/wiring_diagrams.py` writes `overview.svg`, `controller-wiring.svg`,
-`box2-wiring.svg`, `power-box.svg`, `neighbour-base.svg` and `statue-power.svg` into `guide/img/`.
+`box2-wiring.svg`, `power-box.svg`, `tip-tower-cable.svg` and `statue-power.svg` into `guide/img/`.
 Standard library only. The tables in the script (`TOWER_H`, `GPIO`, `RJ45`, `CH_PINS`, `JACKS`,
 `SUPPLIES`) feed the diagrams.
 

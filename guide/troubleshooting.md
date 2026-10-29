@@ -6,7 +6,7 @@
 dangerous. If Ofer doesn't pick up, don't open the box.**
 
 Fastest isolation: swap the suspect part with its twin (towers of the same height, tower
-cables, CAT5e cables, the two jacks' channels) and see whether the fault moves.
+cables, CAT5 cables, the two jacks' channels) and see whether the fault moves.
 
 ## Nothing lights
 
@@ -18,20 +18,20 @@ cables, CAT5e cables, the two jacks' channels) and see whether the fault moves.
 ## All of statue 2 dark, statue 1 fine
 
 1. Box 2 powered (PSU LED on)?
-2. Re-seat the 3 CAT5e cables at both ends.
+2. Re-seat the 3 CAT5 cables at both ends.
 
 ## Statue 2 flickers or shows random colours
 
 Bad data connection between the boxes.
 
-- Re-seat the CAT5e cables at both ends.
+- Re-seat the CAT5 cables at both ends.
 - Check the screw terminals in both boxes: A/B wires and the ground pins (7, 8). Look for
   loose wires or stray strands.
 - Test with a spare cable on the surface. If that fixes it, the buried cable is damaged.
 
 ## Three statue-2 towers dark together
 
-They share one CAT5e cable: T1–T3 = jack 3, T4–T5 = jack 2, T6–T7 = jack 1. Re-seat or
+They share one CAT5 cable: T1–T3 = jack 3, T4–T5 = jack 2, T6–T7 = jack 1. Re-seat or
 replace that cable.
 
 ## One tower dark
@@ -55,7 +55,7 @@ A healthy one is cold, in any weather. Warm means a gate has failed short inside
 heat is killing the others. Box off, pull it, [test it](#testing-a-74ahct125), fit a tested
 spare the same way round. Bin the chip; a chip with one dead gate does not stay at one.
 
-Mains cord out first (one hand on the C13 plug, the other on the far side of the box; never
+Kettle lead out first (one hand on its plug, the other on the far side of the box; never
 touch the PSU). Then touch the GND pin of a data connector before you touch a chip, a socket
 or a data connector. Static is what kills these gates.
 
@@ -69,8 +69,8 @@ good in chip #2; a power box needs all four in its chip #1 and gate 1 in chip #2
 
 ## One face of a tower dark, the others fine
 
-That face's strip, its JST-SM, or that gate of the 74AHCT125 in its power box. On T1 or T7,
-the face's JST-SM at the base's WAGO split.
+That face's strip, its 3-pin LED connector, or that gate of the 74AHCT125 in its power box.
+On T1 or T7, the face's LED connector at the end of the tip-tower cable.
 
 ## A face dark from some point upwards
 
@@ -85,7 +85,9 @@ show playlist, or [restore the backup](build.md#restore-a-backup).
 ## Some towers dark, matching one power box
 
 Each power box feeds the tower it sits in; the one in T2 also feeds T1, the one in T6 also
-T7. Check that box's mains cord at the apex strip, then see below. Only T1 (or T7) dark: its
+T7. Check that box's kettle lead at the strip in its tower, and that strip's extension cord
+back towards the apex. T2 and T3 both dark (or T5 and T6): the strip in T3 (T5) or its cord
+from the apex, since T2's cord comes off that strip. Then see below. Only T1 (or T7) dark: its
 XT60 run or data pair from the power box in T2 (T6).
 
 ## A box is dead
@@ -93,13 +95,12 @@ XT60 run or data pair from the power box in T2 (T6).
 The PSU shuts down on overload or over-temperature.
 
 1. Unplug, let it cool, plug back in.
-2. Still dead: check the 1 A fuse in the C14 inlet's drawer. A blown inlet fuse means a fault
-   between the inlet and the PSU. If a new fuse blows again, leave the box unplugged.
+2. Still dead: leave the box unplugged and call the owner. Do not open the inlet's drawer.
 
 ## Spares
 
-Bag: 2 CAT5e cables, 1 receiver module, 1 ESP32 loaded with the show, 2 × 74AHCT125, 1 A
-fuses, XT60 pairs, JST-SM pairs.
+Bag: 2 CAT5 cables, 1 receiver module, 1 ESP32 loaded with the show, 2 × 74AHCT125. No
+spare strips, cables or connectors: nothing is repaired on site. Call the owner for a new one.
 
 - **74AHCT125:** [test the spare](#testing-a-74ahct125) first, pull the old one from its
   socket and seat the spare the same way round. Cord out and discharge yourself on a data

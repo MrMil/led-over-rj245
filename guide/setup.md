@@ -28,50 +28,54 @@ along the line between the two apexes, towards the other statue.
 
 | From | To | Cable |
 |---|---|---|
-| Controller jack 1 | Box 2 jack 1 | 20 m CAT5e (apexes are 17.4 m apart) |
-| Controller jack 2 | Box 2 jack 2 | 20 m CAT5e |
-| Controller jack 3 | Box 2 jack 3 | 20 m CAT5e |
-| Apex box, tower data outputs | Power boxes in T2 (data for T1, T2), T3, T5, T6 (data for T6, T7); T4's stays inside the apex box | DATA + GND, JST-SM |
-| Apex power strip | Power boxes in T2, T3, T5, T6 (C14) | C13 cords |
-| Each power box, 4 × JST-SM out | Its own tower's 4 strands | JST-SM |
+| Controller jack 1 | Box 2 jack 1 | 20 m CAT5 (apexes are 17.4 m apart) |
+| Controller jack 2 | Box 2 jack 2 | 20 m CAT5 |
+| Controller jack 3 | Box 2 jack 3 | 20 m CAT5 |
+| Apex box, tower data outputs | Power boxes in T2 (data for T1, T2), T3, T5, T6 (data for T6, T7); T4's stays inside the apex box | DATA + GND, 3-pin LED connector |
+| Apex power strip | Strips in T3 and T5, from those on to T2 and T6 | Extension cords, one strip at the end of each |
+| Strip in each tower | The box in that tower | Kettle lead |
+| Each power box, 4 × LED connector out | Its own tower's 4 strands | 3-pin LED connector |
 | Each power box, top-feed XT60 | Up its own tower's post → 4 × XT60 to the strand tops | 3 × 2.5 |
-| Power boxes in T2, T6: XT60 + data out | Tip towers T1 (from T2), T7 (from T6) | 3 × 2.5 + 22 AWG pair |
+| Two-tower boxes (T2, T6): XT60 + data out | Tip towers T1 (from T2), T7 (from T6): the tip-tower cable, 4 LED connectors at its end | 3 × 2.5 + 22 AWG pair |
 
-**The CAT5e cables are not Ethernet.** Never connect them to network equipment. PoE puts
-48 V on the pairs and destroys the transceivers at both ends.
+**The ports on the boxes are not Ethernet.** The cables are ordinary network cables; never
+plug one into network equipment. It will fry the electronics in the boxes and this is
+unfixable (PoE puts 48 V on the pairs).
 
 ## Power
 
-Five power boxes per statue, mains from the strip at the apex
-([statue-power.svg](img/statue-power.svg)):
+Five power boxes per statue. Each apex gets a strip, fed from an outlet by its own extension
+cord, or, if only one outlet is in reach, from the other apex's strip by the apex-to-apex
+cord. From the apex strip, mains runs on extension cords chained tower to tower, a strip at
+each box ([statue-power.svg](img/statue-power.svg)):
 
 | Power box in | Box | Also feeds |
 |---|---|---|
-| T2 | its own `100W` | T1 |
-| T3 | its own `100W` | — |
+| T2 | two-tower box | T1 |
+| T3 | one-tower box | — |
 | T4 | inside the apex box | — |
-| T5 | its own `100W` | — |
-| T6 | its own `100W` | T7 |
+| T5 | one-tower box | — |
+| T6 | two-tower box | T7 |
 
-T1 and T7 have no box: their base only splits the incoming power and data to the 4
-strands ([neighbour-base.svg](img/neighbour-base.svg)).
+T1 and T7 have no box and nothing to wire: the tip-tower cable from the power box next door
+ends in their 4 strands' LED connectors ([tip-tower-cable.svg](img/tip-tower-cable.svg)).
 
 ## Trenches
 
 | Segment | Contents |
 |---|---|
-| T4 → T3 | 230 V and data to the power boxes in T3 and T2 |
-| T3 → T2 | 230 V and data to the power box in T2 |
+| T4 → T3 | extension cord apex → T3; data to the power boxes in T3 and T2 |
+| T3 → T2 | extension cord T3 → T2; data to the power box in T2 |
 | T2 → T1 | 5 V and data, power box in T2 → T1 |
-| T4 → T5 | 230 V and data to the power boxes in T5 and T6 |
-| T5 → T6 | 230 V and data to the power box in T6 |
+| T4 → T5 | extension cord apex → T5; data to the power boxes in T5 and T6 |
+| T5 → T6 | extension cord T5 → T6; data to the power box in T6 |
 | T6 → T7 | 5 V and data, power box in T6 → T7 |
-| Apex 1 → apex 2 | 3 × CAT5e |
+| Apex 1 → apex 2 | 3 × CAT5, and the extension cord to statue 2 if statue 2 has no outlet of its own |
 
 ## Order
 
 1. Place each box in its statue's base.
-2. Lay the 3 CAT5e cables and the mains cords on the surface and connect everything. Power
+2. Lay the 3 CAT5 cables and the extension cords on the surface and connect everything. Power
    up and start the show. Every tower of both statues must light, all 4 faces. Then run the
    tower checks ([operating.md](operating.md#check-a-tower)) to confirm each jack drives the
    right tower. Fix anything wrong now.
@@ -85,6 +89,6 @@ strands ([neighbour-base.svg](img/neighbour-base.svg)).
 ## Teardown
 
 1. Switch off and unplug all mains.
-2. Disconnect the tower cables and the CAT5e cables at both ends.
-3. Dig out all buried cables: per statue 4 mains cords, 2 × 5 V, and the data cables; plus
-   the 3 CAT5e between the statues.
+2. Disconnect the tower cables and the CAT5 cables at both ends.
+3. Dig out all buried cables: per statue 4 extension cords, 2 tip-tower cables, and the
+   data cables; plus the 3 CAT5 and, if used, the extension cord between the statues.
