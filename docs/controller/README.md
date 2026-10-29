@@ -3,10 +3,10 @@
 Path: [docs](../README.md) › **controller**
 Parent: [../README.md](../README.md)
 
-**Covers:** the controller box in statue 1's base: one classic ESP32 producing all 14 tower
+**Covers:** the master box in statue 1's base: one classic ESP32 producing all 14 tower
 channels, two 74AHCT125 for statue 1's 7 towers, seven MAX485 transmitters for statue 2's 7
 towers, and the logic power for all of it.
-**Code:** `tools/wiring_diagrams.py` (`controller()`, `GPIO`), `guide/img/controller-wiring.svg`, `guide/wiring.md`; enclosure `100W-masterbox` in the enclosure repo.
+**Code:** `tools/wiring_diagrams.py` (`master_box()`, `GPIO`), `guide/img/master-box-wiring.svg`, `guide/wiring.md`; enclosure `100W-masterbox` in the enclosure repo.
 
 ## Design
 
@@ -78,7 +78,7 @@ towers, and the logic power for all of it.
 
 ### Not yet documented
 
-- **Transmitter board** — `guide/img/controller-wiring.svg` — seven MAX485 TX modules on one perfboard; chip-level decisions in [../data_link/transceivers.md](../data_link/transceivers.md).
+- **Transmitter board** — `guide/img/master-box-wiring.svg` — seven MAX485 TX modules on one perfboard; chip-level decisions in [../data_link/transceivers.md](../data_link/transceivers.md).
 - **Link-alive indicator** — not built — the owner wants something on each enclosure showing the link is alive, readable without opening the box.
 - **Hardware watchdog** — not built — owner note for dirty generator power; whether WLED's own task watchdog suffices is unknown.
 

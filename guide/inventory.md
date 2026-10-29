@@ -11,8 +11,8 @@ this page is by thing.
 |---|---|---|---|
 | Master box | 1 | Apex of statue 1 | ESP32 + WLED, 7 MAX485 transmitters, 3 RJ45 jacks, the power box for T4 |
 | Slave box | 1 | Apex of statue 2 | 7 MAX485 receivers, 3 RJ45 jacks, the power box for T4 |
-| One-tower box | 4 | T3 and T5 of each statue | PSU, 1 × 74AHCT125, 4 LED connectors out, top-feed XT60 out, data in |
-| Two-tower box | 4 | T2 and T6 of each statue | As the one-tower box, plus a second 74AHCT125, an XT60 out and a data out for the tip tower |
+| 1 tower power box | 4 | T3 and T5 of each statue | PSU, 1 × 74AHCT125, 4 LED connectors out, top-feed XT60 out, data in |
+| 2 tower power box | 4 | T2 and T6 of each statue | As the 1 tower power box, plus a second 74AHCT125, an XT60 out and a data out for the tip tower |
 
 10 boxes, each with its own PSU and a kettle-lead socket with a switch.
 
@@ -69,15 +69,15 @@ runs on from it to the other apex through the trench between them.
 
 ### Bespoke: data cables
 
-DATA + GND, 3-pin LED connector at both ends, apex box → power box, buried. 12 in all. A
-two-tower box gets two: its own tower's and the tip tower's.
+DATA + GND, 3-pin LED connector at both ends, master/slave box → power box, buried. 12 in all. A
+2 tower power box gets two: its own tower's and the tip tower's.
 
 | Qty | Length | Run |
 |---|---|---|
-| 4 | 4 m | apex → two-tower box in T2 (3.0 m), lines T2 and T1 |
-| 2 | 2.5 m | apex → one-tower box in T3 (1.3 m) |
-| 2 | 3.5 m | apex → one-tower box in T5 (2.2 m) |
-| 4 | 5 m | apex → two-tower box in T6 (3.7 m), lines T6 and T7 |
+| 4 | 4 m | apex → 2 tower power box in T2 (3.0 m), lines T2 and T1 |
+| 2 | 2.5 m | apex → 1 tower power box in T3 (1.3 m) |
+| 2 | 3.5 m | apex → 1 tower power box in T5 (2.2 m) |
+| 4 | 5 m | apex → 2 tower power box in T6 (3.7 m), lines T6 and T7 |
 
 ### Bespoke: tip-tower cables (T1, T7)
 
@@ -87,8 +87,8 @@ buried. 4 in all.
 
 | Qty | Length | Run |
 |---|---|---|
-| 2 | 2.5 m | two-tower box in T2 → T1 (1.2 m) |
-| 2 | 2 m | two-tower box in T6 → T7 (1.0 m) |
+| 2 | 2.5 m | 2 tower power box in T2 → T1 (1.2 m) |
+| 2 | 2 m | 2 tower power box in T6 → T7 (1.0 m) |
 
 ### RJ45
 

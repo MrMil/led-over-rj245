@@ -2,7 +2,7 @@
 
 Path: [docs](../README.md) › [data_link](README.md) › **termination_and_bias**
 Parent: [README.md](README.md)
-**Code:** `tools/wiring_diagrams.py` (`box2()`), `guide/img/box2-wiring.svg`, `guide/wiring.md`
+**Code:** `tools/wiring_diagrams.py` (`slave_box()`), `guide/img/slave-box-wiring.svg`, `guide/wiring.md`
 **Covers:** the resistors across and onto each A/B pair.
 
 ## What it does

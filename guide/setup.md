@@ -11,8 +11,8 @@ other**; T4 is the apex.
 |---|---|---|---|---|---|---|---|
 | Height (mm) | 1100 | 1400 | 1700 | 2000 | 1700 | 1400 | 1100 |
 
-- **Statue 1** has the **controller box** (ESP32) in its base.
-- **Statue 2** has **box 2** (receivers only) in its base.
+- **Statue 1** has the **master box** (ESP32) in its base.
+- **Statue 2** has **slave box** (receivers only) in its base.
 - Effects run statue 1 T1 → T7, then statue 2 T1 → T7. Tower numbering must match the
   physical order.
 
@@ -28,15 +28,15 @@ along the line between the two apexes, towards the other statue.
 
 | From | To | Cable |
 |---|---|---|
-| Controller jack 1 | Box 2 jack 1 | 20 m CAT5 (apexes are 17.4 m apart) |
-| Controller jack 2 | Box 2 jack 2 | 20 m CAT5 |
-| Controller jack 3 | Box 2 jack 3 | 20 m CAT5 |
-| Apex box, tower data outputs | Power boxes in T2 (data for T1, T2), T3, T5, T6 (data for T6, T7); T4's stays inside the apex box | DATA + GND, 3-pin LED connector |
+| Master box jack 1 | Slave box jack 1 | 20 m CAT5 (apexes are 17.4 m apart) |
+| Master box jack 2 | Slave box jack 2 | 20 m CAT5 |
+| Master box jack 3 | Slave box jack 3 | 20 m CAT5 |
+| Master/slave box, tower data outputs | Power boxes in T2 (data for T1, T2), T3, T5, T6 (data for T6, T7); T4's stays inside the master/slave box | DATA + GND, 3-pin LED connector |
 | Apex power strip | Strips in T3 and T5, from those on to T2 and T6 | Extension cords, one strip at the end of each |
 | Strip in each tower | The box in that tower | Kettle lead |
 | Each power box, 4 × LED connector out | Its own tower's 4 strands | 3-pin LED connector |
 | Each power box, top-feed XT60 | Up its own tower's post → 4 × XT60 to the strand tops | 3 × 2.5 |
-| Two-tower boxes (T2, T6): XT60 + data out | Tip towers T1 (from T2), T7 (from T6): the tip-tower cable, 4 LED connectors at its end | 3 × 2.5 + 22 AWG pair |
+| 2 tower power boxes (T2, T6): XT60 + data out | Tip towers T1 (from T2), T7 (from T6): the tip-tower cable, 4 LED connectors at its end | 3 × 2.5 + 22 AWG pair |
 
 **The ports on the boxes are not Ethernet.** The cables are ordinary network cables; never
 plug one into network equipment. It will fry the electronics in the boxes and this is
@@ -51,11 +51,11 @@ each box ([statue-power.svg](img/statue-power.svg)):
 
 | Power box in | Box | Also feeds |
 |---|---|---|
-| T2 | two-tower box | T1 |
-| T3 | one-tower box | — |
-| T4 | inside the apex box | — |
-| T5 | one-tower box | — |
-| T6 | two-tower box | T7 |
+| T2 | 2 tower power box | T1 |
+| T3 | 1 tower power box | — |
+| T4 | inside the master/slave box | — |
+| T5 | 1 tower power box | — |
+| T6 | 2 tower power box | T7 |
 
 T1 and T7 have no box and nothing to wire: the tip-tower cable from the power box next door
 ends in their 4 strands' LED connectors ([tip-tower-cable.svg](img/tip-tower-cable.svg)).

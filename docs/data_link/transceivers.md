@@ -7,8 +7,8 @@ Parent: [README.md](README.md)
 
 ## What it does
 
-14 common blue 5 V MAX485 modules: 7 transmitters in the controller box (DE = RE̅ = 5 V, DI
-from GPIO, RO unused) and 7 receivers in box 2 (DE = RE̅ = GND, RO to the tower data outputs,
+14 common blue 5 V MAX485 modules: 7 transmitters in the master box (DE = RE̅ = 5 V, DI
+from GPIO, RO unused) and 7 receivers in the slave box (DE = RE̅ = GND, RO to the tower data outputs,
 DI unused).
 
 ## Decisions

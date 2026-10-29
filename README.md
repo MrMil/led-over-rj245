@@ -29,30 +29,55 @@ makes them; see [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md).
 | [Setup](guide/setup.md) | Numbering, connections, order of work, teardown |
 | [Operating](guide/operating.md) | WiFi, preset numbering, checking a tower, settings not to touch |
 | [Troubleshooting](guide/troubleshooting.md) | Symptom → check, spares |
-| [Wiring](guide/wiring.md) | Diagrams and pin tables: apex boxes, power boxes, tip-tower cable, power |
+| [Wiring](guide/wiring.md) | Diagrams and pin tables: master and slave boxes, power boxes, tip-tower cable, power |
 | [Parts](guide/parts.md) | Bill of materials, spares |
 | [Inventory](guide/inventory.md) | What exists, counted: boxes, strips, every cable by length, spares |
 | [Build](guide/build.md) | Strip cut list, workshop assembly, configuring WLED, backup and restore |
 
 ## System
 
-![Two statues of 7 towers; the controller at statue 1 has three data cables to box 2 at statue 2.](guide/img/overview.svg)
+![Two statues of 7 towers; the controller at statue 1 has three data cables to the slave box at statue 2.](guide/img/overview.svg)
 
-- One ESP32 running [WLED](https://kno.wled.ge), in the controller box at statue 1, drives
+- One ESP32 running [WLED](https://kno.wled.ge), in the master box at statue 1, drives
   14 channels: one per tower.
-- Statue 1's towers are wired from the controller box. Statue 2's 7 channels cross to box 2
+- Statue 1's towers are wired from the master box. Statue 2's 7 channels cross to the slave box
   as RS-485 on 3 buried CAT5 cables, 3 channels per cable.
 - Each tower has 4 strips, one per face, all showing the same pixels, each on its own
   3-pin LED connector.
-- Each statue has five 5 V power boxes, fed with mains from its apex: a **one-tower box** in
-  each of T3 and T5, a **two-tower box** in each of T2 and T6, and the one in T4 inside the
-  apex box. Each box splits its own tower's channel to the 4 strands; a two-tower box also
+- Each statue has five 5 V power boxes, fed with mains from its apex: a **1 tower power box** in
+  each of T3 and T5, a **2 tower power box** in each of T2 and T6, and the one in T4 inside the
+  master/slave box. Each box splits its own tower's channel to the 4 strands; a 2 tower power box also
   feeds the tip tower next to it (T1, T7) through one cable that ends in the tip tower's 4
   LED connectors. Only data and ground cross between the statues.
 - The controller runs its own WiFi access point at `http://4.3.2.1`. The password comes from
   the installation lead.
 - The RJ45 ports on the boxes are not Ethernet: never plug the cables into network equipment
   or PoE. It will fry the electronics in the boxes and this is unfixable.
+
+## Site map
+
+![Both statues to scale, one enlarged with every step drawn corner to corner](guide/img/site-map.svg)
+
+Every step is measured **corner to corner**, between the two corners that face each other,
+as two legs you can lay out with a tape and a right angle: **across** the site (x) and
+**along** the line between the two apexes (y). Every tower is turned 45°, so one corner
+points at the next tower along that line. Statue 2 is statue 1 turned 180° about the
+centre, so the steps are the same at both. From the bench facing either statue, T1 is on
+your left.
+
+| Step, corner to corner | Straight | Across | Along |
+|---|---|---|---|
+| T1 → T2 | 0.64 m | 0.23 m | 0.60 m |
+| T2 → T3 | 1.14 m | 0.34 m | 1.09 m |
+| T3 → T4 | 0.81 m | 0.53 m | 0.61 m |
+| T4 → T5 | 1.64 m | 0.49 m | 1.57 m |
+| T5 → T6 | 0.95 m | 0.33 m | 0.89 m |
+| T6 → T7 | 0.46 m | 0.24 m | 0.39 m |
+| apex 1 → apex 2 | 16.85 m | 0 | 16.85 m |
+
+Centre to centre is 0.58 m more along y than corner to corner. The positions come from
+[`layout/statue-layout.json`](layout/statue-layout.json); the
+[layout tool](https://mrmil.github.io/led-over-rj245/) shows the same plan live.
 
 ## Repository layout
 

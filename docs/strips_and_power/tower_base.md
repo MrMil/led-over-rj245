@@ -37,7 +37,7 @@ own tower, passively at the end of the tip-tower cable for a tip tower.
   the sender off, the floating input would make the strips show garbage; the pull-down holds
   it low, the WS2812 idle state.
 - **100 Ω per buffer output** (agent; optional per the owner). It damps ringing on the lead.
-- **Data cables: any standard copper, DATA + its own GND wire** (owner, 2026-10-10/18). Apex box
+- **Data cables: any standard copper, DATA + its own GND wire** (owner, 2026-10-10/18). Master/slave box
   → power box, and power box → neighbour as a 22 AWG pair. Runs are a few metres between
   buffers, so nothing special is needed. The GND wire gives the signal its reference and ties
   the supplies' grounds together ([power_distribution.md](power_distribution.md)).

@@ -3,10 +3,10 @@
 Path: [docs](../README.md) › **data_link**
 Parent: [../README.md](../README.md)
 
-**Covers:** getting statue 2's 7 tower channels from the controller box to box 2: RS-485 on
+**Covers:** getting statue 2's 7 tower channels from the master box to the slave box: RS-485 on
 three buried CAT5e cables, three channels per cable, received back to single-ended 5 V data
-in box 2.
-**Code:** `tools/wiring_diagrams.py` (`RJ45`, `JACKS`, `box2()`, `controller()`), `guide/img/box2-wiring.svg`, `guide/img/controller-wiring.svg`, `guide/wiring.md`
+in the slave box.
+**Code:** `tools/wiring_diagrams.py` (`RJ45`, `JACKS`, `slave_box()`, `master_box()`), `guide/img/slave-box-wiring.svg`, `guide/img/master-box-wiring.svg`, `guide/wiring.md`
 
 ## Design
 
@@ -14,7 +14,7 @@ in box 2.
 
 - **Raw WS2812 waveform over RS-485, not a protocol** (owner). The transmitter just converts
   the 800 kHz WS2812 bitstream to differential and the receiver converts it back. Nothing is
-  decoded, buffered or re-timed, so there is no firmware in box 2 and no added latency.
+  decoded, buffered or re-timed, so there is no firmware in the slave box and no added latency.
 - **Three channels per cable, three cables between the boxes** (owner, 2026-10-10: "we can pass
   9 channels over the rj45 cables"). Three of a CAT5e's four pairs carry data, one carries
   ground; 9 channels for 7 towers leaves 2 spare. As built (owner, 2026-10-28): jack 3 =

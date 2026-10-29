@@ -9,7 +9,7 @@ Parent: [README.md](README.md)
 
 Pin 1/2 (orange pair) = channel 1, A/B. Pin 3/6 (green pair) = channel 2, A/B. Pin 4/5 (blue
 pair) = channel 3, A/B. Pins 7/8 (brown pair) = GND. Identical at both ends; cables are
-straight-through. Three cables run between the controller box and box 2.
+straight-through. Three cables run between the master box and the slave box.
 
 ## Decisions
 

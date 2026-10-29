@@ -130,7 +130,7 @@ failure — mitigated by a pre-flashed spare ESP32 in a socket ([controller/](co
 ## Areas
 
 - [`controller/`](controller/README.md) — the ESP32 box at statue 1: GPIO map, statue 1's tower outputs, transmitters for statue 2, logic power.
-- [`data_link/`](data_link/README.md) — RS-485 over 3 buried CAT5e cables to box 2: transceivers, cabling, termination and bias.
+- [`data_link/`](data_link/README.md) — RS-485 over 3 buried CAT5e cables to the slave box: transceivers, cabling, termination and bias.
 - [`strips_and_power/`](strips_and_power/README.md) — towers, strips and power: tower layout, tower-base splitter, power distribution, current budget, timing.
 - [`firmware/`](firmware/README.md) — WLED on the controller: configuration, logical LED order, presets, animation authoring.
 - [`field_docs/`](field_docs/README.md) — the human guide (`README.md`, `guide/`) and the generated wiring diagrams.

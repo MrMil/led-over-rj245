@@ -44,14 +44,14 @@ Lengths run from 150 mm above the bottom of the tower to its top.
 ## 1. Enclosures
 
 Print from [MrMil/electronics-enclosure](https://github.com/MrMil/electronics-enclosure):
-two `100W-masterbox` (controller and box 2). Each needs 3 RJ45 couplers, 7 tower data outputs
+two `100W-masterbox` (controller and the slave box). Each needs 3 RJ45 couplers, 7 tower data outputs
 and 7 tower power outputs. PETG or ASA, not PLA.
 
 ## 2. Boards
 
 Follow [wiring.md](wiring.md) and the diagrams there.
 
-**Controller box:**
+**Master box:**
 - ESP32 board (breadboard-style, 30 rows), in this order along the board:
   - ESP32 on 2 × 1×15 female headers, at one end, over a mounting hole.
   - 74AHCT125 #1 in a socket.
@@ -66,11 +66,11 @@ Follow [wiring.md](wiring.md) and the diagrams there.
   pull on the resistors.
 - Transmitter board: 7 MAX485 modules.
 
-**Box 2:** 7 MAX485 receivers, 7 pairs of 560 Ω bias resistors, 7 × 100 Ω.
+**Slave box:** 7 MAX485 receivers, 7 pairs of 560 Ω bias resistors, 7 × 100 Ω.
 
-**Power boxes (one-tower boxes in T3, T5; two-tower boxes in T2, T6; T4's part sits in the
-apex box):** 74AHCT125 #1 in a socket with a 10 kΩ pull-down on its input and 4 × 100 Ω to the
-4 strand JST-SMs. The two-tower boxes also: 74AHCT125 #2 for the tip tower's data (one input
+**Power boxes (1 tower power boxes in T3, T5; 2 tower power boxes in T2, T6; T4's part sits in the
+master/slave box):** 74AHCT125 #1 in a socket with a 10 kΩ pull-down on its input and 4 × 100 Ω to the
+4 strand JST-SMs. The 2 tower power boxes also: 74AHCT125 #2 for the tip tower's data (one input
 with 10 kΩ, one 100 Ω on the output).
 
 **Tip towers (T1, T7):** nothing to build. Their 4 JST-SM are the end of the tip-tower cable
@@ -94,7 +94,7 @@ chip until the others die too.
 ## 3. Power wiring (10 power boxes)
 
 Per [power-box.svg](img/power-box.svg) and [statue-power.svg](img/statue-power.svg): C14 to
-the PSU, PSU to the 4 strand JST-SMs and (two-tower boxes) the XT60 output, and in the apex box a
+the PSU, PSU to the 4 strand JST-SMs and (2 tower power boxes) the XT60 output, and in the master/slave box a
 separate thin pair to the perfboard. Make up the 4 tip-tower cables (power box in T2 → T1, in
 T6 → T7, per statue), per [tip-tower-cable.svg](img/tip-tower-cable.svg): a 3 × 2.5 and a 22 AWG
 pair taped together; at the box end a male XT60 on the 3 × 2.5, the pair bare for the box's data
@@ -109,7 +109,7 @@ Ferrules on every stranded wire that goes into a screw terminal.
 - Inside each box, cut a short patch cable for each of the 3 couplers and land its wires on
   the screw terminals using ferrules.
 - With a meter, check every pin end to end, through both couplers and the long cable: pin N
-  at the controller must reach pin N at box 2, and no pin may touch another.
+  at the controller must reach pin N at the slave box, and no pin may touch another.
 - Label both ends of each CAT5e cable (1, 2, 3) and each tower cable (S1-T1 … S2-T7).
 
 ## 5. WLED is already on the ESP32s

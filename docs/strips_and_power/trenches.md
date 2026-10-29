@@ -65,7 +65,8 @@ gets its own trench from the outlet, ~20 m (owner).
   owner cut it.
 
 - Segment lengths, centre to centre, from the final layout (`layout/statue-layout.json`,
-  2026-10-23; statue 2 mirrors statue 1): T4→T3 1300, T3→T2 1700, T2→T1 1200, T4→T5 2200,
+  2026-10-23; statue 2 mirrors statue 1; drawn to scale in `guide/img/site-map.svg`, the README's site map, which
+  gives the corner-to-corner legs the crew measures): T4→T3 1300, T3→T2 1700, T2→T1 1200, T4→T5 2200,
   T5→T6 1500, T6→T7 1000 mm. The arms are not symmetric. Cable runs along an arm add up:
   apex → A (T2) 3.0 m, apex → B (T3) 1.3 m, apex → D (T5) 2.2 m, apex → E (T6) 3.7 m, plus
   slack into each base. The 5 V runs are T2 → T1 1.2 m and T6 → T7 1.0 m.

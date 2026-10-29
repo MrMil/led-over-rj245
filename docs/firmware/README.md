@@ -41,7 +41,7 @@ installation — and how the show is built and changed.
   privately. The SSID is "Layers-WLED" (owner, 2026-10-26; [controller_files.md](controller_files.md)).
   **Changed 2026-10-26:** it was to avoid the word "WLED" (agent, 2026-10-09: the WLED app
   and passers-by looking for WLED networks would spot it); the owner chose the name.
-  **Changed 2026-10-09:** briefly "on the controller box label"; the owner rejected labelling
+  **Changed 2026-10-09:** briefly "on the master box label"; the owner rejected labelling
   the hardware.
 - **Preset numbering: 10–99 workshop looks, 100+ field looks; the show playlist is the boot
   preset** (agent, 2026-10-09). Separate ranges stop field edits overwriting workshop work;

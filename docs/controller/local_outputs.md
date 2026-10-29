@@ -2,8 +2,8 @@
 
 Path: [docs](../README.md) › [controller](README.md) › **local_outputs**
 Parent: [README.md](README.md)
-**Code:** `tools/wiring_diagrams.py` (`controller()`), `guide/img/controller-wiring.svg`
-**Covers:** how statue 1's 7 tower channels leave the controller box without RS-485.
+**Code:** `tools/wiring_diagrams.py` (`master_box()`), `guide/img/master-box-wiring.svg`
+**Covers:** how statue 1's 7 tower channels leave the master box without RS-485.
 
 ## What it does
 
@@ -23,7 +23,7 @@ that tower's base, through the trench under the statue.
   current.
 - **100 Ω series resistor at each output** (agent, 2026-10-09; optional per the owner). It
   damps ringing on the cable and limits current if a pinched cable shorts DATA. The same
-  value is used at box 2's outputs and in the power boxes.
+  value is used at the slave box's outputs and in the power boxes.
 - **The 100 Ω stands upright in the output pin's row, with the output wire soldered to its
   top lead** (owner, 2026-10-11). The ESP32 board has no room to lay resistors flat (see
   [README.md](README.md)). Upright, it still sits at the driver, where series termination

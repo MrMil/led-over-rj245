@@ -5,8 +5,8 @@
 | Diagram | Covers |
 |---|---|
 | [System overview](img/overview.svg) | Both statues, boxes, cables |
-| [Controller box](img/controller-wiring.svg) | Statue 1: ESP32, 2 × 74AHCT125, 7 transmitters, 3 jacks, 7 tower outputs |
-| [Box 2](img/box2-wiring.svg) | Statue 2: 3 jacks, 7 receivers, 7 tower outputs |
+| [Master box](img/master-box-wiring.svg) | Statue 1: ESP32, 2 × 74AHCT125, 7 transmitters, 3 jacks, 7 tower outputs |
+| [Slave box](img/slave-box-wiring.svg) | Statue 2: 3 jacks, 7 receivers, 7 tower outputs |
 | [Statue power](img/statue-power.svg) | Mains from the apex to 5 power boxes; which box feeds which tower |
 | [Power box](img/power-box.svg) | All 10 power boxes: C14, PSU, own tower's splitter and 4 JST-SM, neighbour outputs |
 | [Tip-tower cable](img/tip-tower-cable.svg) | Power box in T2 → T1, in T6 → T7: one cable, XT60 + data at the box, 4 JST-SM at the tower |
@@ -16,9 +16,9 @@ RJ45 pigtail wires are drawn in T568B colours (striped = white/colour).
 
 ---
 
-## Controller box (statue 1)
+## Master box (statue 1)
 
-![Controller box wiring](img/controller-wiring.svg)
+![Master box wiring](img/master-box-wiring.svg)
 
 ### ESP32 pins
 
@@ -69,9 +69,9 @@ Leave the module's own 120 Ω resistor in place.
 
 ---
 
-## Box 2 (statue 2)
+## Slave box (statue 2)
 
-![Box 2 wiring](img/box2-wiring.svg)
+![Slave box wiring](img/slave-box-wiring.svg)
 
 ### MAX485 receivers (×7)
 
@@ -116,7 +116,7 @@ jacks; don't rely on colours.
 
 ---
 
-## Power box (one-tower boxes in T3, T5; two-tower boxes in T2, T6; T4's is inside the apex box)
+## Power box (1 tower power boxes in T3, T5; 2 tower power boxes in T2, T6; T4's is inside the master/slave box)
 
 ![Power box](img/power-box.svg)
 
@@ -125,10 +125,10 @@ jacks; don't rely on colours.
 | Own tower data in (JST-SM) | DATA → 74AHCT125 #1 pins 2, 5, 9, 12, and 10 kΩ to GND; GND → GND; 5V pin not connected |
 | 74AHCT125 #1 pins 3, 6, 8, 11 | 100 Ω → DATA of JST-SM out 1–4 (one per face) |
 | JST-SM out 5V / GND | PSU +V / −V |
-| Tip-tower data in (two-tower boxes only) | DATA → 74AHCT125 #2 gate 1, 10 kΩ to GND |
+| Tip-tower data in (2 tower power boxes only) | DATA → 74AHCT125 #2 gate 1, 10 kΩ to GND |
 | 74AHCT125 #2 pin 3 | 100 Ω → tip-tower data out (22 AWG pair: DATA + GND) |
 | 74AHCT125 VCC (14) / GND (7), OE (1, 4, 10, 13) | +5V / GND, GND; unused inputs to GND |
-| XT60 out (two-tower boxes only) | PSU +V / −V, NYAF 2.5 mm² |
+| XT60 out (2 tower power boxes only) | PSU +V / −V, NYAF 2.5 mm² |
 | XT60 out · top feed (every box) | PSU +V / −V, NYAF 2.5 mm² |
 
 ---
@@ -151,10 +151,12 @@ One made-up cable per tip tower; T1 and T7 have no box and nothing to wire in th
 
 ![Statue power](img/statue-power.svg)
 
-- **Mains:** outlet → extension cord → apex strip → extension cords chained tower to tower
-  (apex → T3 → T2, apex → T5 → T6), a power strip at the end of each, and from apex 1 a cord
-  on to apex 2. Each box: one short C13 cord from the strip in its own tower to its C14 (T4's
-  box is at the apex strip). In each box: L → PSU 1, N → 2, PE → 3 (FG).
+- **Mains:** outlet → extension cord → apex strip, one per statue if both apexes have an
+  outlet in reach, otherwise one cord from the outlet to apex 1 and the apex-to-apex cord on
+  to apex 2. From each apex strip: extension cords chained tower to tower (apex → T3 → T2,
+  apex → T5 → T6), a power strip at the end of each. Each box: one short C13 cord from the
+  strip in its own tower to its C14 (T4's box is at the apex strip). In each box: L → PSU 1,
+  N → 2, PE → 3 (FG).
 - **Strands:** every strand plugs into a JST-SM (5V, DATA, GND), at its own power box or at
   the end of the tip-tower cable.
 - **Tip-tower cable (power box in T2 → T1, power box in T6 → T7):** 3 × 2.5 cable, brown +5 V,
@@ -165,7 +167,7 @@ One made-up cable per tip tower; T1 and T7 have no box and nothing to wire in th
   post. At the top: two soldered joints (+5 V, GND), each the cable core with 4 NYAF 2.5 mm²
   tails to 4 female XT60s, one per strand top (male XT60 on the strip). Heat shrink over each
   joint. T1 and T7 have none.
-- **Power box in T4 only:** PSU 5 (−V) / 7 (+V) → apex box perfboard rails, 0.5 mm².
+- **Power box in T4 only:** PSU 5 (−V) / 7 (+V) → master/slave box perfboard rails, 0.5 mm².
 
 ---
 

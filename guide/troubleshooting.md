@@ -17,7 +17,7 @@ cables, CAT5 cables, the two jacks' channels) and see whether the fault moves.
 
 ## All of statue 2 dark, statue 1 fine
 
-1. Box 2 powered (PSU LED on)?
+1. Slave box powered (PSU LED on)?
 2. Re-seat the 3 CAT5 cables at both ends.
 
 ## Statue 2 flickers or shows random colours
@@ -106,6 +106,6 @@ spare strips, cables or connectors: nothing is repaired on site. Call the owner 
   socket and seat the spare the same way round. Cord out and discharge yourself on a data
   connector's GND pin before handling either; never touch the PSU.
 - **Receiver:** photograph the wiring, move the wires across, check against
-  [box2-wiring.svg](img/box2-wiring.svg).
+  [slave-box-wiring.svg](img/slave-box-wiring.svg).
 - **ESP32:** lifts out of its socket. Seat the spare the same way round (USB connector in
   the same position). It already holds the show; if not, [restore](build.md#restore-a-backup).

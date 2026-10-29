@@ -21,7 +21,7 @@ OUT = Path(__file__).resolve().parent.parent / "guide" / "img"
 TOWER_H = {"T1": 1100, "T2": 1400, "T3": 1700, "T4": 2000, "T5": 1700, "T6": 1400, "T7": 1100}  # artist, final, 2026-10-21
 TOWERS = list(TOWER_H)
 
-# One channel per tower. Statue 1 is local to the controller box; statue 2's
+# One channel per tower. Statue 1 is local to the master box; statue 2's
 # channels cross to the second box as RS-485.
 GPIO = {
     "S1-T1": 4, "S1-T2": 13, "S1-T3": 14, "S1-T4": 16, "S1-T5": 17, "S1-T6": 18, "S1-T7": 19,
@@ -45,7 +45,7 @@ CH_PINS = {1: (1, 2), 2: (3, 6), 3: (5, 4)}   # channel in a cable -> (A pin, B 
 JACKS = {1: ["T6", "T7", None], 2: ["T4", "T5", None], 3: ["T3", "T2", "T1"]}
 
 # Power boxes per statue, named by the tower they sit in (owner, 2026-10-25; formerly A-E):
-# name -> (box sits at, own tower, tip towers fed from it). T4's is inside the apex box. A tip tower has no electronics: one cable
+# name -> (box sits at, own tower, tip towers fed from it). T4's is inside the master/slave box. A tip tower has no electronics: one cable
 # from the box (XT60 power on 3 x 2.5, data already buffered on a 22 AWG pair) ends in its 4 JST-SM.
 SUPPLIES = {
     "T2": ("T2", "T2", ["T1"]),
@@ -325,6 +325,9 @@ def overview():
             side = -1 if i < 3 else 1
             pos[t] = (apex_x + s * 55 * k, cy + side * 60 * k)
         bx, by = apex_x - s * 70, cy
+        # 230 V: extension cords chained tower to tower along each arm, a power strip at each (owner, 2026-10-29)
+        for a, b in (("T4", "T3"), ("T3", "T2"), ("T4", "T5"), ("T5", "T6")):
+            d.wire([pos[a], pos[b]], "#8b5a2b", 5)
         for n, (_, own, nb) in SUPPLIES.items():
             if n != "T4":
                 d.wire([(bx, by), pos[own]], led, 2)
@@ -343,28 +346,29 @@ def overview():
         d.text(apex_x, cy - 230, label, size=17, anchor="middle", weight="bold")
         return bx, by
 
-    b1 = statue(cx - r + 40, 1, "Statue 1", "#2e7d32", "CTRL")
-    b2 = statue(cx + r - 40, -1, "Statue 2", "#1565c0", "BOX 2")
+    b1 = statue(cx - r + 40, 1, "Statue 1", "#2e7d32", "MASTER")
+    b2 = statue(cx + r - 40, -1, "Statue 2", "#1565c0", "SLAVE")
     for dy in (-12, 0, 12):
         d.wire([(b1[0] - 34, b1[1] + dy), (b1[0] - 60, b1[1] + dy), (b1[0] - 60, cy + 300 + dy),
                 (b2[0] + 60, cy + 300 + dy), (b2[0] + 60, b2[1] + dy), (b2[0] + 34, b2[1] + dy)], cable, 4)
     d.rect(cx - 150, cy + 312, 300, 30, fill="#fff", stroke=cable, sw=1.5)
     d.text(cx, cy + 333, "3 × CAT5e, jacks 1–3 → jacks 1–3", size=14, anchor="middle", fill=cable, weight="bold")
-    d.rect(60, 870, 1080, 96, fill="#fafafa", stroke="#bbb", sw=1)
-    d.lines(80, 896, ["CTRL / BOX 2 = apex box (with the power box in T4) in statue 1 / 2. Grey P = the power box in T2, T3, T5, T6.",
-                      "Orange: data (DATA + GND) from the apex box, and 230 V chained tower to tower, to the power boxes in T2, T3, T5, T6. Red: the tip-tower cables to T1, T7.",
-                      "Purple: 3 data cables between the apex boxes. Placement and distances to be confirmed."],
+    d.rect(60, 862, 1080, 112, fill="#fafafa", stroke="#bbb", sw=1)
+    d.lines(80, 886, ["MASTER / SLAVE = the master box (statue 1) / slave box (statue 2), each with the power box in T4 inside. Grey P = the power box in T2, T3, T5, T6.",
+                      "Orange: data (DATA + GND) from the master/slave box to each power box. Red: the tip-tower cables to T1, T7.",
+                      "Brown: 230 V on extension cords chained tower to tower (apex → T3 → T2, apex → T5 → T6), a power strip at each tower with a box.",
+                      "Purple: 3 data cables between the master and slave boxes. Placement and distances to be confirmed."],
             size=14)
     d.save("overview.svg", "Two statues of 7 towers, one controller, three data cables between the boxes.")
 
 
 # --------------------------------------------------------------------------
-# 2. Controller box (statue 1)
+# 2. Master box (statue 1)
 # --------------------------------------------------------------------------
 
-def controller():
-    d = Drawing(1600, 2460, "Controller box wiring (statue 1)")
-    header(d, "Controller box — statue 1 (enclosure 100W-masterbox)",
+def master_box():
+    d = Drawing(1600, 2460, "Master box wiring (statue 1)")
+    header(d, "Master box — statue 1 (enclosure 100W-masterbox)",
            ["Signals only. Power: statue-power.svg, power-box.svg.",
             "14 channels: statue 1's 7 towers through 2 × 74AHCT125,",
             "statue 2's 7 towers as RS-485 on 3 RJ45 jacks."])
@@ -416,18 +420,18 @@ def controller():
         pair_label(d, mp["B"][0], mp["B"][1], pb, j, "right")
     for j in (1, 2, 3):
         jt = G + (j - 1) * 480 + 20
-        jack_table(d, 1260, jt, f"RJ45 jack {j} → box 2 jack {j}", j)
+        jack_table(d, 1260, jt, f"RJ45 jack {j} → slave box jack {j}", j)
         d.text(1410, jt + 48 + 26 * 8 + 22, "pins 7, 8 → GND", size=13, anchor="middle", fill="#555")
-    d.save("controller-wiring.svg", "ESP32, two 74AHCT125, seven MAX485 transmitters and three RJ45 jacks in the controller box.")
+    d.save("master-box-wiring.svg", "ESP32, two 74AHCT125, seven MAX485 transmitters and three RJ45 jacks in the master box.")
 
 
 # --------------------------------------------------------------------------
-# 3. Box 2 (statue 2)
+# 3. Slave box (statue 2)
 # --------------------------------------------------------------------------
 
-def box2():
-    d = Drawing(1700, 2030, "Box 2 wiring (statue 2)")
-    header(d, "Box 2 — statue 2 (enclosure 100W-masterbox, no ESP32)",
+def slave_box():
+    d = Drawing(1700, 2030, "Slave box wiring (statue 2)")
+    header(d, "Slave box — statue 2 (enclosure 100W-masterbox, no ESP32)",
            ["Signals only. Power: statue-power.svg, power-box.svg.",
             "7 receivers, one per tower. Jack N here = jack N at the controller",
             "(straight-through cables)."])
@@ -462,11 +466,11 @@ def box2():
         d.resistor(1300, ro[1], "100 Ω", color=DATA_5)
         tower_exit(d, 1390, ro[1], f"Tower {t} data", f"{dest_of(t)} · + GND")
     for j in (1, 2, 3):
-        jack_table(d, 40, 300 + (j - 1) * 560, f"RJ45 jack {j} ← controller jack {j}", j)
+        jack_table(d, 40, 300 + (j - 1) * 560, f"RJ45 jack {j} ← master box jack {j}", j)
         d.text(190, 300 + (j - 1) * 560 + 48 + 26 * 8 + 22, "pins 7, 8 → GND", size=13, anchor="middle", fill="#555")
     d.lines(40, 2005, ["Each receiver: 560 Ω A→GND and B→+5V hold the line idle-low when the controller is off, so the towers stay dark instead of flickering."],
             size=14, fill="#333")
-    d.save("box2-wiring.svg", "Three RJ45 jacks, seven MAX485 receivers with idle bias, and seven tower data outputs in box 2.")
+    d.save("slave-box-wiring.svg", "Three RJ45 jacks, seven MAX485 receivers with idle bias, and seven tower data outputs in the slave box.")
 
 
 # --------------------------------------------------------------------------
@@ -492,11 +496,11 @@ def jst_block(d, x, y, title, sub, pins, w=300):
 
 def power_box():
     d = Drawing(1600, 1640, "Power box wiring")
-    header(d, "Power box — one-tower boxes in T3, T5 · two-tower boxes in T2, T6 (and T4, inside the apex box)",
+    header(d, "Power box — 1 tower power boxes in T3, T5 · 2 tower power boxes in T2, T6 (and T4, inside the master/slave box)",
            ["Mains in, the box's own tower out on 4 JST-SM (one per face) and a top feed (XT60), and for",
-            "the two-tower boxes the tip-tower cable's power (XT60) and buffered data. Same pixels on all 4 faces."])
+            "the 2 tower power boxes the tip-tower cable's power (XT60) and buffered data. Same pixels on all 4 faces."])
     # own tower: data in -> pull-down -> buffer #1 -> 4 faces
-    din = jst_block(d, 40, 190, "JST-SM in · own tower data", "from apex box",
+    din = jst_block(d, 40, 190, "JST-SM in · own tower data", "from master/slave box",
                     [("DATA", ""), ("GND", ""), ("5V", "not connected")], w=330)
     d.wire([din["GND"], (400, din["GND"][1])], BLACK, 2), d.flag(400, din["GND"][1], "GND", "right")
     dy = din["DATA"][1]
@@ -520,7 +524,7 @@ def power_box():
     # neighbours (power box in T2: T1; in T6: T7)
     top2 = bot + 60
     d.rect(30, top2 - 30, 1540, 3, fill="#bbb", stroke="none", rx=0)
-    d.text(40, top2 - 6, "Two-tower boxes (T2, T6) only: the tip tower next door (T2 → T1; T6 → T7)", size=15, weight="bold", fill="#555")
+    d.text(40, top2 - 6, "2 tower power boxes (T2, T6) only: the tip tower next door (T2 → T1; T6 → T7)", size=15, weight="bold", fill="#555")
     gy2, bot2 = buffer_chip(d, x0, top2 + 20, 1, "74AHCT125 #2 · tip tower", gap=60)
     for k, (lbl, which) in enumerate((("tip tower", "in T2: T1 · in T6: T7"),)):
         yy = top2 + 30 + 130 * k
@@ -559,7 +563,7 @@ def power_box():
     d.lines(1214, top3 + 166, ["XT60 out · top feed, own tower", "3 × 2.5 cable up the post, soldered",
                                "at the top → 4 × XT60 to the strand tops", "every power box, T2–T6"], size=13, fill="#333")
     d.lines(40, top3 + 310, ["All flags with the same label are the same wire. The data inputs' 5V pins stay unconnected so two supplies never join on +5 V.",
-                             "Power box in T4: the same circuit inside the apex box, plus the perfboard feed for the ESP32 / transceivers.",
+                             "Power box in T4: the same circuit inside the master/slave box, plus the perfboard feed for the ESP32 / transceivers.",
                              "100 Ω resistors optional. The tip tower's data shares one buffer gate; it is split to the 4 faces at the end of the tip-tower cable."],
             size=14, fill="#333")
     d.save("power-box.svg", "Power box: mains, S-100-5, own tower's 74AHCT125 to 4 JST-SM strands, the tip-tower cable's power and data.")
@@ -610,7 +614,7 @@ def tip_tower_cable():
 def statue_power():
     d = Drawing(1600, 920, "Statue power and data distribution")
     header(d, "Statue power and data — the same at both statues",
-           ["Mains from the apex to 5 power boxes; each drives the tower it sits in, the two-tower boxes (T2, T6) also the tip towers.",
+           ["Mains from the apex to 5 power boxes; each drives the tower it sits in, the 2 tower power boxes (T2, T6) also the tip towers.",
             "Thick lines run in the trench; thin lines stay inside a base."])
     tx = {"T1": 150, "T2": 360, "T3": 570, "T4": 800, "T5": 1030, "T6": 1240, "T7": 1450}
     ty = 540
@@ -625,7 +629,7 @@ def statue_power():
     for n, x in sx.items():
         d.rect(x - 75, sy0, 150, sy1 - sy0, fill="#eceff1", stroke="#455a64")
         d.text(x, sy0 + 28, f"Power box in {n}", size=15, anchor="middle", weight="bold", fill="#455a64")
-        d.text(x, sy0 + 50, "apex box" if n == "T4" else ("two-tower box" if SUPPLIES[n][2] else "one-tower box"), size=12, anchor="middle", fill="#555")
+        d.text(x, sy0 + 50, "master/slave box" if n == "T4" else ("2 tower power box" if SUPPLIES[n][2] else "1 tower power box"), size=12, anchor="middle", fill="#555")
         d.text(x, sy0 + 68, "S-100-5", size=12, anchor="middle", fill="#555")
     MAINS = "#8b5a2b"
     d.rect(600, 135, 400, 50, fill="#fff3e0", stroke="#e65100")
@@ -660,15 +664,165 @@ def statue_power():
         y = 730 + 34 * i
         d.wire([(80, y), (150, y)], col, w)
         d.text(170, y + 5, txt, size=14)
-    d.text(80, 880, "Data to the power boxes in T2, T3, T5, T6: one DATA + GND line per tower from the apex box, in the same trenches (see the trench table).",
+    d.text(80, 880, "Data to the power boxes in T2, T3, T5, T6: one DATA + GND line per tower from the master/slave box, in the same trenches (see the trench table).",
            size=14, fill="#333")
     d.save("statue-power.svg", "Mains from the apex to five power boxes per statue; own towers and the tip towers.")
 
 
+# --------------------------------------------------------------------------
+# 7. Site map, to scale, from layout/statue-layout.json
+# --------------------------------------------------------------------------
+
+LAYOUT = Path(__file__).resolve().parent.parent / "layout" / "statue-layout.json"
+ARM_PAIRS = (("T1", "T2"), ("T2", "T3"), ("T3", "T4"), ("T4", "T5"), ("T5", "T6"), ("T6", "T7"))
+DATA_RUNS = (("T4", "T2"), ("T4", "T3"), ("T4", "T5"), ("T4", "T6"))
+
+
+def site_distances():
+    """Steps between neighbouring towers of statue 1, from the layout file, measured between the
+    facing corners (owner, 2026-10-29): every tower is turned 45°, so a corner points at the next
+    tower along the apex line. Returns (st, rows, params, half_diag_mm) where rows are
+    (a, b, dx_mm, dy_corner_mm, straight_corner_mm); dx is between centres (the corners sit on the
+    centre line), dy is the clear gap along the apex line. Statue 2 is statue 1 turned 180° about
+    the centre, so its steps are the same."""
+    import json, math
+    lay = json.loads(LAYOUT.read_text())
+    st = {s["statue"]: {t["name"]: (t["x_mm"], t["y_mm"]) for t in s["towers"]} for s in lay["layout"]["statues"]}
+    outside = lay["layout"]["statues"][0]["towers"][0]["outside_mm"]
+    half = outside / math.sqrt(2)
+    pos = st[1]
+    rows = []
+    for a, b in ARM_PAIRS:
+        dx, dy = abs(pos[b][0] - pos[a][0]), abs(pos[b][1] - pos[a][1]) - 2 * half
+        rows.append((a, b, dx, dy, math.hypot(dx, dy)))
+    dx, dy = abs(st[2]["T4"][0] - pos["T4"][0]), abs(st[2]["T4"][1] - pos["T4"][1]) - 2 * half
+    rows.append(("apex 1", "apex 2", dx, dy, math.hypot(dx, dy)))
+    return st, rows, lay["params"], half
+
+
+def site_map():
+    import json
+    st, rows, prm, half = site_distances()
+    lay = json.loads(LAYOUT.read_text())
+    tw = {sn: {t["name"]: t for s_ in lay["layout"]["statues"] if s_["statue"] == sn for t in s_["towers"]} for sn in st}
+    W, H = 1500, 1420
+    d = Drawing(W, H, "Site map, to scale")
+    header(d, "Site map — top view, to scale",
+           ["Left: the whole site on a 1 m grid. Right: one statue enlarged. Every step is measured CORNER TO CORNER, between the two corners",
+            "that face each other, as two legs: ACROSS (x) and ALONG the apex-to-apex line (y), dashed, in metres. Lay it out with a tape and a",
+            "right angle. The brown number is the straight tape from corner to corner. Statue 2 is statue 1 turned 180° about the centre: the same steps.",
+            "From the bench facing either statue, T1 is on your left."])
+    MAINS, LEG = "#8b5a2b", "#1565c0"
+
+    def tower(px, py, t, sz, label_dx, label_size=14):
+        fill = "#ffcc80" if t["name"] in SUPPLIES else "#ffe0b2"
+        d.add(f'<rect x="{px - sz / 2:.1f}" y="{py - sz / 2:.1f}" width="{sz:.1f}" height="{sz:.1f}" '
+              f'fill="{fill}" stroke="#e65100" stroke-width="2" transform="rotate({t["box_yaw_deg"]} {px:.1f} {py:.1f})"/>')
+        d.text(px + label_dx, py + 5, t["name"], size=label_size, anchor="end" if label_dx < 0 else "start", weight="bold")
+
+    # ---- left panel: the whole site, 40 px per metre
+    sc = 40 / 1000.0
+    cx, cy = 60 + 9000 * sc, 200 + 9000 * sc
+    R = prm["circle_diameter_mm"] / 2 * sc
+    def P(x_mm, y_mm):
+        return cx + x_mm * sc, cy - y_mm * sc
+    g = int(prm["circle_diameter_mm"] / 2000)
+    for k in range(-g, g + 1):
+        col, sw = ("#ccc", 1.2) if k % 5 == 0 else ("#eee", 0.8)
+        x1, y1 = P(k * 1000, -g * 1000); x2, y2 = P(k * 1000, g * 1000)
+        d.add(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="{col}" stroke-width="{sw}"/>')
+        x1, y1 = P(-g * 1000, k * 1000); x2, y2 = P(g * 1000, k * 1000)
+        d.add(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="{col}" stroke-width="{sw}"/>')
+    d.add(f'<circle cx="{cx}" cy="{cy}" r="{R:.1f}" fill="none" stroke="#999" stroke-width="2" stroke-dasharray="10 8"/>')
+    d.text(cx - R + 10, cy - R + 60, f'circle Ø {prm["circle_diameter_mm"] / 1000:g} m · 1 m grid', size=13, fill="#777")
+    rb = prm["bench_diameter_mm"] / 2 * sc
+    d.add(f'<circle cx="{cx}" cy="{cy}" r="{rb:.1f}" fill="#f3e9d8" stroke="#a0865a" stroke-width="2"/>')
+    d.text(cx, cy + 5, f'bench Ø {prm["bench_diameter_mm"] / 1000:g} m', size=12, anchor="middle", fill="#7a6240")
+    a1, a2 = P(*st[1]["T4"]), P(*st[2]["T4"])
+    d.add(f'<line x1="{a1[0]:.1f}" y1="{a1[1]:.1f}" x2="{a2[0]:.1f}" y2="{a2[1]:.1f}" stroke="#bbb" stroke-width="1.5" stroke-dasharray="4 6"/>')
+    d.text(cx + 8, cy - 3000 * sc, f"apex to apex {rows[-1][4] / 1000:.2f} m corner to corner", size=12, fill="#777")
+    x0, y0 = P(-8500, -8700)
+    d.wire([(x0, y0), (x0 + 5000 * sc, y0)], "#333", 4)
+    for k in range(6):
+        d.wire([(x0 + k * 1000 * sc, y0 - 5), (x0 + k * 1000 * sc, y0 + 5)], "#333", 2)
+    d.text(x0 + 2500 * sc, y0 - 10, "5 m", size=12, anchor="middle", weight="bold")
+    for sn, pos in st.items():
+        for a, b in ARM_PAIRS:
+            d.wire([P(*pos[a]), P(*pos[b])], MAINS, 3)
+        for n, (x, y) in pos.items():
+            px, py = P(x, y)
+            tower(px, py, tw[sn][n], tw[sn][n]["outside_mm"] * sc, -18 if x < 0 else 18, 12)
+        ax_, ay_ = P(*pos["T4"])
+        d.text(ax_, ay_ - 20 if sn == 1 else ay_ + 30, f"Statue {sn} · " + ("MASTER box" if sn == 1 else "SLAVE box"), size=14, anchor="middle", weight="bold",
+               fill="#2e7d32" if sn == 1 else "#1565c0")
+    site_bottom = cy + R
+
+    # ---- right panel: one statue enlarged, 150 px per metre, with the legs of every step
+    sc2 = 150 / 1000.0
+    pos = st[1]
+    xs = [x for x, _ in pos.values()]; ys = [y for _, y in pos.values()]
+    px0 = 900
+    ox, oy = px0 - min(xs) * sc2, 260 + max(ys) * sc2
+    def Q(x_mm, y_mm):
+        return ox + x_mm * sc2, oy - y_mm * sc2
+    d.text(px0 - 30, 170, "One statue, enlarged (both are the same)", size=16, weight="bold")
+    axx, axy = Q(max(xs) + 450, max(ys) - 1600)
+    d.wire([(axx, axy), (axx, axy - 1000 * sc2)], "#555", 2)
+    d.add(f'<polygon points="{axx - 6},{axy - 1000 * sc2 + 12} {axx + 6},{axy - 1000 * sc2 + 12} {axx},{axy - 1000 * sc2 - 2}" fill="#555"/>')
+    d.wire([(axx, axy), (axx + 1000 * sc2, axy)], "#555", 2)
+    d.add(f'<polygon points="{axx + 1000 * sc2 - 12},{axy - 6} {axx + 1000 * sc2 - 12},{axy + 6} {axx + 1000 * sc2 + 2},{axy}" fill="#555"/>')
+    d.lines(axx + 10, axy - 1000 * sc2 + 14, ["y · ALONG the", "apex line, 1 m"], size=12, fill="#555")
+    d.text(axx + 1000 * sc2 / 2, axy + 18, "x · ACROSS, 1 m", size=12, anchor="middle", fill="#555")
+    for a, b, dx, dy, straight in rows[:len(ARM_PAIRS)]:
+        (xa, ya), (xb, yb) = pos[a], pos[b]
+        lower, upper = ((xa, ya), (xb, yb)) if ya < yb else ((xb, yb), (xa, ya))
+        c_low = (lower[0], lower[1] + half)        # the lower tower's corner that points at the upper one
+        c_up = (upper[0], upper[1] - half)         # the upper tower's corner that points back
+        outer_is_lower = abs(lower[0]) > abs(upper[0])
+        o, i = (c_low, c_up) if outer_is_lower else (c_up, c_low)
+        corner = (o[0], i[1])
+        po, pi, pc = Q(*o), Q(*i), Q(*corner)
+        d.add(f'<polyline points="{po[0]:.1f},{po[1]:.1f} {pc[0]:.1f},{pc[1]:.1f} {pi[0]:.1f},{pi[1]:.1f}" fill="none" stroke="{LEG}" stroke-width="2.5" stroke-dasharray="7 5"/>')
+        for q in (po, pi):
+            d.dot(q[0], q[1], LEG, 4)
+        ql, qu = Q(*c_low), Q(*c_up)
+        d.add(f'<line x1="{ql[0]:.1f}" y1="{ql[1]:.1f}" x2="{qu[0]:.1f}" y2="{qu[1]:.1f}" stroke="{MAINS}" stroke-width="3"/>')
+        side = -1 if o[0] < 0 else 1
+        d.text(pc[0] + side * 10, (po[1] + pc[1]) / 2 + 5, f"{dy / 1000:.2f} along", size=14, anchor="end" if side < 0 else "start", fill=LEG, weight="bold")
+        d.text(pc[0] + side * 10, pc[1] - 8, f"{dx / 1000:.2f} across", size=13, anchor="end" if side < 0 else "start", fill=LEG, weight="bold")
+        mx, my = (ql[0] + qu[0]) / 2, (ql[1] + qu[1]) / 2
+        d.text(mx - side * 14, my + 5, f"{straight / 1000:.2f}", size=14, anchor="start" if side < 0 else "end", fill=MAINS, weight="bold")
+    for n, (x, y) in pos.items():
+        px, py = Q(x, y)
+        tower(px, py, tw[1][n], tw[1][n]["outside_mm"] * sc2, -52 if x < 0 else 52, 16)
+    d.text(Q(0, max(ys))[0], Q(0, max(ys))[1] - 48, "T4 · apex · master/slave box", size=14, anchor="middle", weight="bold", fill="#2e7d32")
+    d.lines(px0 - 30, Q(0, min(ys))[1] + 70, [f"Towers are {tw[1]['T4']['outside_mm']} × {tw[1]['T4']['outside_mm']} mm, turned 45°: a corner points along the apex line.",
+                                              f"Blue dots: the corners measured between. Centre to centre is {2 * half / 1000:.2f} m more along y."], size=12, fill="#555")
+
+    # ---- table
+    ty = site_bottom + 50
+    d.rect(60, ty, 18000 * sc, 30 + 24 * (len(rows) + 1), fill="#fafafa", stroke="#bbb", sw=1)
+    d.text(80, ty + 22, "Step, corner to corner", size=13, weight="bold"), d.text(330, ty + 22, "straight", size=13, weight="bold", anchor="end")
+    d.text(420, ty + 22, "across x", size=13, weight="bold", anchor="end"), d.text(510, ty + 22, "along y", size=13, weight="bold", anchor="end")
+    d.text(540, ty + 22, "what runs there", size=13, weight="bold")
+    what = {("T1", "T2"): "tip-tower cable", ("T2", "T3"): "cord T3 → T2 · data to T2 (2 lines)",
+            ("T3", "T4"): "cord apex → T3 · data to T3 and T2", ("T4", "T5"): "cord apex → T5 · data to T5 and T6",
+            ("T5", "T6"): "cord T5 → T6 · data to T6 (2 lines)", ("T6", "T7"): "tip-tower cable",
+            ("apex 1", "apex 2"): "3 × CAT5 and the apex-to-apex cord"}
+    for i, (a, b, dx, dy, straight) in enumerate(rows):
+        y = ty + 46 + 24 * i
+        d.text(80, y, f"{a} → {b}", size=13)
+        d.text(330, y, f"{straight / 1000:.2f}", size=13, anchor="end"), d.text(420, y, f"{dx / 1000:.2f}", size=13, anchor="end")
+        d.text(510, y, f"{dy / 1000:.2f}", size=13, anchor="end"), d.text(540, y, what.get((a, b), ""), size=13, fill="#555")
+    d.text(60, ty + 30 + 24 * (len(rows) + 1) + 20, "Metres, between the facing corners. x is across the site, y is along the apex-to-apex line.", size=12, fill="#555")
+    d.save("site-map.svg", "Both statues to scale from layout/statue-layout.json, one statue enlarged with every step drawn corner to corner as its across and along legs.")
+
+
 if __name__ == "__main__":
+    site_map()
     overview()
-    controller()
-    box2()
+    master_box()
+    slave_box()
     power_box()
     tip_tower_cable()
     statue_power()

@@ -11,11 +11,11 @@ Per statue, five S-100-5 supplies, each in a box with a C14 inlet:
 
 | Power box in | Box | Own tower | Neighbour fed | Worst case |
 |---|---|---|---|---|
-| T2 | two-tower box (`100W`) | T2 (1400) | T1 (1100) | 15.5 A |
-| T3 | one-tower box (`100W`) | T3 (1700) | — | 10.9 A |
+| T2 | 2 tower power box (`100W`) | T2 (1400) | T1 (1100) | 15.5 A |
+| T3 | 1 tower power box (`100W`) | T3 (1700) | — | 10.9 A |
 | T4 | apex `100W-masterbox` | T4 (2000) | — | 13.1 A |
-| T5 | one-tower box (`100W`) | T5 (1700) | — | 10.9 A |
-| T6 | two-tower box (`100W`) | T6 (1400) | T7 (1100) | 15.5 A |
+| T5 | 1 tower power box (`100W`) | T5 (1700) | — | 10.9 A |
+| T6 | 2 tower power box (`100W`) | T6 (1400) | T7 (1100) | 15.5 A |
 
 Mains: extension cords from the outlet to statue 1's apex and on to statue 2's, then chained
 tower to tower along each arm (apex → T3 → T2, apex → T5 → T6), a power strip at the end of
@@ -32,14 +32,18 @@ tip tower next to them through one tip-tower cable: an XT60 run (3 × 2.5) with 
   (owner, 2026-10-25: "I don't remember what ABC etc means"). A name that says where the box is
   needs no lookup, on site or in a diagram. **Changed 2026-10-25:** previously supplies A–E
   (A = T2, B = T3, C = T4, D = T5, E = T6), as older notes and git history still call them.
-- **The two kinds of field box are the "one-tower box" (T3, T5) and the "two-tower box"
-  (T2, T6)** (owner, 2026-10-29, from the agent's options). The only difference between them
-  is that a two-tower box also feeds the tip tower next to it, so it carries the second
-  74AHCT125, the XT60 out and the tip-tower data out; the name states that difference and is
-  clear on first hearing. **Rejected:** *single box / double box* (shorter, but "double" does
-  not say double what); *plain box / feeder box* (which is which needs a lookup). The apex
-  boxes keep their names: the controller box (statue 1) and box 2 (statue 2), which the
-  owner's inventory calls the master and the slave box.
+- **The four kinds of box are the "master box" (statue 1's apex: ESP32 and transmitters),
+  the "slave box" (statue 2's apex: receivers), the "1 tower power box" (T3, T5) and the
+  "2 tower power box" (T2, T6), everywhere in the repo** (owner, 2026-10-29: "the terms are
+  master box and slave box, 1 tower power box and 2 tower power box. everywhere in the
+  repo"). The only difference between the two power boxes is that a 2 tower power box also
+  feeds the tip tower next to it, so it carries the second 74AHCT125, the XT60 out and the
+  tip-tower data out; the name states that difference and is clear on first hearing. "Apex
+  box" survives only as the generic for the master or slave box, written "master/slave box".
+  **Changed 2026-10-29:** the agent first wrote "one-tower / two-tower box", "controller
+  box" and "slave box"; the owner fixed the spelling and the apex names the same day.
+  **Rejected:** *single box / double box* (shorter, but "double" does not say double what);
+  *plain box / feeder box* (which is which needs a lookup).
 
 - **Five S-100-5 per statue, whole towers only, symmetric** (owner, 2026-10-18). At the
   artist's final heights (2026-10-21) and the measured 29.4 mA per LED
@@ -62,8 +66,8 @@ tip tower next to them through one tip-tower cable: an XT60 run (3 × 2.5) with 
 - **Each supply in its own box with a C14 inlet** (agent proposal, 2026-10-10). This reuses the
   enclosure repo's `100W` design (S-100-5, C14, perfboard, 4 JST-SM exits), so no mains
   terminals are exposed in a tower base. C shares the apex `100W-masterbox` with the ESP32 or
-  receivers. **Enclosure change pending:** a data input on the one-tower and two-tower
-  boxes; an XT60 and a tip-tower data output on the two-tower boxes; a top-feed XT60 out on
+  receivers. **Enclosure change pending:** a data input on the 1 tower and 2 tower power
+  boxes; an XT60 and a tip-tower data output on the 2 tower power boxes; a top-feed XT60 out on
   all five.
 - **One JST-SM per strand, from the box straight to the strand** (owner, 2026-10-18). Every
   strand is ≤ 2.5 A at full white except the 2000 mm tower's 3.3 A. A JST-SM contact is rated
@@ -110,7 +114,7 @@ tip tower next to them through one tip-tower cable: an XT60 run (3 × 2.5) with 
   the crew is on site, so each apex is fed from its own outlet if there is one in reach, and
   otherwise statue 2 is fed from statue 1's apex strip through the apex-to-apex trench.
 - **No separate ground bond** (agent, 2026-10-18). Each supply's 5 V output is isolated from
-  mains, and every power box receives a data cable with its own GND from the apex box. That
+  mains, and every power box receives a data cable with its own GND from the master/slave box. That
   ties all supplies to one reference, and only leakage-level current flows through it.
   **Changed 2026-10-18:** previously a 1.5 mm² bond wire along each arm.
 - **Every strand of 75 LEDs or more gets a second feed at its top, on an XT60** (owner,
@@ -137,7 +141,7 @@ tip tower next to them through one tip-tower cable: an XT60 run (3 × 2.5) with 
   together and putting a shrink on it"); the part leaves the list.
 - **XT60 gender: male on the strip, female on the feed cable** (agent, 2026-10-25). The
   powered side carries the shrouded female, so an unplugged live feed has no exposed contacts.
-- **Logic power only from the power box in T4** (agent, 2026-10-09). The apex box perfboard
+- **Logic power only from the power box in T4** (agent, 2026-10-09). The master/slave box perfboard
   gets its own pair from that PSU's second terminals, so tower current never flows through perfboard copper.
 - **C14 fuse 1 A on the AC side** (owner, 2026-10-09). ~240 W of input for a 100 W PSU. The
   PSU's own fuse and over-temperature trip act first.
