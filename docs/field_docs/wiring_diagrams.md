@@ -65,16 +65,22 @@ Standard library only. The tables in the script (`TOWER_H`, `GPIO`, `RJ45`, `CH_
 - **One drawing per kind of power box, each ending in a "what goes into one box" count**
   (owner, 2026-10-29: "separate the diagrams of the 1 tower power box and the 2 tower power
   box? i don't understand what I need to make and it's really stressful"). `power_box(two)`
-  draws the 1 tower power box with one chip, one gate used, and one XT60 and nothing else,
-  and the 2 tower power box with the tip tower's gate 2, data in/out and second XT60 added
+  draws the same board in both (one chip, gates 1 and 2 with their resistors): the 1 tower
+  power box with one XT60 and gate 2's connectors as dashed grey outlines saying what is
+  not there, the 2 tower power box with the tip tower's data in/out and second XT60 fitted
   ([../strips_and_power/tower_base.md](../strips_and_power/tower_base.md)). The builder
   has one box in front of them and should see only that box, with its part count beside it;
-  `guide/wiring.md` has a section and a connection table per kind for the same reason.
+  `guide/wiring.md` has a section and a connection table per kind for the same reason. The
+  dashed outlines, rather than leaving the space blank, are so that a builder who has just
+  made a 2 tower power box sees the same board and knows the gap is deliberate.
   **Changed 2026-10-29:** previously one `power-box.svg` for all ten boxes, with the tip-tower
   parts in a band marked "2 tower power boxes only" (agent, 2026-10-18), to draw the shared
   circuit once. Changed because the owner, about to build eight boxes, could not tell from it
   what to make. The first split still showed a second chip labelled "tip tower", which the
   owner read as electronics in the tip tower; the label now names the gate, not a place.
+  **Changed 2026-10-29 (later):** the 1 tower drawing first showed gate 2 as an unused gate
+  (input to GND, output n/c); it now shows gate 2 with its resistors and dashed connectors,
+  since the owner settled on one board for every box.
 - **Vertical layout for the controller diagram** (agent, 2026-10-09). Phones scroll vertically
   much more comfortably than they pan sideways.
 

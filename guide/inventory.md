@@ -11,8 +11,8 @@ this page is by thing.
 |---|---|---|---|
 | Master box | 1 | Apex of statue 1 | ESP32 + WLED, 7 MAX485 transmitters, 3 RJ45 jacks, the power box for T4 |
 | Slave box | 1 | Apex of statue 2 | 7 MAX485 receivers, 3 RJ45 jacks, the power box for T4 |
-| 1 tower power box | 4 | T3 and T5 of each statue | PSU, 1 × 74AHCT125, 4 LED connectors out, top-feed XT60 out, data in |
-| 2 tower power box | 4 | T2 and T6 of each statue | As the 1 tower power box, plus a second data in, an XT60 out and a data out for the tip tower |
+| 1 tower power box | 4 | T3 and T5 of each statue | PSU, the common power-box board (1 × 74AHCT125), 4 LED connectors out, top-feed XT60 out, data in |
+| 2 tower power box | 4 | T2 and T6 of each statue | The same board and parts, plus a second data in, an XT60 out and a data out for the tip tower |
 
 10 boxes, each with its own PSU and a kettle-lead socket with a switch.
 

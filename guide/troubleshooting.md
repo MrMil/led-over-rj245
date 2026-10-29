@@ -65,7 +65,8 @@ Chip out of its socket, meter on the diode setting. Red probe on pin 7 (GND, the
 on the side away from the notch), black on each output pin: 3, 6, 8, 11. Good: a diode,
 0.5–0.7 V. Dead: about 0.00 V. Then red on pin 14 (VCC, the corner pin by the notch), black on
 each output: good reads open. The controller needs four good gates in chip #1 and gates 1–3
-good in chip #2; a 1 tower power box needs gate 1, a 2 tower power box gates 1 and 2.
+good in chip #2; every power box board needs gates 1 and 2 (a 1 tower power box only uses gate 1, but the
+board is the same in all 10 boxes, so test both and any board can go in any box).
 
 ## One face of a tower dark, the others fine
 
@@ -92,7 +93,9 @@ XT60 run or data pair from the power box in T2 (T6).
 
 ## A box is dead
 
-The PSU shuts down on overload or over-temperature.
+The PSU shuts down on overload or over-temperature. A dead or switched-off power box comes
+to no harm from the show still running into it, and neither do its LEDs: its chip and its
+strips are off together.
 
 1. Unplug, let it cool, plug back in.
 2. Still dead: leave the box unplugged and call the owner. Do not open the inlet's drawer.

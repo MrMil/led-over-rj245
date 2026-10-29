@@ -38,7 +38,8 @@ tip tower next to them through one tip-tower cable: an XT60 run (3 × 2.5) with 
   master box and slave box, 1 tower power box and 2 tower power box. everywhere in the
   repo"). The only difference between the two power boxes is that a 2 tower power box also
   feeds the tip tower next to it, so it carries a second data in, the tip-tower data out from
-  gate 2 of its chip and a second XT60 out; the name states that difference and is clear on
+  gate 2 of its chip and a second XT60 out (the board inside is the same,
+  [tower_base.md](tower_base.md)); the name states that difference and is clear on
   first hearing. "Apex
   box" survives only as the generic for the master or slave box, written "master/slave box".
   **Changed 2026-10-29:** the agent first wrote "one-tower / two-tower box", "controller

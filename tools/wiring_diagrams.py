@@ -498,24 +498,27 @@ def power_box(two):
     """One drawing per kind of power box, so the builder sees only what goes into the
     box in front of them: two=False is the 1 tower power box (T3, T5), two=True the
     2 tower power box (T2, T6), which also drives the tip-tower cable from gate 2 of
-    the same 74AHCT125. One chip per box; gate 1's output is joined to all 4 faces
+    the same 74AHCT125. Every box has the same board (one chip, gates 1 and 2 each
+    with a 10 kΩ pull-down and a 100 Ω); the two kinds differ only in the connectors
+    fitted, so the 1 tower drawing shows gate 2's connectors as dashed outlines
     (owner, 2026-10-29)."""
     kind = "2 tower power box" if two else "1 tower power box"
     where = "in T2 and T6 of each statue, 4 to build" if two else "in T3 and T5 of each statue, 4 to build"
     bot = 170 + 248 + 3 * 60          # buffer_chip is 248 + 3*gap tall
     top3 = bot + 50
-    H = top3 + (640 if two else 520)
+    H = top3 + 640
     d = Drawing(1600, H, f"{kind} wiring")
     if two:
         header(d, f"{kind} — {where}",
-               ["Mains in. One 74AHCT125, 2 gates used: gate 1 → its own tower's 4 JST-SM (one per face), gate 2 → the tip tower",
-                "next door (in T2: T1 · in T6: T7) through the tip-tower cable, which also carries its power from a second XT60."])
+               ["Mains in. The same board as every power box: one 74AHCT125, gate 1 → its own tower's 4 JST-SM (one per face), gate 2 → the tip",
+                "tower next door (in T2: T1 · in T6: T7) through the tip-tower cable, which also carries its power from a second XT60."])
     else:
         header(d, f"{kind} — {where}",
-               ["Mains in. One 74AHCT125, 1 gate used: gate 1 → its own tower's 4 JST-SM (one per face). One XT60 out for the top feed.",
-                "Nothing for a tip tower. (T4's power box is this same circuit inside the master/slave box.)"])
+               ["Mains in. The same board as every power box: one 74AHCT125, gate 1 → its own tower's 4 JST-SM (one per face). Gate 2 is built",
+                "but gets no connectors (dashed): nothing for a tip tower. (T4's power box is this same board inside the master/slave box.)"])
+    GHOST = "#999"
     x0 = 640
-    gy, b1 = buffer_chip(d, x0, 170, 2 if two else 1, f"74AHCT125 · {'2 gates' if two else '1 gate'} used", gap=60)
+    gy, b1 = buffer_chip(d, x0, 170, 2, "74AHCT125 · gates 1 and 2", gap=60)
     assert b1 == bot
     # own tower: data in -> pull-down -> gate 1 -> joined -> 4 faces
     din = jst_block(d, 40, 190, "JST-SM in · own tower data", "",
@@ -541,24 +544,34 @@ def power_box(two):
         d.text(1214, y + 16, "DATA here · 5V/GND from the +5V/GND rails", size=12, fill="#555")
     d.dot(1100, y1, DATA_5)
     d.lines(1110, face_y[-1] + 40, ["joined: gate 1 drives all 4 faces,", "one wire per face from this point"], size=12, fill="#555")
+    # gate 2: the same parts on every board (10 kΩ on pin 5, 100 Ω on pin 6). The 2 tower
+    # power box fits the tip tower's data in and data out to them; the 1 tower power box
+    # leaves both off, and the gate sits idle at 0 V (owner, 2026-10-29: one board for all).
+    yy, y2, yt = 350, gy[1], face_y[-1] + 110
     if two:
-        # the tip tower next door: its own data in -> gate 2 -> data out into the tip-tower cable
-        yy = 350
         pin = jst_block(d, 40, yy, "JST-SM in · tip tower data", "", [("DATA", ""), ("GND", "")], w=330)
         d.lines(40, yy + 108, ["the tip tower's own data cable from the", "master/slave box (in T2: T1 · in T6: T7)"], size=13, fill="#555")
         d.wire([pin["GND"], (400, pin["GND"][1])], BLACK, 2), d.flag(400, pin["GND"][1], "GND", "right")
         py = pin["DATA"][1]
-        d.dot(470, py, DATA_5), d.wire([(470, py), (470, py + 60)], BLACK, 2)
-        d.resistor(470, py + 34, "10 kΩ", vertical=True), d.flag(470, py + 60, "GND", "down")
-        d.wire([pin["DATA"], (520, py), (520, gy[1]), (x0, gy[1])], DATA_5, 3)
-        y2 = gy[1]
-        yt = face_y[-1] + 110
-        d.wire([(x0 + 220, y2), (1000, y2), (1000, yt), (1200, yt)], DATA_5, 3)
-        d.resistor(1100, yt, "100 Ω", color=DATA_5)
+        d.wire([pin["DATA"], (520, py), (520, y2), (x0, y2)], DATA_5, 3)
+    else:
+        py = yy + 44
+        d.rect(40, yy, 330, 88, fill="none", stroke=GHOST, dash="8 6")
+        d.lines(54, yy + 30, ["no JST-SM in here", "(a 2 tower power box has the tip", "tower's data in on these pins)"], size=13, fill=GHOST)
+        d.wire([(470, py), (520, py), (520, y2), (x0, y2)], DATA_5, 3)
+    d.dot(470, py, DATA_5), d.wire([(470, py), (470, py + 60)], BLACK, 2)
+    d.resistor(470, py + 34, "10 kΩ", vertical=True), d.flag(470, py + 60, "GND", "down")
+    d.wire([(x0 + 220, y2), (1000, y2), (1000, yt), (1200, yt)], DATA_5, 3)
+    d.resistor(1100, yt, "100 Ω", color=DATA_5)
+    if two:
         d.rect(1200, yt - 24, 360, 48, fill="#fff8e1", stroke="#b58900")
         d.pin(1200, yt)
         d.text(1214, yt - 3, "Data out · tip tower (gate 2)", size=15, weight="bold")
         d.text(1214, yt + 16, "22 AWG pair (DATA + GND), part of the tip-tower cable", size=12, fill="#555")
+    else:
+        d.rect(1200, yt - 24, 360, 48, fill="none", stroke=GHOST, dash="8 6")
+        d.text(1214, yt - 3, "no data out here · wire end left open", size=15, weight="bold", fill=GHOST)
+        d.text(1214, yt + 16, "(a 2 tower power box's tip-tower data out)", size=12, fill=GHOST)
     # power
     d.rect(30, top3 - 30, 1540, 3, fill="#bbb", stroke="none", rx=0)
     d.rect(40, top3, 220, 90, fill="#fff3e0", stroke="#e65100")
@@ -580,14 +593,17 @@ def power_box(two):
         d.rect(1200, top3 + 140, 360, 130, fill="#fde3e3", stroke=RED)
         d.lines(1214, top3 + 166, ["XT60 out · tip-tower cable", "in T2: to T1 · in T6: to T7",
                                    "3 × 2.5 cable, brown +5 V, blue GND", "+5V / GND rails, NYAF 2.5 mm²"], size=13, fill="#333")
+    else:
+        d.rect(1200, top3 + 140, 360, 60, fill="none", stroke=GHOST, dash="8 6")
+        d.lines(1214, top3 + 166, ["no second XT60 here", "(a 2 tower power box's tip-tower XT60)"], size=13, fill=GHOST)
     # what goes into this box
     parts = [("1", "100W enclosure"),
              ("1", "C14 inlet with switch and fuse"),
              ("1", "S-100-5 PSU"),
-             ("1", "half-size perfboard"),
-             ("1", "74AHCT125 in a DIP socket" + (" (2 gates used)" if two else " (1 gate used)")),
-             ("2" if two else "1", "10 kΩ resistor (one per data in)"),
-             ("2" if two else "1", "100 Ω resistor (one per gate used)"),
+             ("1", "half-size perfboard · the same board in every power box:"),
+             ("1", "74AHCT125 in a DIP socket, gates 1 and 2 wired" + ("" if two else " (gate 2 idle)")),
+             ("2", "10 kΩ resistor (pins 2 and 5 to GND)"),
+             ("2", "100 Ω resistor (on pins 3 and 6)"),
              ("2" if two else "1", "JST-SM in: own tower data" + (" + tip tower data" if two else "")),
              ("4", "JST-SM out: faces 1–4, all from gate 1"),
              ("2" if two else "1", "XT60 out: top feed" + (" + tip-tower cable" if two else ""))]
@@ -595,7 +611,7 @@ def power_box(two):
         parts.append(("1", "data out for the tip-tower cable's 22 AWG pair (gate 2)"))
     else:
         parts.append(("—", "no second data in, no second XT60, no tip-tower data out"))
-    px, py0 = 40, top3 + (300 if two else 160)
+    px, py0 = 40, top3 + 300
     d.rect(px, py0, 560, 44 + 24 * len(parts), fill="#f1f8e9", stroke="#558b2f")
     d.text(px + 14, py0 + 26, f"What goes into one {kind}", size=16, weight="bold", fill="#33691e")
     for i, (n, what) in enumerate(parts):
@@ -605,17 +621,18 @@ def power_box(two):
         d.text(px + 56, yy, what, size=14, fill="#777" if grey else "#222")
     notes = ["All flags with the same label are the same wire. The data inputs' 5V pins stay",
              "unconnected so two supplies never join on +5 V. 100 Ω resistors optional.",
-             "Unused gates: input to GND, output open. No electronics anywhere in a tower:"]
+             "Gates 3 and 4: input to GND, output open. No electronics anywhere in a tower:"]
     if two:
         notes += ["the tip tower's 4 faces are joined at the far end of the tip-tower cable",
                   "(tip-tower-cable.svg), the same way gate 1 is joined to the 4 faces here."]
     else:
         notes += ["the 4 faces are joined on the perfboard, after the 100 Ω.",
-                  "T4's power box: this same circuit inside the master/slave box, plus the",
-                  "perfboard feed for the ESP32 / transceivers."]
+                  "Gate 2 is built like in a 2 tower power box and just not connected: its 10 kΩ",
+                  "holds it at 0 V. T4's power box: this same board inside the master/slave box,",
+                  "plus the perfboard feed for the ESP32 / transceivers."]
     d.lines(660, py0 + 26, notes, size=14, fill="#333")
     name = "power-box-2-tower.svg" if two else "power-box-1-tower.svg"
-    d.save(name, f"{kind}: mains, S-100-5, one 74AHCT125 (gate 1 joined to the 4 JST-SM strands), top-feed XT60" + (", and gate 2 + an XT60 into the tip-tower cable." if two else "."))
+    d.save(name, f"{kind}: mains, S-100-5, the common board (one 74AHCT125: gate 1 joined to the 4 JST-SM strands, gate 2 with its resistors), top-feed XT60" + (", and gate 2 + an XT60 into the tip-tower cable." if two else "; gate 2 unconnected."))
 
 
 def tip_tower_cable():

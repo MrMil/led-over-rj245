@@ -40,7 +40,7 @@ and timing.
 
 - [`tower_layout.md`](tower_layout.md) — 7 towers per statue, 4 faces per tower, same data on all faces, strips on the central post, no dividers.
 - [`statue_geometry/`](statue_geometry/README.md) — where the towers stand in the 18 m circle (the final layout, the 400 / 408 mm box of 4 mm plywood), what the eye at the bench sees, the 3D sightline check (`tools/statue_render.html`, `renders/`).
-- [`tower_base.md`](tower_base.md) — tower data splitting: one 74AHCT125 per power box, gate 1 joined to its own tower's 4 strands, gate 2 to the tip-tower cable; tip towers get theirs split passively at the end of the cable.
+- [`tower_base.md`](tower_base.md) — tower data splitting: the same board in every power box (one 74AHCT125, gate 1 joined to its own tower's 4 strands, gate 2 to the tip-tower cable or idle); tip towers get theirs split passively at the end of the cable.
 - [`power_distribution.md`](power_distribution.md) — five supplies per statue, mains from the apex, JST-SM per strand, the tip-tower cables, cable types.
 - [`trenches.md`](trenches.md) — what runs in each trench segment.
 - [`led_power_budget.md`](led_power_budget.md) — current per tower, PSU sizing, brightness estimates, why nothing limits current.

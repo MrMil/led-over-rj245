@@ -69,11 +69,12 @@ Follow [wiring.md](wiring.md) and the diagrams there.
 **Slave box:** 7 MAX485 receivers, 7 pairs of 560 Ω bias resistors, 7 × 100 Ω.
 
 **Power boxes (1 tower power boxes in T3, T5; 2 tower power boxes in T2, T6; T4's part sits in the
-master/slave box):** one 74AHCT125 in a socket. Gate 1 (pin 2 in, pin 3 out): 10 kΩ pull-down on
-the input, 100 Ω on the output, then the output joined to the 4 strand JST-SMs' DATA leads.
-The 2 tower power boxes also use gate 2 (pin 5 in, pin 6 out) for the tip tower's data, the
-same way: 10 kΩ on the input, 100 Ω on the output, to the tip-tower data out. Unused inputs
-to GND. Each diagram ends with the count of what goes into one box.
+master/slave box):** **the same board, 10 times.** One 74AHCT125 in a socket; gate 1 (pin 2 in,
+pin 3 out) and gate 2 (pin 5 in, pin 6 out) each get a 10 kΩ pull-down on the input and a 100 Ω
+on the output; pins 9 and 12 to GND. Gate 1's output is joined to the 4 strand JST-SMs' DATA
+leads. In a 2 tower power box gate 2's input gets the tip tower's data in and its output goes
+to the tip-tower data out; in a 1 tower power box gate 2 gets no connectors and just sits at
+0 V. Any board fits any box. Each diagram ends with the count of what goes into one box.
 
 **Tip towers (T1, T7):** nothing to build. Their 4 JST-SM are the end of the tip-tower cable
 (step 3).

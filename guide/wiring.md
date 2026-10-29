@@ -8,8 +8,8 @@
 | [Master box](img/master-box-wiring.svg) | Statue 1: ESP32, 2 × 74AHCT125, 7 transmitters, 3 jacks, 7 tower outputs |
 | [Slave box](img/slave-box-wiring.svg) | Statue 2: 3 jacks, 7 receivers, 7 tower outputs |
 | [Statue power](img/statue-power.svg) | Mains from the apex to 5 power boxes; which box feeds which tower |
-| [1 tower power box](img/power-box-1-tower.svg) | T3, T5 (4 to build): C14, PSU, one 74AHCT125 with gate 1 joined to the 4 JST-SM out, top-feed XT60. T4's is the same inside the master/slave box |
-| [2 tower power box](img/power-box-2-tower.svg) | T2, T6 (4 to build): the same chip, gate 2 to the tip-tower cable's data out, plus the tip-tower XT60 |
+| [1 tower power box](img/power-box-1-tower.svg) | T3, T5 (4 to build): C14, PSU, the common power-box board (one 74AHCT125, gate 1 joined to the 4 JST-SM out, gate 2 built but unconnected), top-feed XT60. T4's is the same inside the master/slave box |
+| [2 tower power box](img/power-box-2-tower.svg) | T2, T6 (4 to build): the same board, with the tip tower's data in and data out on gate 2, plus the tip-tower XT60 |
 | [Tip-tower cable](img/tip-tower-cable.svg) | Power box in T2 → T1, in T6 → T7: one cable, XT60 + data at the box, 4 JST-SM at the tower |
 
 `+5V` / `GND` flags are the perfboard rails. Crossing lines without a dot are not connected.
@@ -121,14 +121,18 @@ jacks; don't rely on colours.
 
 ![1 tower power box](img/power-box-1-tower.svg)
 
-One chip with one gate used, one data in, 4 JST-SM out joined to that gate, one XT60 out.
-Nothing for a tip tower. The power box in T4 is this same circuit inside the master/slave box.
+**Every power box has the same board:** one chip, 10 kΩ on pins 2 and 5, 100 Ω on pins 3 and 6.
+Here only gate 1 is connected: one data in, 4 JST-SM out joined to pin 3's 100 Ω, one XT60 out.
+Gate 2's 10 kΩ holds it at 0 V and its 100 Ω ends in the air (dashed in the drawing). Nothing
+for a tip tower. The power box in T4 is this same board inside the master/slave box.
 
 | Connection | To |
 |---|---|
 | Own tower data in (JST-SM) | DATA → 74AHCT125 pin 2, and 10 kΩ to GND; GND → GND; 5V pin not connected |
 | 74AHCT125 pin 3 | 100 Ω → joined → DATA of JST-SM out 1–4 (one wire per face from the joint) |
-| 74AHCT125 pins 5, 9, 12 | GND (unused inputs); pins 6, 8, 11 open |
+| 74AHCT125 pin 5 | 10 kΩ to GND, nothing else (no tip-tower data in here) |
+| 74AHCT125 pin 6 | 100 Ω, its far end left open (no tip-tower data out here) |
+| 74AHCT125 pins 9, 12 | GND (unused inputs); pins 8, 11 open |
 | 74AHCT125 VCC (14) / GND (7), OE (1, 4, 10, 13) | +5V / GND, GND |
 | JST-SM out 5V / GND | PSU +V / −V |
 | XT60 out · top feed | PSU +V / −V, NYAF 2.5 mm² |
@@ -137,8 +141,8 @@ Nothing for a tip tower. The power box in T4 is this same circuit inside the mas
 
 ![2 tower power box](img/power-box-2-tower.svg)
 
-Everything in the 1 tower power box, plus, on the same chip, gate 2 for the tip tower next
-door (in T2: T1; in T6: T7): a second data in, a data out and a second XT60 out. Data out and
+The same board as the 1 tower power box, with gate 2's connectors fitted for the tip tower
+next door (in T2: T1; in T6: T7): a second data in, a data out and a second XT60 out. Data out and
 XT60 both go into the one tip-tower cable
 ([below](#tip-tower-cable-power-box-in-t2--t1-in-t6--t7)). No electronics in the tip tower.
 
