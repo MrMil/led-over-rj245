@@ -65,12 +65,12 @@ Chip out of its socket, meter on the diode setting. Red probe on pin 7 (GND, the
 on the side away from the notch), black on each output pin: 3, 6, 8, 11. Good: a diode,
 0.5–0.7 V. Dead: about 0.00 V. Then red on pin 14 (VCC, the corner pin by the notch), black on
 each output: good reads open. The controller needs four good gates in chip #1 and gates 1–3
-good in chip #2; a power box needs all four in its chip #1 and gate 1 in chip #2.
+good in chip #2; a 1 tower power box needs gate 1, a 2 tower power box gates 1 and 2.
 
 ## One face of a tower dark, the others fine
 
-That face's strip, its 3-pin LED connector, or that gate of the 74AHCT125 in its power box.
-On T1 or T7, the face's LED connector at the end of the tip-tower cable.
+That face's strip or its 3-pin LED connector; the chip drives all 4 faces from one gate, so
+it is not the chip. On T1 or T7, the face's LED connector at the end of the tip-tower cable.
 
 ## A face dark from some point upwards
 

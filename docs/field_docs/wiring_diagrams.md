@@ -3,12 +3,13 @@
 Path: [docs](../README.md) › [field_docs](README.md) › **wiring_diagrams**
 Parent: [README.md](README.md)
 **Code:** `tools/wiring_diagrams.py`, `guide/img/*.svg`
-**Covers:** how the six diagrams are produced and the drawing conventions they follow.
+**Covers:** how the eight diagrams are produced and the drawing conventions they follow.
 
 ## What it does
 
 `python3 tools/wiring_diagrams.py` writes `site-map.svg`, `overview.svg`, `master-box-wiring.svg`,
-`slave-box-wiring.svg`, `power-box.svg`, `tip-tower-cable.svg` and `statue-power.svg` into `guide/img/`.
+`slave-box-wiring.svg`, `power-box-1-tower.svg`, `power-box-2-tower.svg`, `tip-tower-cable.svg` and
+`statue-power.svg` into `guide/img/`.
 Standard library only. The tables in the script (`TOWER_H`, `GPIO`, `RJ45`, `CH_PINS`, `JACKS`,
 `SUPPLIES`) feed the diagrams; the site map reads `layout/statue-layout.json`.
 
@@ -61,6 +62,19 @@ Standard library only. The tables in the script (`TOWER_H`, `GPIO`, `RJ45`, `CH_
   One orange line per box labelled "data and 230 V" read as one power cord from the apex to
   each box, which is not how mains runs
   ([../strips_and_power/power_distribution.md](../strips_and_power/power_distribution.md)).
+- **One drawing per kind of power box, each ending in a "what goes into one box" count**
+  (owner, 2026-10-29: "separate the diagrams of the 1 tower power box and the 2 tower power
+  box? i don't understand what I need to make and it's really stressful"). `power_box(two)`
+  draws the 1 tower power box with one chip, one gate used, and one XT60 and nothing else,
+  and the 2 tower power box with the tip tower's gate 2, data in/out and second XT60 added
+  ([../strips_and_power/tower_base.md](../strips_and_power/tower_base.md)). The builder
+  has one box in front of them and should see only that box, with its part count beside it;
+  `guide/wiring.md` has a section and a connection table per kind for the same reason.
+  **Changed 2026-10-29:** previously one `power-box.svg` for all ten boxes, with the tip-tower
+  parts in a band marked "2 tower power boxes only" (agent, 2026-10-18), to draw the shared
+  circuit once. Changed because the owner, about to build eight boxes, could not tell from it
+  what to make. The first split still showed a second chip labelled "tip tower", which the
+  owner read as electronics in the tip tower; the label now names the gate, not a place.
 - **Vertical layout for the controller diagram** (agent, 2026-10-09). Phones scroll vertically
   much more comfortably than they pan sideways.
 
@@ -70,8 +84,9 @@ Standard library only. The tables in the script (`TOWER_H`, `GPIO`, `RJ45`, `CH_
 - `guide/wiring.md` and the LED Preferences table in `guide/build.md` restate the pin tables in
   prose and are **not** generated; update them alongside the script.
 - Coordinates are hand-placed to avoid wire crossings. After changing a table, render and look
-  (e.g. `qlmanage -t -s 1600 -o <dir> guide/img/<name>.svg` on macOS; it renders square, so
-  wide diagrams appear cropped unless width = height).
+  (e.g. `qlmanage -t -s 1600 -o <dir> guide/img/<name>.svg` on macOS; it fills a square and
+  crops, so first copy the SVG with `width`, `height` and the `viewBox` set to the larger of
+  the two, render that, and crop the PNG back).
 
 ## Related
 

@@ -35,7 +35,7 @@ along the line between the two apexes, towards the other statue.
 | Apex power strip | Strips in T3 and T5, from those on to T2 and T6 | Extension cords, one strip at the end of each |
 | Strip in each tower | The box in that tower | Kettle lead |
 | Each power box, 4 × LED connector out | Its own tower's 4 strands | 3-pin LED connector |
-| Each power box, top-feed XT60 | Up its own tower's post → 4 × XT60 to the strand tops | 3 × 2.5 |
+| Each power box, top-feed XT60 | Up its own tower's post → 4 × XT60 to the strand tops | 3 × 1.5 |
 | 2 tower power boxes (T2, T6): XT60 + data out | Tip towers T1 (from T2), T7 (from T6): the tip-tower cable, 4 LED connectors at its end | 3 × 2.5 + 22 AWG pair |
 
 **The ports on the boxes are not Ethernet.** The cables are ordinary network cables; never

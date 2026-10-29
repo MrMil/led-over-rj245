@@ -8,7 +8,8 @@
 | [Master box](img/master-box-wiring.svg) | Statue 1: ESP32, 2 × 74AHCT125, 7 transmitters, 3 jacks, 7 tower outputs |
 | [Slave box](img/slave-box-wiring.svg) | Statue 2: 3 jacks, 7 receivers, 7 tower outputs |
 | [Statue power](img/statue-power.svg) | Mains from the apex to 5 power boxes; which box feeds which tower |
-| [Power box](img/power-box.svg) | All 10 power boxes: C14, PSU, own tower's splitter and 4 JST-SM, neighbour outputs |
+| [1 tower power box](img/power-box-1-tower.svg) | T3, T5 (4 to build): C14, PSU, one 74AHCT125 with gate 1 joined to the 4 JST-SM out, top-feed XT60. T4's is the same inside the master/slave box |
+| [2 tower power box](img/power-box-2-tower.svg) | T2, T6 (4 to build): the same chip, gate 2 to the tip-tower cable's data out, plus the tip-tower XT60 |
 | [Tip-tower cable](img/tip-tower-cable.svg) | Power box in T2 → T1, in T6 → T7: one cable, XT60 + data at the box, 4 JST-SM at the tower |
 
 `+5V` / `GND` flags are the perfboard rails. Crossing lines without a dot are not connected.
@@ -116,20 +117,42 @@ jacks; don't rely on colours.
 
 ---
 
-## Power box (1 tower power boxes in T3, T5; 2 tower power boxes in T2, T6; T4's is inside the master/slave box)
+## 1 tower power box (T3, T5 · 4 to build)
 
-![Power box](img/power-box.svg)
+![1 tower power box](img/power-box-1-tower.svg)
+
+One chip with one gate used, one data in, 4 JST-SM out joined to that gate, one XT60 out.
+Nothing for a tip tower. The power box in T4 is this same circuit inside the master/slave box.
 
 | Connection | To |
 |---|---|
-| Own tower data in (JST-SM) | DATA → 74AHCT125 #1 pins 2, 5, 9, 12, and 10 kΩ to GND; GND → GND; 5V pin not connected |
-| 74AHCT125 #1 pins 3, 6, 8, 11 | 100 Ω → DATA of JST-SM out 1–4 (one per face) |
+| Own tower data in (JST-SM) | DATA → 74AHCT125 pin 2, and 10 kΩ to GND; GND → GND; 5V pin not connected |
+| 74AHCT125 pin 3 | 100 Ω → joined → DATA of JST-SM out 1–4 (one wire per face from the joint) |
+| 74AHCT125 pins 5, 9, 12 | GND (unused inputs); pins 6, 8, 11 open |
+| 74AHCT125 VCC (14) / GND (7), OE (1, 4, 10, 13) | +5V / GND, GND |
 | JST-SM out 5V / GND | PSU +V / −V |
-| Tip-tower data in (2 tower power boxes only) | DATA → 74AHCT125 #2 gate 1, 10 kΩ to GND |
-| 74AHCT125 #2 pin 3 | 100 Ω → tip-tower data out (22 AWG pair: DATA + GND) |
-| 74AHCT125 VCC (14) / GND (7), OE (1, 4, 10, 13) | +5V / GND, GND; unused inputs to GND |
-| XT60 out (2 tower power boxes only) | PSU +V / −V, NYAF 2.5 mm² |
-| XT60 out · top feed (every box) | PSU +V / −V, NYAF 2.5 mm² |
+| XT60 out · top feed | PSU +V / −V, NYAF 2.5 mm² |
+
+## 2 tower power box (T2, T6 · 4 to build)
+
+![2 tower power box](img/power-box-2-tower.svg)
+
+Everything in the 1 tower power box, plus, on the same chip, gate 2 for the tip tower next
+door (in T2: T1; in T6: T7): a second data in, a data out and a second XT60 out. Data out and
+XT60 both go into the one tip-tower cable
+([below](#tip-tower-cable-power-box-in-t2--t1-in-t6--t7)). No electronics in the tip tower.
+
+| Connection | To |
+|---|---|
+| Own tower data in (JST-SM) | DATA → 74AHCT125 pin 2, and 10 kΩ to GND; GND → GND; 5V pin not connected |
+| 74AHCT125 pin 3 | 100 Ω → joined → DATA of JST-SM out 1–4 (one wire per face from the joint) |
+| Tip-tower data in (JST-SM) | DATA → 74AHCT125 pin 5, and 10 kΩ to GND; GND → GND |
+| 74AHCT125 pin 6 | 100 Ω → tip-tower data out (22 AWG pair: DATA + GND) |
+| 74AHCT125 pins 9, 12 | GND (unused inputs); pins 8, 11 open |
+| 74AHCT125 VCC (14) / GND (7), OE (1, 4, 10, 13) | +5V / GND, GND |
+| JST-SM out 5V / GND | PSU +V / −V |
+| XT60 out · top feed | PSU +V / −V, NYAF 2.5 mm² |
+| XT60 out · tip-tower cable | PSU +V / −V, NYAF 2.5 mm² |
 
 ---
 
@@ -163,7 +186,7 @@ One made-up cable per tip tower; T1 and T7 have no box and nothing to wire in th
   blue GND, green/yellow unused or GND, with the 22 AWG data pair taped to it. XT60 at the box
   end only; the tower end is the 4 JST-SM.
 - **Top feed (T2–T6):** every strand of 75 LEDs or more gets 5 V / GND at its top end too.
-  One cable per tower, 3 × 2.5 (brown +5 V, blue GND), from the box's top-feed XT60 up the
+  One cable per tower, 3 × 1.5 (brown +5 V, blue GND), from the box's top-feed XT60 up the
   post. At the top: two soldered joints (+5 V, GND), each the cable core with 4 NYAF 2.5 mm²
   tails to 4 female XT60s, one per strand top (male XT60 on the strip). Heat shrink over each
   joint. T1 and T7 have none.

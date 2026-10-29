@@ -9,7 +9,7 @@ Parent: [README.md](README.md)
 
 Per statue, one trench along each arm of the V: T1 – T2 – T3 – T4 (apex) – T5 – T6 – T7.
 
-| Segment | 230 V (extension cord, strip at its end) | 5 V (3 × 2.5, XT60) | Data (DATA + GND) |
+| Segment | 230 V (extension cord, strip at its end) | 5 V (tip-tower cable, 3 × 2.5) | Data (DATA + GND) |
 |---|---|---|---|
 | T4 → T3 | apex strip → T3 strip | — | apex → T3 box: T3 · apex → T2 box: T2, T1 |
 | T3 → T2 | T3 strip → T2 strip | — | apex → T2 box: T2, T1 |

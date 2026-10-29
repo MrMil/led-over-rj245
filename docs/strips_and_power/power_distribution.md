@@ -2,7 +2,7 @@
 
 Path: [docs](../README.md) › [strips_and_power](README.md) › **power_distribution**
 Parent: [README.md](README.md)
-**Code:** `tools/wiring_diagrams.py` (`SUPPLIES`, `power_box()`, `tip_tower_cable()`, `statue_power()`), `guide/img/statue-power.svg`, `guide/img/power-box.svg`, `guide/img/tip-tower-cable.svg`, `guide/wiring.md` (Power)
+**Code:** `tools/wiring_diagrams.py` (`SUPPLIES`, `power_box(two)`, `tip_tower_cable()`, `statue_power()`), `guide/img/statue-power.svg`, `guide/img/power-box-1-tower.svg`, `guide/img/power-box-2-tower.svg`, `guide/img/tip-tower-cable.svg`, `guide/wiring.md` (Power)
 **Covers:** mains from the apex to five supplies per statue, and 5 V from each supply to its towers.
 
 ## What it does
@@ -37,8 +37,9 @@ tip tower next to them through one tip-tower cable: an XT60 run (3 × 2.5) with 
   "2 tower power box" (T2, T6), everywhere in the repo** (owner, 2026-10-29: "the terms are
   master box and slave box, 1 tower power box and 2 tower power box. everywhere in the
   repo"). The only difference between the two power boxes is that a 2 tower power box also
-  feeds the tip tower next to it, so it carries the second 74AHCT125, the XT60 out and the
-  tip-tower data out; the name states that difference and is clear on first hearing. "Apex
+  feeds the tip tower next to it, so it carries a second data in, the tip-tower data out from
+  gate 2 of its chip and a second XT60 out; the name states that difference and is clear on
+  first hearing. "Apex
   box" survives only as the generic for the master or slave box, written "master/slave box".
   **Changed 2026-10-29:** the agent first wrote "one-tower / two-tower box", "controller
   box" and "slave box"; the owner fixed the spelling and the apex names the same day.
@@ -130,8 +131,14 @@ tip tower next to them through one tip-tower cable: an XT60 run (3 × 2.5) with 
   2026-10-25: "a thick cable with 1 xt60 at the bottom and 4 at the top"). It plugs into an XT60
   out on the tower's own power box (all five, T2–T6), climbs the post, and splits at the top to
   the 4 strand tops. 10 cables, 10 box outputs, 50 XT60 pairs in all (10 bottom + 40 top).
-  The cable is the buried runs' 3 × 2.5 mm² (agent, 2026-10-25): one cable type to stock, and
-  a tower's top share (~6.6 A worst case at T4, half its 13.1 A) is well inside it. The split is
+  The cable is 3 × 1.5 mm² (owner, 2026-10-29: "it doesn't matter on the top feed cables"):
+  a tower's top share (~6.6 A worst case at T4, half its 13.1 A) is far inside 1.5 mm², and the
+  drop over 2.3 m at that current is ~0.36 V against ~0.23 V for 2.5 mm², a difference that
+  only shows at full white, which the show never reaches. The owner's 25 m of 3 × 2.5 is kept
+  for the tip-tower cables, where the whole tower's current travels and the drop matters.
+  **Changed 2026-10-29:** previously the buried runs' 3 × 2.5 mm² (agent, 2026-10-25), for one
+  cable type to stock; the owner asked why 2.5 was needed at all, since 1.5 mm² carries 16 A
+  and nothing here exceeds 6.7 A, and chose to spend the 2.5 only where the drop counts. The split is
   two soldered joints at the top of the post, +5 V and GND, each the cable core with 4 short
   NYAF 2.5 mm² tails to the XT60s, heat shrink over each (owner, 2026-10-29): the same joint
   as the tip-tower cable's end.

@@ -69,9 +69,11 @@ Follow [wiring.md](wiring.md) and the diagrams there.
 **Slave box:** 7 MAX485 receivers, 7 pairs of 560 Ω bias resistors, 7 × 100 Ω.
 
 **Power boxes (1 tower power boxes in T3, T5; 2 tower power boxes in T2, T6; T4's part sits in the
-master/slave box):** 74AHCT125 #1 in a socket with a 10 kΩ pull-down on its input and 4 × 100 Ω to the
-4 strand JST-SMs. The 2 tower power boxes also: 74AHCT125 #2 for the tip tower's data (one input
-with 10 kΩ, one 100 Ω on the output).
+master/slave box):** one 74AHCT125 in a socket. Gate 1 (pin 2 in, pin 3 out): 10 kΩ pull-down on
+the input, 100 Ω on the output, then the output joined to the 4 strand JST-SMs' DATA leads.
+The 2 tower power boxes also use gate 2 (pin 5 in, pin 6 out) for the tip tower's data, the
+same way: 10 kΩ on the input, 100 Ω on the output, to the tip-tower data out. Unused inputs
+to GND. Each diagram ends with the count of what goes into one box.
 
 **Tip towers (T1, T7):** nothing to build. Their 4 JST-SM are the end of the tip-tower cable
 (step 3).
@@ -93,14 +95,16 @@ chip until the others die too.
 
 ## 3. Power wiring (10 power boxes)
 
-Per [power-box.svg](img/power-box.svg) and [statue-power.svg](img/statue-power.svg): C14 to
-the PSU, PSU to the 4 strand JST-SMs and (2 tower power boxes) the XT60 output, and in the master/slave box a
-separate thin pair to the perfboard. Make up the 4 tip-tower cables (power box in T2 → T1, in
+4 [1 tower power boxes](img/power-box-1-tower.svg) and 4
+[2 tower power boxes](img/power-box-2-tower.svg); each drawing lists what goes into one box.
+C14 to the PSU, PSU to the 4 strand JST-SMs and the top-feed XT60, in the 2 tower power boxes
+also the tip-tower XT60, and in the master/slave box a separate thin pair to the perfboard
+([statue-power.svg](img/statue-power.svg) shows which box sits where). Make up the 4 tip-tower cables (power box in T2 → T1, in
 T6 → T7, per statue), per [tip-tower-cable.svg](img/tip-tower-cable.svg): a 3 × 2.5 and a 22 AWG
 pair taped together; at the box end a male XT60 on the 3 × 2.5, the pair bare for the box's data
 out; at the tower end 4 JST-SM, the 5V leads soldered to the +5 V core, the GND leads and the
 pair's GND to the GND core, the DATA leads to the pair's DATA. Heat shrink over every joint.
-Make up 10 top-feed cables (3 × 2.5, one per tower T2–T6): male XT60 at the bottom;
+Make up 10 top-feed cables (3 × 1.5, one per tower T2–T6): male XT60 at the bottom;
 at the top solder each cable core to 4 NYAF tails to 4 female XT60s, heat shrink over the joint.
 Ferrules on every stranded wire that goes into a screw terminal.
 
