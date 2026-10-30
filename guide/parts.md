@@ -10,9 +10,8 @@
 | Female header 1 × 15, 2.54 mm (Assmann A-BL254-EG-Z15D) | 2 + 2 spare | The ESP32 plugs into a socket so it can be swapped in the field |
 | 74AHCT125 (DIP-14) + socket | 2 (controller, optional) + 10 (one per power box, T4's included) + 2 spare | SN74AHCT125N + Assmann A 14-LC-TT sockets. Replacements must be **AHCT** and DIP (N suffix; NSR is surface-mount) |
 | MAX485 module, 5 V (blue board) | 7 + 7 + 2 spare | 7 transmitters (controller), 7 receivers (slave box). **Chip must read MAX485** |
-| Resistor 560 Ω | 14 + spares | Idle bias, 2 per receiver |
+| Resistor 560 Ω | 14 + 20 + spares | 14: idle bias, 2 per receiver. 20: from both data inputs of every power box to GND (pins 2 and 5), the same board in all 10; in a 1 tower power box and T4 the second one just holds the idle gate at 0 V. **Not 10 kΩ:** with 10 kΩ the tower flashes at random; a board already built with 10 kΩ gets a 560 Ω across it |
 | Resistor 100 Ω | 7 + 7 + 20 + spares | Controller outputs (optional), slave box outputs, power-box gate outputs (optional): 2 per power box (pins 3 and 6), the same board in all 10 |
-| Resistor 10 kΩ | 20 + spares | Pull-down on both data inputs of every power box (pins 2 and 5), the same board in all 10; in a 1 tower power box and T4 the second one just holds the idle gate at 0 V |
 | Perfboard, DIKAVS half-size (81 × 55) | 2 per master/slave box + 1 per power box + 1 spare | ESP32 board + transmitter board (slave box: receivers); power boxes: the tower's splitter |
 | S-100-5 PSU (5 V 20 A) | 10 | 5 per statue |
 | C14 inlet with fuse and switch | 10 | One per power box; 1 A fuse, + spares |

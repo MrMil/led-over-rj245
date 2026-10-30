@@ -63,7 +63,10 @@ that tower's base, through the trench under the statue.
   Harmless for a few seconds at boot; do not run the board powered without the ESP32.
   **Rejected (owner, 2026-10-28):** 10 kΩ pull-downs on the seven inputs. The ESP32 is meant
   to stay in its socket, a floating input warms a chip but does not kill it, and the 10 kΩ
-  resistors bought are the power boxes' ([../strips_and_power/tower_base.md](../strips_and_power/tower_base.md)).
+  resistors bought were the power boxes' (since replaced there by 560 Ω,
+  [../strips_and_power/tower_base.md](../strips_and_power/tower_base.md)). The power boxes'
+  reason for 560 Ω, ending a metres-long cable, does not arise here: these inputs sit a few
+  centimetres from the ESP32.
 
 ## Related
 

@@ -499,9 +499,12 @@ def power_box(two):
     box in front of them: two=False is the 1 tower power box (T3, T5), two=True the
     2 tower power box (T2, T6), which also drives the tip-tower cable from gate 2 of
     the same 74AHCT125. Every box has the same board (one chip, gates 1 and 2 each
-    with a 10 kΩ pull-down and a 100 Ω); the two kinds differ only in the connectors
-    fitted, so the 1 tower drawing shows gate 2's connectors as dashed outlines
-    (owner, 2026-10-29)."""
+    with a 560 Ω from the input to GND and a 100 Ω on the output); the two kinds differ
+    only in the connectors fitted, so the 1 tower drawing shows gate 2's connectors as
+    dashed outlines (owner, 2026-10-29). The input resistor was 10 kΩ until 2026-10-31:
+    with it the chip misread a 4 m data cable (random flashes every second or two), and
+    560 Ω, which also terminates the cable, cured it on the owner's bench
+    (docs/strips_and_power/tower_base.md)."""
     kind = "2 tower power box" if two else "1 tower power box"
     where = "in T2 and T6 of each statue, 4 to build" if two else "in T3 and T5 of each statue, 4 to build"
     bot = 170 + 248 + 3 * 60          # buffer_chip is 248 + 3*gap tall
@@ -528,7 +531,7 @@ def power_box(two):
     dy = din["DATA"][1]
     d.wire([din["DATA"], (540, dy), (540, gy[0]), (x0, gy[0])], DATA_5, 3)
     d.dot(460, dy, DATA_5), d.wire([(460, dy), (460, dy + 70)], BLACK, 2)
-    d.resistor(460, dy + 40, "10 kΩ", vertical=True), d.flag(460, dy + 70, "GND", "down")
+    d.resistor(460, dy + 40, "560 Ω", vertical=True), d.flag(460, dy + 70, "GND", "down")
     y1 = gy[0]
     face_y = [y1 + 70 * i for i in range(4)]
     d.wire([(x0 + 220, y1), (1100, y1)], DATA_5, 3)
@@ -544,7 +547,7 @@ def power_box(two):
         d.text(1214, y + 16, "DATA here · 5V/GND from the +5V/GND rails", size=12, fill="#555")
     d.dot(1100, y1, DATA_5)
     d.lines(1110, face_y[-1] + 40, ["joined: gate 1 drives all 4 faces,", "one wire per face from this point"], size=12, fill="#555")
-    # gate 2: the same parts on every board (10 kΩ on pin 5, 100 Ω on pin 6). The 2 tower
+    # gate 2: the same parts on every board (560 Ω on pin 5, 100 Ω on pin 6). The 2 tower
     # power box fits the tip tower's data in and data out to them; the 1 tower power box
     # leaves both off, and the gate sits idle at 0 V (owner, 2026-10-29: one board for all).
     yy, y2, yt = 350, gy[1], face_y[-1] + 110
@@ -560,7 +563,7 @@ def power_box(two):
         d.lines(54, yy + 30, ["no JST-SM in here", "(a 2 tower power box has the tip", "tower's data in on these pins)"], size=13, fill=GHOST)
         d.wire([(470, py), (520, py), (520, y2), (x0, y2)], DATA_5, 3)
     d.dot(470, py, DATA_5), d.wire([(470, py), (470, py + 60)], BLACK, 2)
-    d.resistor(470, py + 34, "10 kΩ", vertical=True), d.flag(470, py + 60, "GND", "down")
+    d.resistor(470, py + 34, "560 Ω", vertical=True), d.flag(470, py + 60, "GND", "down")
     d.wire([(x0 + 220, y2), (1000, y2), (1000, yt), (1200, yt)], DATA_5, 3)
     d.resistor(1100, yt, "100 Ω", color=DATA_5)
     if two:
@@ -602,7 +605,7 @@ def power_box(two):
              ("1", "S-100-5 PSU"),
              ("1", "half-size perfboard · the same board in every power box:"),
              ("1", "74AHCT125 in a DIP socket, gates 1 and 2 wired" + ("" if two else " (gate 2 idle)")),
-             ("2", "10 kΩ resistor (pins 2 and 5 to GND)"),
+             ("2", "560 Ω resistor (pins 2 and 5 to GND; not 10 kΩ, see note)"),
              ("2", "100 Ω resistor (on pins 3 and 6)"),
              ("2" if two else "1", "JST-SM in: own tower data" + (" + tip tower data" if two else "")),
              ("4", "JST-SM out: faces 1–4, all from gate 1"),
@@ -621,13 +624,16 @@ def power_box(two):
         d.text(px + 56, yy, what, size=14, fill="#777" if grey else "#222")
     notes = ["All flags with the same label are the same wire. The data inputs' 5V pins stay",
              "unconnected so two supplies never join on +5 V. 100 Ω resistors optional.",
+             "The 560 Ω on pins 2 and 5 is NOT optional and NOT 10 kΩ: it ends the data cable,",
+             "and with 10 kΩ the strands flash at random. A board already built with 10 kΩ",
+             "gets a 560 Ω soldered across it (in parallel) and the 10 kΩ stays.",
              "Gates 3 and 4: input to GND, output open. No electronics anywhere in a tower:"]
     if two:
         notes += ["the tip tower's 4 faces are joined at the far end of the tip-tower cable",
                   "(tip-tower-cable.svg), the same way gate 1 is joined to the 4 faces here."]
     else:
         notes += ["the 4 faces are joined on the perfboard, after the 100 Ω.",
-                  "Gate 2 is built like in a 2 tower power box and just not connected: its 10 kΩ",
+                  "Gate 2 is built like in a 2 tower power box and just not connected: its 560 Ω",
                   "holds it at 0 V. T4's power box: this same board inside the master/slave box,",
                   "plus the perfboard feed for the ESP32 / transceivers."]
     d.lines(660, py0 + 26, notes, size=14, fill="#333")

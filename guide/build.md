@@ -70,8 +70,10 @@ Follow [wiring.md](wiring.md) and the diagrams there.
 
 **Power boxes (1 tower power boxes in T3, T5; 2 tower power boxes in T2, T6; T4's part sits in the
 master/slave box):** **the same board, 10 times.** One 74AHCT125 in a socket; gate 1 (pin 2 in,
-pin 3 out) and gate 2 (pin 5 in, pin 6 out) each get a 10 kΩ pull-down on the input and a 100 Ω
-on the output; pins 9 and 12 to GND. Gate 1's output is joined to the 4 strand JST-SMs' DATA
+pin 3 out) and gate 2 (pin 5 in, pin 6 out) each get a 560 Ω from the input to GND and a 100 Ω
+on the output; pins 9 and 12 to GND. **The 560 Ω is not optional and must not be 10 kΩ:** it
+ends the data cable, and with 10 kΩ the tower flashes at random. A board already built with
+10 kΩ gets a 560 Ω soldered across it (in parallel); the 10 kΩ stays. Gate 1's output is joined to the 4 strand JST-SMs' DATA
 leads. In a 2 tower power box gate 2's input gets the tip tower's data in and its output goes
 to the tip-tower data out; in a 1 tower power box gate 2 gets no connectors and just sits at
 0 V. Any board fits any box. Each diagram ends with the count of what goes into one box.
@@ -80,7 +82,8 @@ to the tip-tower data out; in a 1 tower power box gate 2 gets no connectors and 
 (step 3).
 
 Check each module's chip marking reads MAX485 (not 483/487/488/489). The controller's
-74AHCT125s and all 100 Ω resistors are optional, depending on space. Keep a spare receiver
+74AHCT125s and all 100 Ω resistors are optional, depending on space; the power boxes' 560 Ω
+are not. Keep a spare receiver
 module and spare 74AHCT125s.
 
 **Handling the 74AHCT125s.** Static kills single gates in them, and one dead gate heats the

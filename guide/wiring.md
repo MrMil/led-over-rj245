@@ -121,16 +121,19 @@ jacks; don't rely on colours.
 
 ![1 tower power box](img/power-box-1-tower.svg)
 
-**Every power box has the same board:** one chip, 10 kΩ on pins 2 and 5, 100 Ω on pins 3 and 6.
+**Every power box has the same board:** one chip, 560 Ω from pins 2 and 5 to GND, 100 Ω on pins 3
+and 6. **The 560 Ω is not optional and not 10 kΩ:** it ends the data cable, and with 10 kΩ the
+strands flash at random. A board already built with 10 kΩ gets a 560 Ω soldered across it
+(in parallel; the 10 kΩ stays).
 Here only gate 1 is connected: one data in, 4 JST-SM out joined to pin 3's 100 Ω, one XT60 out.
-Gate 2's 10 kΩ holds it at 0 V and its 100 Ω ends in the air (dashed in the drawing). Nothing
+Gate 2's 560 Ω holds it at 0 V and its 100 Ω ends in the air (dashed in the drawing). Nothing
 for a tip tower. The power box in T4 is this same board inside the master/slave box.
 
 | Connection | To |
 |---|---|
-| Own tower data in (JST-SM) | DATA → 74AHCT125 pin 2, and 10 kΩ to GND; GND → GND; 5V pin not connected |
+| Own tower data in (JST-SM) | DATA → 74AHCT125 pin 2, and 560 Ω to GND; GND → GND; 5V pin not connected |
 | 74AHCT125 pin 3 | 100 Ω → joined → DATA of JST-SM out 1–4 (one wire per face from the joint) |
-| 74AHCT125 pin 5 | 10 kΩ to GND, nothing else (no tip-tower data in here) |
+| 74AHCT125 pin 5 | 560 Ω to GND, nothing else (no tip-tower data in here) |
 | 74AHCT125 pin 6 | 100 Ω, its far end left open (no tip-tower data out here) |
 | 74AHCT125 pins 9, 12 | GND (unused inputs); pins 8, 11 open |
 | 74AHCT125 VCC (14) / GND (7), OE (1, 4, 10, 13) | +5V / GND, GND |
@@ -148,9 +151,9 @@ XT60 both go into the one tip-tower cable
 
 | Connection | To |
 |---|---|
-| Own tower data in (JST-SM) | DATA → 74AHCT125 pin 2, and 10 kΩ to GND; GND → GND; 5V pin not connected |
+| Own tower data in (JST-SM) | DATA → 74AHCT125 pin 2, and 560 Ω to GND; GND → GND; 5V pin not connected |
 | 74AHCT125 pin 3 | 100 Ω → joined → DATA of JST-SM out 1–4 (one wire per face from the joint) |
-| Tip-tower data in (JST-SM) | DATA → 74AHCT125 pin 5, and 10 kΩ to GND; GND → GND |
+| Tip-tower data in (JST-SM) | DATA → 74AHCT125 pin 5, and 560 Ω to GND; GND → GND |
 | 74AHCT125 pin 6 | 100 Ω → tip-tower data out (22 AWG pair: DATA + GND) |
 | 74AHCT125 pins 9, 12 | GND (unused inputs); pins 8, 11 open |
 | 74AHCT125 VCC (14) / GND (7), OE (1, 4, 10, 13) | +5V / GND, GND |

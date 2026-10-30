@@ -75,7 +75,7 @@
 <circle cx="460" cy="234" r="5" fill="#7b1fa2"/>
 <polyline points="460,234 460,304" fill="none" stroke="#222222" stroke-width="2" stroke-linejoin="round"/>
 <rect x="452" y="252" width="16" height="44" rx="2" fill="#fff" stroke="#222222" stroke-width="2"/>
-<text x="474" y="279" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">10 kΩ</text>
+<text x="474" y="279" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">560 Ω</text>
 <polygon points="460,304 481.5,314 481.5,338 438.5,338 438.5,314" fill="#e6e6e6" stroke="#222222" stroke-width="1.5"/>
 <text x="460" y="331" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="middle" font-weight="bold" fill="#222222">GND</text>
 <polyline points="860,220 1100,220" fill="none" stroke="#7b1fa2" stroke-width="3" stroke-linejoin="round"/>
@@ -122,7 +122,7 @@
 <circle cx="470" cy="394" r="5" fill="#7b1fa2"/>
 <polyline points="470,394 470,454" fill="none" stroke="#222222" stroke-width="2" stroke-linejoin="round"/>
 <rect x="462" y="406" width="16" height="44" rx="2" fill="#fff" stroke="#222222" stroke-width="2"/>
-<text x="484" y="433" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">10 kΩ</text>
+<text x="484" y="433" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="bold" fill="#222">560 Ω</text>
 <polygon points="470,454 491.5,464 491.5,488 448.5,488 448.5,464" fill="#e6e6e6" stroke="#222222" stroke-width="1.5"/>
 <text x="470" y="481" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="middle" font-weight="bold" fill="#222222">GND</text>
 <polyline points="860,280 1000,280 1000,540 1200,540" fill="none" stroke="#7b1fa2" stroke-width="3" stroke-linejoin="round"/>
@@ -175,7 +175,7 @@
 <text x="80" y="1096" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="end" font-weight="bold" fill="#222">1</text>
 <text x="96" y="1096" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#222">74AHCT125 in a DIP socket, gates 1 and 2 wired</text>
 <text x="80" y="1120" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="end" font-weight="bold" fill="#222">2</text>
-<text x="96" y="1120" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#222">10 kΩ resistor (pins 2 and 5 to GND)</text>
+<text x="96" y="1120" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#222">560 Ω resistor (pins 2 and 5 to GND; not 10 kΩ, see note)</text>
 <text x="80" y="1144" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="end" font-weight="bold" fill="#222">2</text>
 <text x="96" y="1144" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#222">100 Ω resistor (on pins 3 and 6)</text>
 <text x="80" y="1168" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="end" font-weight="bold" fill="#222">2</text>
@@ -188,7 +188,10 @@
 <text x="96" y="1240" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#222">data out for the tip-tower cable's 22 AWG pair (gate 2)</text>
 <text x="660" y="974" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#333">All flags with the same label are the same wire. The data inputs' 5V pins stay</text>
 <text x="660" y="993" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#333">unconnected so two supplies never join on +5 V. 100 Ω resistors optional.</text>
-<text x="660" y="1012" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#333">Gates 3 and 4: input to GND, output open. No electronics anywhere in a tower:</text>
-<text x="660" y="1031" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#333">the tip tower's 4 faces are joined at the far end of the tip-tower cable</text>
-<text x="660" y="1050" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#333">(tip-tower-cable.svg), the same way gate 1 is joined to the 4 faces here.</text>
+<text x="660" y="1012" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#333">The 560 Ω on pins 2 and 5 is NOT optional and NOT 10 kΩ: it ends the data cable,</text>
+<text x="660" y="1031" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#333">and with 10 kΩ the strands flash at random. A board already built with 10 kΩ</text>
+<text x="660" y="1050" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#333">gets a 560 Ω soldered across it (in parallel) and the 10 kΩ stays.</text>
+<text x="660" y="1069" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#333">Gates 3 and 4: input to GND, output open. No electronics anywhere in a tower:</text>
+<text x="660" y="1088" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#333">the tip tower's 4 faces are joined at the far end of the tip-tower cable</text>
+<text x="660" y="1107" font-family="Helvetica, Arial, sans-serif" font-size="14" text-anchor="start" font-weight="normal" fill="#333">(tip-tower-cable.svg), the same way gate 1 is joined to the 4 faces here.</text>
 </svg>

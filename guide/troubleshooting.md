@@ -29,6 +29,14 @@ Bad data connection between the boxes.
   loose wires or stray strands.
 - Test with a spare cable on the surface. If that fixes it, the buried cable is damaged.
 
+## One tower flashes at random every second or two
+
+The others are steady and the tower's power is fine. Its power box board has the old 10 kΩ on
+the data input instead of 560 Ω ([wiring.md](wiring.md#1-tower-power-box-t3-t5--4-to-build)).
+With the cord out, solder a 560 Ω across the 10 kΩ (pin 2's resistor; in a 2 tower power box
+the tip tower's is pin 5's) and leave the 10 kΩ in place. Not a chip fault: do not swap the
+chip for this.
+
 ## Three statue-2 towers dark together
 
 They share one CAT5 cable: T1–T3 = jack 3, T4–T5 = jack 2, T6–T7 = jack 1. Re-seat or
