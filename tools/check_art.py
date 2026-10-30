@@ -87,11 +87,15 @@ def read_drawing(path):
     doc = ezdxf.readfile(path)
     units = doc.header.get('$INSUNITS', 0)
     ents = []
-    for e in doc.modelspace():
-        if e.dxftype() == 'INSERT':          # Illustrator puts the drawing in one block at the origin
-            ents += list(doc.blocks.get(e.dxf.name))
-        else:
-            ents.append(e)
+    def collect(space):                      # Illustrator puts the drawing in a block at the origin, sometimes in a block in a block
+        for e in space:
+            if e.dxftype() == 'INSERT':
+                if tuple(e.dxf.insert)[:2] != (0.0, 0.0) or (e.dxf.xscale, e.dxf.yscale, e.dxf.rotation) != (1, 1, 0):
+                    sys.exit(f'block {e.dxf.name} is placed with an offset, scale or rotation; flatten the drawing first')
+                collect(doc.blocks.get(e.dxf.name))
+            else:
+                ents.append(e)
+    collect(doc.modelspace())
     hatches = [e for e in ents if e.dxftype() == 'HATCH']
     if hatches:
         shapes = []

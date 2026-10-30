@@ -13,9 +13,9 @@ plate, each with an `.svg` twin to inspect in a browser), `art/<viewpoint>.png` 
 (the pictures with the faces drawn in), `art/<viewpoint>-towers.png` (only the plates, 8192 px, anti-aliased), `tools/embed_pictures.py` (puts the preview pictures into
 `layout/statue-layout.json`), `tools/statue_render.html` (`PICTURE_MAX`, `?load=`).
 `tools/sheet_packing.py` packs the plates onto plywood sheets ([sheets.md](sheets.md), `art/sheets/`); `tools/check_art.py` checks an artist's drawing on the plates, adds supports and writes the cut files; `art/eye/`,
-`art/praying/` and `art/sea/` hold the artist's drawings, their projections (`<view>-projection.json`, for the 4 mm
+`art/praying/`, `art/sea/` and `art/dancing/` hold the artist's drawings, their projections (`<view>-projection.json`, for the 4 mm
 box since 2026-10-28) and the supported copies (`art/eye/EyeFinal-4mm-supported.dxf`,
-`art/praying/Praying-supported.dxf`, `art/sea/SeaFinalll-supported.dxf`; [eye_final.md](eye_final.md), [praying.md](praying.md), [sea.md](sea.md)).
+`art/praying/Praying-supported.dxf`, `art/sea/SeaFinalll-supported.dxf`, `art/dancing/DancingFinal3-supported.dxf`; [eye_final.md](eye_final.md), [praying.md](praying.md), [sea.md](sea.md), [dancing.md](dancing.md)).
 
 **Status (owner, 2026-10-23): superseded, kept as they are.** The pictures, `art/viewpoints.json`
 and the cut files in `art/dxf/` were made for the layout of 2026-10-21. The final layout of
@@ -24,7 +24,7 @@ moved every tower but the apexes, so they no longer fit the faces and must not b
 left unchanged and not regenerated, because the artist is drawing different art (owner,
 2026-10-23: "do not change the art"). The tool showed the demo smiley again from 2026-10-23
 ([pipeline.md](pipeline.md)); since 2026-10-28 its back viewpoints open with the artist's drawings
-([eye_final.md](eye_final.md), [praying.md](praying.md)) and the bench of statue 1 with her sea drawing ([sea.md](sea.md)); the bench of statue 2 still shows the smiley. What follows records how they were made, for whoever picks the
+([eye_final.md](eye_final.md), [praying.md](praying.md)) and the benches with her sea and dancing drawings ([sea.md](sea.md), [dancing.md](dancing.md)); the smiley only shows in a bare file. What follows records how they were made, for whoever picks the
 generator up again.
 **Changed 2026-10-23:** previously a working state, not final, and the tool's defaults so the
 layout could be judged with real cuts in place (owner, 2026-10-22). Changed because the layout
@@ -60,6 +60,7 @@ see [eye_final.md](eye_final.md).
 - [`eye_final.md`](eye_final.md) — the artist's eye drawing for the back of statue 1: checked at plate scale with `tools/check_art.py`, supports added, the 0.13 bottom shrink baked in, and the 14 cut files for the laser in `art/eye/cut/`.
 - [`praying.md`](praying.md) — the artist's praying figure for the back of statue 2: same check, 0.02 top shrink baked in, and its 14 cut files in `art/praying/cut/`, sent with the drawing for her approval.
 - [`sea.md`](sea.md) — the artist's sea drawing for the bench side of statue 1: checked on the bench projection, 0.01 top and 0.16 bottom shrinks baked in; 37 bars; the rules written for it (moved and shaved strokes, crumbs, bench plate order) were reverted by the owner; 14 cut files in `art/sea/cut/` (approved 2026-10-29).
+- [`dancing.md`](dancing.md) — the artist's dancing drawing for the bench side of statue 2: checked on statue 2's bench projection (identical to statue 1's), 0.14 bottom shrink baked in, 24 bars; approved 2026-10-30, 14 cut files in `art/dancing/cut/`, the bench-2 default in the tool; the loader now follows nested blocks.
 - [`sheets.md`](sheets.md) — the 56 plates packed onto 2440 × 1220 sheets: 14 sheets, with 12 of the tip towers' plates turned sideways (`tools/sheet_packing.py`, `art/sheets/`).
 
 ## Gotchas

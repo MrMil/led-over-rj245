@@ -71,7 +71,7 @@ against 55 before); the first file is not kept, the fix replaced it before anyth
 `SeaFinalll-supported.dxf` is the bench-1 picture the layout tool opens with and the one in
 `layout/statue-layout.json`, as the back drawings are
 ([../strips_and_power/statue_geometry/pictures.md](../strips_and_power/statue_geometry/pictures.md));
-bench 2 keeps the demo smiley until its drawing comes.
+bench 2 opens with her dancing drawing since 2026-10-30 ([dancing.md](dancing.md)).
 
 ## The cut files (owner, 2026-10-29: "approved, please make the cut files")
 

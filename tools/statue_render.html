@@ -574,18 +574,18 @@ body.shot .panel, body.shot .views, body.shot #pad, body.shot #hint, body.shot #
     return c;
   }
   const demoPicture = () => { const c = demoSmiley(); return Object.assign(maskFromRaster(c), { name: 'demo smiley', type: 'raster', source: c.toDataURL('image/png') }); };
-  state.povs.bench1.image = demoPicture();                      // the smiley is the bench default until the artist's bench drawings come (owner, 2026-10-23)
+  state.povs.bench1.image = demoPicture();                      // the smiley is the placeholder a viewpoint shows as a bare file, before DEFAULT_PICTURES load
   state.povs.back1.image = demoPicture();
   state.povs.bench2.image = demoPicture();
   state.povs.back2.image = demoPicture();
-  // The artist's back drawings are the defaults of the two back viewpoints (owner, 2026-10-28: "make these the project defaults
-  // in the backs instead of the smileys"): the supported copies with their tool insets baked in (docs/art/eye_final.md,
+  // The artist's drawings are the defaults of all four viewpoints (owner, 2026-10-28: "make these the project defaults
+  // in the backs instead of the smileys"; the benches followed as her drawings were approved, 2026-10-29 and 2026-10-30): the supported copies with their tool insets baked in (docs/art/eye_final.md,
   // docs/art/praying.md), so the insets are zero. Fetched next to the page, so they need the repository served (GitHub Pages
   // or a local server); as a bare file the smiley stays. A back viewpoint still showing the smiley after the store and ?load
   // were applied gets its default: the smiley is a demo, never a choice to keep.
   // The show, wled/presets.json (docs/firmware/README.md), is the default playlist the same way (owner, 2026-10-28: "add the
   // playlist to the default settings as well"): an empty playlist after the store and ?load were applied gets it.
-  const DEFAULT_PICTURES = { bench1: '../art/sea/SeaFinalll-supported.dxf', back1: '../art/eye/EyeFinal-4mm-supported.dxf', back2: '../art/praying/Praying-supported.dxf' };
+  const DEFAULT_PICTURES = { bench1: '../art/sea/SeaFinalll-supported.dxf', bench2: '../art/dancing/DancingFinal3-supported.dxf', back1: '../art/eye/EyeFinal-4mm-supported.dxf', back2: '../art/praying/Praying-supported.dxf' };
   const DEFAULT_PLAYLIST = '../wled/presets.json';
   function loadDefaults() {
     // '../x' finds the file when the repository is served; the published artifact carries the same files beside the page,
